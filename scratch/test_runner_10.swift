@@ -606,21 +606,28 @@ class HeadlessJungleEngine {
                 let penalty = calculateRepetitionPenalty(from: from, to: to, piece: piece)
                 score -= penalty
                 
-                if difficulty == .easy {
-                    score += Int.random(in: -200...200)
+                switch difficulty {
+                case .easy:
+                    score += Int.random(in: -250...250)
+                case .normal:
+                    score += Int.random(in: -80...80)
+                case .hard:
+                    score += Int.random(in: -35...35)
                 }
                 
                 candidateMoves.append((from, to, piece, score))
             }
         }
         
-        if let best = candidateMoves.max(by: { $0.score < $1.score }) {
-            return executeMove(from: best.from, to: best.to)
-        } else {
-            // 无子可走判负
+        guard !candidateMoves.isEmpty else {
             winner = player.opponent
             return false
         }
+        
+        let maxScore = candidateMoves.map { $0.score }.max() ?? 0
+        let topTierMoves = candidateMoves.filter { $0.score >= maxScore - 40 }
+        let selectedMove = topTierMoves.randomElement() ?? candidateMoves[0]
+        return executeMove(from: selectedMove.from, to: selectedMove.to)
     }
 }
 
