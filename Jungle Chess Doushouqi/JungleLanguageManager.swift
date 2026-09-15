@@ -539,20 +539,21 @@ class JungleLanguageManager: ObservableObject {
     
     func frenzySkillText(_ count: Int) -> String {
         switch currentLanguage {
-        case .zhHans: return "🔥 狂暴越级 (\(count))"
-        case .zhHant: return "🔥 狂暴越級 (\(count))"
-        case .en:     return "🔥 Beast Frenzy (\(count))"
-        case .ja:     return "🔥 猛獣バーサーク (\(count))"
-        case .ko:     return "🔥 맹수 광폭화 (\(count))"
-        case .es:     return "🔥 Caza Frenética (\(count))"
-        case .fr:     return "🔥 Chasse Frénétique (\(count))"
-        case .de:     return "🔥 Raserei-Jagd (\(count))"
+        case .zhHans: return "✨ 妙手越级 (\(count))"
+        case .zhHant: return "✨ 妙手越級 (\(count))"
+        case .en:     return "✨ Master Leap (\(count))"
+        case .ja:     return "✨ 妙手跳躍 (\(count))"
+        case .ko:     return "✨ 묘수 도약 (\(count))"
+        case .es:     return "✨ Salto Magistral (\(count))"
+        case .fr:     return "✨ Saut Magistral (\(count))"
+        case .de:     return "✨ Meister-Sprung (\(count))"
         }
     }
     
     var victoryTitle: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "🎉 战斗胜利！"
+        case .zhHans: return "🎉 对决胜利！"
+        case .zhHant: return "🎉 對決勝利！"
         case .en: return "🎉 Victory!"
         case .ja: return "🎉 勝利！"
         case .ko: return "🎉 승리!"
@@ -715,14 +716,14 @@ class JungleLanguageManager: ObservableObject {
     
     var frenzyBannerText: String {
         switch currentLanguage {
-        case .zhHans: return "🔥【全员狂暴已开启】：2回合内你的所有动物可越级吃掉任何红方强敌！"
-        case .zhHant: return "🔥【全員狂暴已開啟】：2回合內你的所有動物可越級吃掉任何紅方強敵！"
-        case .en:     return "🔥【Beast Frenzy Activated】: For 2 turns, all your pieces can capture higher-ranked opponents!"
-        case .ja:     return "🔥【猛獣バーサーク発動】：2ターンの間、味方全駒が格上の敵を捕獲可能！"
-        case .ko:     return "🔥【광폭화 발동】：2턴 동안 모든 아군 말이 상위 등급의 적을 잡을 수 있습니다!"
-        case .es:     return "🔥【Furia Bestial Activada】: ¡Durante 2 turnos tus animales pueden comer rangos superiores!"
-        case .fr:     return "🔥【Frénésie Animale Activée】: Pendant 2 tours, vos animaux capturent les rangs supérieurs !"
-        case .de:     return "🔥【Raserei Aktiviert】: Für 2 Runden können deine Tiere stärkere Gegner schlagen!"
+        case .zhHans: return "✨【妙手越级已开启】：2回合内你的所有动物可越级吃掉对方棋子！"
+        case .zhHant: return "✨【妙手越級已開啟】：2回合內你的所有動物可越級吃掉對方棋子！"
+        case .en:     return "✨【Master Leap Activated】: For 2 turns, all your pieces can capture higher-ranked opponents!"
+        case .ja:     return "✨【妙手跳躍発動】：2ターンの間、味方全駒が格上の駒を捕獲可能！"
+        case .ko:     return "✨【묘수 발동】：2턴 동안 모든 아군 말이 상위 등급의 말을 잡을 수 있습니다!"
+        case .es:     return "✨【Salto Magistral Activado】: ¡Durante 2 turnos tus animales pueden comer rangos superiores!"
+        case .fr:     return "✨【Saut Magistral Activé】: Pendant 2 tours, vos animaux capturent les rangs supérieurs !"
+        case .de:     return "✨【Meister-Sprung Aktiviert】: Für 2 Runden können deine Tiere stärkere Figuren schlagen!"
         }
     }
     
@@ -804,21 +805,21 @@ class JungleLanguageManager: ObservableObject {
         switch doctrine {
         case .lionBlitz:
             switch currentLanguage {
-            case .zhHans: return "🦁 狮王飞河突击"
-            case .zhHant: return "🦁 獅王飛河突擊"
-            case .en:     return "🦁 Lion River Blitz"
-            case .ja:     return "🦁 獅子渡河電撃戦"
-            case .ko:     return "🦁 사자 도하 돌격"
-            case .es:     return "🦁 Asalto de León"
-            case .fr:     return "🦁 Assaut du Lion"
-            case .de:     return "🦁 Löwen-Flussblitz"
+            case .zhHans: return "🦁 狮王飞河跃进"
+            case .zhHant: return "🦁 獅王飛河躍進"
+            case .en:     return "🦁 Lion River Leap"
+            case .ja:     return "🦁 獅子渡河跳躍"
+            case .ko:     return "🦁 사자 도하 도약"
+            case .es:     return "🦁 Salto de León"
+            case .fr:     return "🦁 Saut du Lion"
+            case .de:     return "🦁 Löwen-Flusssprung"
             }
         case .elephantTank:
             switch currentLanguage {
-            case .zhHans: return "🐘 象王中军平推"
-            case .zhHant: return "🐘 象王中軍平推"
+            case .zhHans: return "🐘 象王稳步推进"
+            case .zhHant: return "🐘 象王穩步推進"
             case .en:     return "🐘 Elephant Advance"
-            case .ja:     return "🐘 巨象中央突破"
+            case .ja:     return "🐘 巨象中央推進"
             case .ko:     return "🐘 코끼리 정면 진격"
             case .es:     return "🐘 Avance de Elefante"
             case .fr:     return "🐘 Poussée de l'Éléphant"
@@ -826,11 +827,11 @@ class JungleLanguageManager: ObservableObject {
             }
         case .ratStealth:
             switch currentLanguage {
-            case .zhHans: return "🐭 水鬼潜行偷家"
-            case .zhHant: return "🐭 水鬼潛行偷家"
+            case .zhHans: return "🐭 灵鼠潜河入穴"
+            case .zhHant: return "🐭 靈鼠潛河入穴"
             case .en:     return "🐭 Rat River Infiltration"
-            case .ja:     return "🐭 鼠の水中奇襲"
-            case .ko:     return "🐭 쥐 수중 기습"
+            case .ja:     return "🐭 鼠の水中潜行"
+            case .ko:     return "🐭 쥐 수중 침투"
             case .es:     return "🐭 Infiltración de Rata"
             case .fr:     return "🐭 Infiltration du Rat"
             case .de:     return "🐭 Ratten-Infiltration"
@@ -864,14 +865,14 @@ class JungleLanguageManager: ObservableObject {
     func recommendedMoveHeadline(_ type: AnimalType) -> String {
         let name = animalName(type)
         switch currentLanguage {
-        case .zhHans: return "👉 推荐进攻: 移动【\(name)】"
-        case .zhHant: return "👉 推薦進攻: 移動【\(name)】"
-        case .en:     return "👉 Best Move: Advance [\(name)]"
+        case .zhHans: return "👉 推荐走法: 移动【\(name)】"
+        case .zhHant: return "👉 推薦走法: 移動【\(name)】"
+        case .en:     return "👉 Best Move: Move [\(name)]"
         case .ja:     return "👉 推奨手: [\(name)]を進める"
         case .ko:     return "👉 추천 수: [\(name)] 이동"
-        case .es:     return "👉 Ataque recomendado: Mover [\(name)]"
-        case .fr:     return "👉 Coup recommandé : Avancer [\(name)]"
-        case .de:     return "👉 Empfohlener Zug: [\(name)] vorrücken"
+        case .es:     return "👉 Jugada recomendada: Mover [\(name)]"
+        case .fr:     return "👉 Coup recommandé : Déplacer [\(name)]"
+        case .de:     return "👉 Empfohlener Zug: [\(name)] ziehen"
         }
     }
     
@@ -906,8 +907,8 @@ class JungleLanguageManager: ObservableObject {
         if let type = type {
             let name = animalName(type)
             switch currentLanguage {
-            case .zhHans: return "2️⃣ 敌方【\(name)】应对"
-            case .zhHant: return "2️⃣ 敵方【\(name)】應對"
+            case .zhHans: return "2️⃣ 对方【\(name)】应对"
+            case .zhHant: return "2️⃣ 對方【\(name)】應對"
             case .en:     return "2️⃣ Opponent [\(name)] reacts"
             case .ja:     return "2️⃣ 敵方 [\(name)] 応戦"
             case .ko:     return "2️⃣ 적 [\(name)] 대응"
@@ -917,8 +918,8 @@ class JungleLanguageManager: ObservableObject {
             }
         } else {
             switch currentLanguage {
-            case .zhHans: return "2️⃣ 敌方应对"
-            case .zhHant: return "2️⃣ 敵方應對"
+            case .zhHans: return "2️⃣ 对方应对"
+            case .zhHant: return "2️⃣ 對方應對"
             case .en:     return "2️⃣ Opponent reacts"
             case .ja:     return "2️⃣ 敵方応戦"
             case .ko:     return "2️⃣ 적 대응"
@@ -941,7 +942,7 @@ class JungleLanguageManager: ObservableObject {
         }
     }
     
-    // MARK: - 🎯 战术建议与进攻提示全套国际化
+    // MARK: - 🎯 妙手建议与对局提示全套国际化
 
     var adviceWinHeadline: String {
         switch currentLanguage {
@@ -958,8 +959,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceWinDetail: String {
         switch currentLanguage {
-        case .zhHans: return "大本营空虚！直接一步攻占红方兽穴，立刻赢得比赛！"
-        case .zhHant: return "大本營空虛！直接一步攻佔紅方獸穴，立刻贏得比賽！"
+        case .zhHans: return "对方大本营空虚！直接一步走入兽穴，立刻赢得棋局！"
+        case .zhHant: return "對方大本營空虛！直接一步走入獸穴，立刻贏得棋局！"
         case .en:     return "Enemy Den is unprotected! Capture it now to win immediately!"
         case .ja:     return "敵の獣穴が空いています！今すぐ占領して勝利を掴みましょう！"
         case .ko:     return "적 진영이 비었습니다! 즉시 진입하여 승리하세요!"
@@ -971,8 +972,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceWinForecast(piece: String, winner: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】直插大本营 ➔ 🏆 \(winner)获胜！"
-        case .zhHant: return "1️⃣ 我方【\(piece)】直插大本營 ➔ 🏆 \(winner)獲勝！"
+        case .zhHans: return "1️⃣ 我方【\(piece)】走入大本营 ➔ 🏆 \(winner)获胜！"
+        case .zhHant: return "1️⃣ 我方【\(piece)】走入大本營 ➔ 🏆 \(winner)獲勝！"
         case .en:     return "1️⃣ [\(piece)] enters Den ➔ 🏆 \(winner) Wins!"
         case .ja:     return "1️⃣ 味方 [\(piece)] 敵城突入 ➔ 🏆 \(winner) 勝利！"
         case .ko:     return "1️⃣ 아군 [\(piece)] 진영 침투 ➔ 🏆 \(winner) 승리!"
@@ -996,33 +997,33 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceCounterKillHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🚨【绝地反击·驱逐入侵者】"
-        case .zhHant: return "🚨【絕地反擊·驅逐入侵者】"
-        case .en:     return "🚨【Intercept & Defend Den】"
-        case .ja:     return "🚨【迎撃！本陣の侵入者を撃破】"
-        case .ko:     return "🚨【역습! 침입자 처치】"
-        case .es:     return "🚨【¡Contraataque! Eliminar Invasor】"
-        case .fr:     return "🚨【Contre-attaque ! Éliminer l'intrus】"
-        case .de:     return "🚨【Konter! Eindringling abfangen】"
+        case .zhHans: return "🛡️【门前解围·化险为夷】"
+        case .zhHant: return "🛡️【門前解圍·化險為夷】"
+        case .en:     return "🛡️【Defend Den·Resolve Threat】"
+        case .ja:     return "🛡️【本陣防衛・危機脱出】"
+        case .ko:     return "🛡️【진영 방어・위기 극복】"
+        case .es:     return "🛡️【¡Defender Entrada!】"
+        case .fr:     return "🛡️【Défendre l'Entrée】"
+        case .de:     return "🛡️【Höhleneingang sichern】"
         }
     }
 
     func adviceCounterKillDetail(piece: String, inv: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "立刻用【\(piece)】将敌方【\(inv)】吃掉于大本营门前！"
-        case .zhHant: return "立刻用【\(piece)】將敵方【\(inv)】吃掉於大本營門前！"
-        case .en:     return "Use [\(piece)] to eliminate enemy [\(inv)] at your Den entrance!"
-        case .ja:     return "今すぐ[\(piece)]で本陣前の敵[\(inv)]を撃破しましょう！"
-        case .ko:     return "[\(piece)] 말로 본진 앞의 적 [\(inv)] 말을 즉시 처치하세요!"
-        case .es:     return "¡Usa tu [\(piece)] para abatir al [\(inv)] frente a la guarida!"
-        case .fr:     return "Utilisez [\(piece)] pour intercepter le [\(inv)] ennemi !"
-        case .de:     return "Schlage gegnerischen [\(inv)] vor der Höhle mit [\(piece)]!"
+        case .zhHans: return "立刻用【\(piece)】吃掉大本营门前的对方【\(inv)】！"
+        case .zhHant: return "立刻用【\(piece)】吃掉大本營門前的對方【\(inv)】！"
+        case .en:     return "Use [\(piece)] to capture [\(inv)] at your Den entrance!"
+        case .ja:     return "今すぐ[\(piece)]で本陣前の[\(inv)]を捕獲しましょう！"
+        case .ko:     return "[\(piece)] 말로 본진 앞의 [\(inv)] 말을 즉시 포획하세요!"
+        case .es:     return "¡Usa tu [\(piece)] para capturar al [\(inv)] frente a la guarida!"
+        case .fr:     return "Utilisez [\(piece)] pour intercepter le [\(inv)] !"
+        case .de:     return "Schlage [\(inv)] vor der Höhle mit [\(piece)]!"
         }
     }
 
     var adviceCounterKillBadge: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "🛡️ 驱敌保家"
+        case .zhHans, .zhHant: return "🛡️ 门前解围"
         case .en: return "🛡️ Defend Den"
         case .ja: return "🛡️ 本陣防衛"
         case .ko: return "🛡️ 진영 수호"
@@ -1034,35 +1035,35 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceBlockGateHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🚨【誓死堵门·保卫大本营】"
-        case .zhHant: return "🚨【誓死堵門·保衛大本營】"
-        case .en:     return "🚨【Block Choke Point】"
-        case .ja:     return "🚨【要所封鎖！本陣を死守】"
-        case .ko:     return "🚨【길목 차단! 진영 방어】"
-        case .es:     return "🚨【¡Bloquear Paso Clave!】"
-        case .fr:     return "🚨【Bloquer l'accès au repaire】"
-        case .de:     return "🚨【Engpass blockieren】"
+        case .zhHans: return "🛡️【稳守要道·保卫大本营】"
+        case .zhHant: return "🛡️【穩守要道·保衛大本營】"
+        case .en:     return "🛡️【Block Choke Point】"
+        case .ja:     return "🛡️【要所封鎖・本陣防衛】"
+        case .ko:     return "🛡️【길목 차단・진영 방어】"
+        case .es:     return "🛡️【¡Bloquear Paso Clave!】"
+        case .fr:     return "🛡️【Bloquer l'accès au repaire】"
+        case .de:     return "🛡️【Engpass blockieren】"
         }
     }
 
     func adviceBlockGateDetail(piece: String, inv: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "敌方【\(inv)】直逼大本营！立刻移动【\(piece)】堵住要道！"
-        case .zhHant: return "敵方【\(inv)】直逼大本營！立刻移動【\(piece)】堵住要道！"
-        case .en:     return "Enemy [\(inv)] approaches Den! Move [\(piece)] to block the entrance!"
-        case .ja:     return "敵[\(inv)]が本陣へ迫っています！[\(piece)]で要所を塞ぎましょう！"
-        case .ko:     return "적 [\(inv)] 말이 접근 중입니다! [\(piece)] 말로 길목을 차단하세요!"
+        case .zhHans: return "对方【\(inv)】直逼大本营！立刻移动【\(piece)】堵住要道！"
+        case .zhHant: return "對方【\(inv)】直逼大本營！立刻移動【\(piece)】堵住要道！"
+        case .en:     return "Opponent [\(inv)] approaches Den! Move [\(piece)] to block the entrance!"
+        case .ja:     return "相手の[\(inv)]が本陣へ迫っています！[\(piece)]で要所を塞ぎましょう！"
+        case .ko:     return "상대 [\(inv)] 말이 접근 중입니다! [\(piece)] 말로 길목을 차단하세요!"
         case .es:     return "¡[\(inv)] se acerca! Mueve [\(piece)] para bloquear la entrada."
-        case .fr:     return "L'ennemi [\(inv)] approche ! Déplacez [\(piece)] pour bloquer l'accès."
+        case .fr:     return "L'adversaire [\(inv)] approche ! Déplacez [\(piece)] pour bloquer l'accès."
         case .de:     return "Gegnerischer [\(inv)] nähert sich! Mit [\(piece)] den Eingang sperren!"
         }
     }
 
     var adviceBlockGateBadge: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "🛡️ 堵门保家"
+        case .zhHans, .zhHant: return "🛡️ 稳守要道"
         case .en: return "🛡️ Block Den"
-        case .ja: return "🛡️ 本陣死守"
+        case .ja: return "🛡️ 要所防衛"
         case .ko: return "🛡️ 입구 방어"
         case .es: return "🛡️ Bloquear"
         case .fr: return "🛡️ Bloquer"
@@ -1072,14 +1073,14 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceFallBackHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🚨【全速回防·迎击敌军】"
-        case .zhHant: return "🚨【全速回防·迎擊敵軍】"
-        case .en:     return "🚨【Emergency Fallback】"
-        case .ja:     return "🚨【全力救援！本陣へ急行】"
-        case .ko:     return "🚨【긴급 회방! 진영 복귀】"
-        case .es:     return "🚨【¡Regreso de Emergencia!】"
-        case .fr:     return "🚨【Repli d'Urgence】"
-        case .de:     return "🚨【Notfall-Rückzug】"
+        case .zhHans: return "🛡️【全速回防·守护家园】"
+        case .zhHant: return "🛡️【全速回防·守護家園】"
+        case .en:     return "🛡️【Emergency Fallback】"
+        case .ja:     return "🛡️【全力救援・本陣急行】"
+        case .ko:     return "🛡️【긴급 회방・진영 복귀】"
+        case .es:     return "🛡️【¡Regreso de Emergencia!】"
+        case .fr:     return "🛡️【Repli d'Urgence】"
+        case .de:     return "🛡️【Notfall-Rückzug】"
         }
     }
 
@@ -1110,8 +1111,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceHomeDefenseForecast(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】紧急回防 ➔ 2️⃣ 敌方进攻受阻 ➔ 3️⃣ 稳固大本营"
-        case .zhHant: return "1️⃣ 我方【\(piece)】緊急回防 ➔ 2️⃣ 敵方進攻受阻 ➔ 3️⃣ 穩固大本營"
+        case .zhHans: return "1️⃣ 我方【\(piece)】紧急回防 ➔ 2️⃣ 对方推进受阻 ➔ 3️⃣ 稳固大本营"
+        case .zhHant: return "1️⃣ 我方【\(piece)】緊急回防 ➔ 2️⃣ 對方推進受阻 ➔ 3️⃣ 穩固大本營"
         case .en:     return "1️⃣ [\(piece)] rushes back ➔ 2️⃣ Enemy attack stalled ➔ 3️⃣ Secure Den"
         case .ja:     return "1️⃣ 味方 [\(piece)] 救援 ➔ 2️⃣ 敵の進撃阻止 ➔ 3️⃣ 本陣防衛"
         case .ko:     return "1️⃣ 아군 [\(piece)] 복귀 ➔ 2️⃣ 적 공격 차단 ➔ 3️⃣ 진영 사수"
@@ -1136,8 +1137,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceRatSwimEvadeDetail: String {
         switch currentLanguage {
-        case .zhHans: return "敌方强敌已贴身逼近！立刻跳入河中避险，陆地猛兽无法下水，绝对安全！"
-        case .zhHant: return "敵方強敵已貼身逼近！立刻跳入河中避險，陸地猛獸無法下水，絕對安全！"
+        case .zhHans: return "对方棋子已贴身逼近！立刻跳入河中避险，陆地动物无法下水，绝对安全！"
+        case .zhHant: return "對方棋子已貼身逼近！立刻跳入河中避險，陸地動物無法下水，絕對安全！"
         case .en:     return "Threat close by! Jump into the river where land animals cannot follow!"
         case .ja:     return "敵が接近中！陸の猛獣が入れない川へ飛び込み、安全を確保しましょう！"
         case .ko:     return "적이 근접했습니다! 육지 맹수가 들어올 수 없는 강으로 피신하세요!"
@@ -1161,8 +1162,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceRatSwimEvadeForecast: String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【鼠】跳入河中 ➔ 2️⃣ 敌兽无法追击 ➔ 3️⃣ 伺机渡河偷家"
-        case .zhHant: return "1️⃣ 我方【鼠】跳入河中 ➔ 2️⃣ 敵獸無法追擊 ➔ 3️⃣ 伺機渡河偷家"
+        case .zhHans: return "1️⃣ 我方【鼠】跳入河中 ➔ 2️⃣ 对方无法追赶 ➔ 3️⃣ 伺机渡河推进"
+        case .zhHant: return "1️⃣ 我方【鼠】跳入河中 ➔ 2️⃣ 對方無法追趕 ➔ 3️⃣ 伺機渡河推進"
         case .en:     return "1️⃣ Rat dives into river ➔ 2️⃣ Beasts cannot follow ➔ 3️⃣ Flank enemy Den"
         case .ja:     return "1️⃣ 鼠が川へ潜入 ➔ 2️⃣ 敵追撃不能 ➔ 3️⃣ 対岸を伺う"
         case .ko:     return "1️⃣ 쥐 강 입수 ➔ 2️⃣ 적 추격 불가 ➔ 3️⃣ 빈집 기습 노림"
@@ -1187,8 +1188,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceRatFleeDetail: String {
         switch currentLanguage {
-        case .zhHans: return "敌方强敌就在旁边！立刻向后/向小河方向撤退一步脱离危险！"
-        case .zhHant: return "敵方強敵就在旁邊！立刻向後/向小河方向撤退一步脫離危險！"
+        case .zhHans: return "对方棋子就在旁边！立刻向后或向小河方向移动一步脱离危险！"
+        case .zhHant: return "對方棋子就在旁邊！立刻向後或向小河方向移動一步脫離危險！"
         case .en:     return "Enemy predator is next to you! Step back towards the river to escape danger!"
         case .ja:     return "敵が隣接しています！川や後方へ一歩下がって危険を回避しましょう！"
         case .ko:     return "적 맹수가 바로 옆에 있습니다! 뒤나 강 방향으로 한 칸 물러나세요!"
@@ -1212,8 +1213,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceRatFleeForecast: String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【鼠】脱离危险区 ➔ 2️⃣ 避开强敌捕捉 ➔ 3️⃣ 保全关键神兽"
-        case .zhHant: return "1️⃣ 我方【鼠】脫離危險區 ➔ 2️⃣ 避開強敵捕捉 ➔ 3️⃣ 保全關鍵神獸"
+        case .zhHans: return "1️⃣ 我方【鼠】脱离危险区 ➔ 2️⃣ 避开对方捕捉 ➔ 3️⃣ 保全关键棋子"
+        case .zhHant: return "1️⃣ 我方【鼠】脫離危險區 ➔ 2️⃣ 避開對方捕捉 ➔ 3️⃣ 保全關鍵棋子"
         case .en:     return "1️⃣ Rat leaves danger zone ➔ 2️⃣ Avoid predator ➔ 3️⃣ Keep piece safe"
         case .ja:     return "1️⃣ 鼠が危険域を脱出 ➔ 2️⃣ 強敵の攻撃回避 ➔ 3️⃣ 貴重な戦力を温存"
         case .ko:     return "1️⃣ 쥐 위험 구역 탈출 ➔ 2️⃣ 적 공격 회피 ➔ 3️⃣ 전력 보존"
@@ -1238,8 +1239,8 @@ class JungleLanguageManager: ObservableObject {
 
     func advicePieceRetreatDetail(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "敌方天敌正虎视眈眈！立刻将【\(piece)】转移到安全格子避开锋芒！"
-        case .zhHant: return "敵方天敵正虎視眈眈！立刻將【\(piece)】轉移到安全格子避開鋒芒！"
+        case .zhHans: return "对方大子正虎视眈眈！立刻将【\(piece)】转移到安全格子避开锋芒！"
+        case .zhHant: return "對方大子正虎視眈眈！立刻將【\(piece)】轉移到安全格子避開鋒芒！"
         case .en:     return "Enemy predators are lurking! Move [\(piece)] to a safe tile immediately!"
         case .ja:     return "敵が狙っています！今すぐ[\(piece)]を安全なマスへ退避させましょう！"
         case .ko:     return "상위 천적이 노리고 있습니다! [\(piece)] 말을 안전한 곳으로 이동하세요!"
@@ -1263,8 +1264,8 @@ class JungleLanguageManager: ObservableObject {
 
     func advicePieceRetreatForecast(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】避险撤退 ➔ 2️⃣ 敌方扑空 ➔ 3️⃣ 保留战力"
-        case .zhHant: return "1️⃣ 我方【\(piece)】避險撤退 ➔ 2️⃣ 敵方撲空 ➔ 3️⃣ 保留戰力"
+        case .zhHans: return "1️⃣ 我方【\(piece)】避险撤退 ➔ 2️⃣ 对方扑空 ➔ 3️⃣ 保留子力"
+        case .zhHant: return "1️⃣ 我方【\(piece)】避險撤退 ➔ 2️⃣ 對方撲空 ➔ 3️⃣ 保留子力"
         case .en:     return "1️⃣ [\(piece)] retreats ➔ 2️⃣ Enemy strike misses ➔ 3️⃣ Preserve army"
         case .ja:     return "1️⃣ [\(piece)] 緊急退避 ➔ 2️⃣ 敵の攻撃空振り ➔ 3️⃣ 戦力維持"
         case .ko:     return "1️⃣ [\(piece)] 후퇴 ➔ 2️⃣ 적 공격 무산 ➔ 3️⃣ 전력 보존"
@@ -1276,26 +1277,26 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceHuntRiverRatHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🐭【水中猎鼠·打通航道】"
-        case .zhHant: return "🐭【水中獵鼠·打通航道】"
-        case .en:     return "🐭【Hunt River Rat·Clear Path】"
-        case .ja:     return "🐭【水中戦！敵鼠を討ち航路開放】"
-        case .ko:     return "🐭【수중전! 적 쥐 처치 및 도하로 개방】"
-        case .es:     return "🐭【Cazar Rata en Agua·Abrir Paso】"
-        case .fr:     return "🐭【Chasser le Rat d'Eau·Voie Libre】"
-        case .de:     return "🐭【Flussratte schlagen·Weg frei】"
+        case .zhHans: return "🐭【水中清障·打通航道】"
+        case .zhHant: return "🐭【水中清障·打通航道】"
+        case .en:     return "🐭【Clear River Rat·Open Path】"
+        case .ja:     return "🐭【水中戦！相手の鼠を捕獲し航路開放】"
+        case .ko:     return "🐭【수중전! 상대 쥐 포획 및 도하로 개방】"
+        case .es:     return "🐭【Despejar Rata en Agua·Abrir Paso】"
+        case .fr:     return "🐭【Voie Fluviale·Prendre le Rat】"
+        case .de:     return "🐭【Flussratte fangen·Weg frei】"
         }
     }
 
     var adviceHuntRiverRatDetail: String {
         switch currentLanguage {
-        case .zhHans: return "敌方老鼠潜伏在水中封锁猛虎跳河！立刻在水中将其吃掉，全面打通飞河航道！"
-        case .zhHant: return "敵方老鼠潛伏在水中封鎖猛虎跳河！立刻在水中將其吃掉，全面打通飛河航道！"
+        case .zhHans: return "对方老鼠潜伏在水中阻挡猛虎跳河！立刻在水中将其吃掉，打通跳河路线！"
+        case .zhHant: return "對方老鼠潛伏在水中阻擋猛虎跳河！立刻在水中將其吃掉，打通跳河路線！"
         case .en:     return "Enemy Rat blocks the river! Capture it in water to clear the river-jumping path!"
-        case .ja:     return "敵鼠が水中で跳河を妨害しています！水中で撃破して渡河航路を開放しましょう！"
-        case .ko:     return "적 쥐가 수중에서 호랑이의 도하를 막고 있습니다! 물속에서 잡아 도하로를 여세요!"
+        case .ja:     return "相手の鼠が水中で跳河を妨害しています！水中で捕獲して渡河航路を開放しましょう！"
+        case .ko:     return "상대 쥐가 수중에서 호랑이의 도하를 막고 있습니다! 물속에서 잡아 도하로를 여세요!"
         case .es:     return "¡La rata rival bloquea el río! Captúrala en el agua para despejar el salto fluvial."
-        case .fr:     return "Le rat ennemi bloque le saut ! Capturez-le dans l'eau pour libérer le passage."
+        case .fr:     return "Le rat adverse bloque le saut ! Capturez-le dans l'eau pour libérer le passage."
         case .de:     return "Gegnerische Ratte blockiert den Sprung! Im Wasser schlagen und Weg freimachen!"
         }
     }
@@ -1314,11 +1315,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceHuntRiverRatForecast: String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【鼠】水中吃掉敌鼠 ➔ 2️⃣ 解除跳河封锁 ➔ 3️⃣ 猛虎狮王飞河突破！"
-        case .zhHant: return "1️⃣ 我方【鼠】水中吃掉敵鼠 ➔ 2️⃣ 解除跳河封鎖 ➔ 3️⃣ 猛虎獅王飛河突破！"
+        case .zhHans: return "1️⃣ 我方【鼠】水中吃掉对方老鼠 ➔ 2️⃣ 解除跳河阻挡 ➔ 3️⃣ 猛虎狮王跃河推进！"
+        case .zhHant: return "1️⃣ 我方【鼠】水中吃掉對方老鼠 ➔ 2️⃣ 解除跳河阻擋 ➔ 3️⃣ 猛虎獅王躍河推進！"
         case .en:     return "1️⃣ Rat captures enemy Rat ➔ 2️⃣ Unblock river jump ➔ 3️⃣ Tiger & Lion leap across!"
-        case .ja:     return "1️⃣ 鼠が敵鼠を捕獲 ➔ 2️⃣ 跳河封鎖解除 ➔ 3️⃣ 獅子虎の渡河突撃！"
-        case .ko:     return "1️⃣ 쥐가 적 쥐 포획 ➔ 2️⃣ 도하 봉쇄 해제 ➔ 3️⃣ 호랑이 사자 도하 기습!"
+        case .ja:     return "1️⃣ 鼠が相手の鼠を捕獲 ➔ 2️⃣ 跳河封鎖解除 ➔ 3️⃣ 獅子虎の渡河前進！"
+        case .ko:     return "1️⃣ 쥐가 상대 쥐 포획 ➔ 2️⃣ 도하 봉쇄 해제 ➔ 3️⃣ 호랑이 사자 도하 전진!"
         case .es:     return "1️⃣ Rata captura rata rival ➔ 2️⃣ Desbloquea salto ➔ 3️⃣ ¡Tigre y León saltan el río!"
         case .fr:     return "1️⃣ Le Rat capture le rat rival ➔ 2️⃣ Voie libérée ➔ 3️⃣ Tigre et Lion sautent !"
         case .de:     return "1️⃣ Ratte schlägt Ratte ➔ 2️⃣ Flusssprung frei ➔ 3️⃣ Tiger & Löwe springen über!"
@@ -1327,11 +1328,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceUnderwaterPursuitHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🐭【水下潜行·合围水鬼】"
-        case .zhHant: return "🐭【水下潛行·合圍水鬼】"
+        case .zhHans: return "🐭【水下推进·清除水障】"
+        case .zhHant: return "🐭【水下推進·清除水障】"
         case .en:     return "🐭【Underwater Stealth·Pursuit】"
-        case .ja:     return "🐭【水中追撃！敵鼠包囲】"
-        case .ko:     return "🐭【수중 추격! 적 쥐 포위】"
+        case .ja:     return "🐭【水中前進！相手の鼠を牽制】"
+        case .ko:     return "🐭【수중 전진! 상대 쥐 압박】"
         case .es:     return "🐭【Persecución Submarina】"
         case .fr:     return "🐭【Traque Aquatique】"
         case .de:     return "🐭【Unterwasser-Verfolgung】"
@@ -1340,11 +1341,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceUnderwaterPursuitDetail: String {
         switch currentLanguage {
-        case .zhHans: return "调动老鼠向水中敌鼠靠近，准备清除水障！"
-        case .zhHant: return "調動老鼠向水中敵鼠靠近，準備清除水障！"
+        case .zhHans: return "调动老鼠向水中对方老鼠靠近，准备清除水障！"
+        case .zhHant: return "調動老鼠向水中對方老鼠靠近，準備清除水障！"
         case .en:     return "Move your Rat closer to the enemy Rat in the river to clear the waterway!"
-        case .ja:     return "鼠を水中へ進め、敵鼠を追い詰めて川を開放する準備をしましょう！"
-        case .ko:     return "쥐를 움직여 수중의 적 쥐를 압박하고 수로를 확보하세요!"
+        case .ja:     return "鼠を水中へ進め、相手の鼠を牽制して川を開放する準備をしましょう！"
+        case .ko:     return "쥐를 움직여 수중의 상대 쥐를 압박하고 수로를 확보하세요!"
         case .es:     return "¡Acerca tu rata al enemigo en el agua para despejar el río!"
         case .fr:     return "Rapprochez votre Rat de l'adversaire pour libérer le fleuve !"
         case .de:     return "Ratte im Fluss näher an Gegner heranführen, um den Fluss zu befreien!"
@@ -1353,11 +1354,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceUnderwaterPursuitBadge: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "🌊 水下追击"
+        case .zhHans, .zhHant: return "🌊 水下清障"
         case .en: return "🌊 River Pursuit"
-        case .ja: return "🌊 水中追撃"
-        case .ko: return "🌊 수중 추격"
-        case .es: return "🌊 Perseguir"
+        case .ja: return "🌊 水中前進"
+        case .ko: return "🌊 수중 전진"
+        case .es: return "🌊 Despejar"
         case .fr: return "🌊 Poursuite"
         case .de: return "🌊 Verfolgung"
         }
@@ -1365,11 +1366,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceUnderwaterPursuitForecast: String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【鼠】下水进逼 ➔ 2️⃣ 逼退敌方水鬼 ➔ 3️⃣ 打通跳河路线"
-        case .zhHant: return "1️⃣ 我方【鼠】下水進逼 ➔ 2️⃣ 逼退敵方水鬼 ➔ 3️⃣ 打通跳河路線"
+        case .zhHans: return "1️⃣ 我方【鼠】下水进逼 ➔ 2️⃣ 化解水中阻碍 ➔ 3️⃣ 打通跳河路线"
+        case .zhHant: return "1️⃣ 我方【鼠】下水進逼 ➔ 2️⃣ 化解水中阻礙 ➔ 3️⃣ 打通跳河路線"
         case .en:     return "1️⃣ Rat advances in water ➔ 2️⃣ Corner enemy Rat ➔ 3️⃣ Clear river jump lane"
-        case .ja:     return "1️⃣ 鼠が水中へ前進 ➔ 2️⃣ 敵鼠を牽制 ➔ 3️⃣ 渡河ルート確保"
-        case .ko:     return "1️⃣ 쥐 수중 전진 ➔ 2️⃣ 적 쥐 압박 ➔ 3️⃣ 도하로 확보"
+        case .ja:     return "1️⃣ 鼠が水中へ前進 ➔ 2️⃣ 相手の鼠を牽制 ➔ 3️⃣ 渡河ルート確保"
+        case .ko:     return "1️⃣ 쥐 수중 전진 ➔ 2️⃣ 상대 쥐 압박 ➔ 3️⃣ 도하로 확보"
         case .es:     return "1️⃣ Rata avanza en río ➔ 2️⃣ Acorrala a rival ➔ 3️⃣ Abre paso al salto"
         case .fr:     return "1️⃣ Le Rat avance dans l'eau ➔ 2️⃣ Bloque le rival ➔ 3️⃣ Prépare le saut"
         case .de:     return "1️⃣ Ratte rückt im Wasser vor ➔ 2️⃣ Gegner bedrängt ➔ 3️⃣ Sprungweg frei"
@@ -1378,24 +1379,24 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceProtectElephantHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🐱【天敌诛鼠·护卫神象】"
-        case .zhHant: return "🐱【天敵誅鼠·護衛神象】"
-        case .en:     return "🐱【Hunt Rat·Protect Elephant】"
-        case .ja:     return "🐱【鼠退治！巨象を護衛】"
-        case .ko:     return "🐱【쥐 퇴치! 코끼리 보호】"
-        case .es:     return "🐱【Cazar Rata·Proteger Elefante】"
-        case .fr:     return "🐱【Chasser le Rat·Protéger l'Éléphant】"
-        case .de:     return "🐱【Ratte schlagen·Elefant schützen】"
+        case .zhHans: return "🐱【灵巧捕鼠·护卫神象】"
+        case .zhHant: return "🐱【靈巧捕鼠·護衛神象】"
+        case .en:     return "🐱【Guard Elephant·Take Rat】"
+        case .ja:     return "🐱【象の護衛！鼠を捕獲】"
+        case .ko:     return "🐱【코끼리 호위! 쥐 포획】"
+        case .es:     return "🐱【Capturar Rata·Proteger Elefante】"
+        case .fr:     return "🐱【Prendre le Rat·Protéger l'Éléphant】"
+        case .de:     return "🐱【Ratte fangen·Elefant schützen】"
         }
     }
 
     func adviceProtectElephantDetail(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "敌方老鼠逼近大象！立刻调动【\(piece)】将其吃掉，解除大象危机！"
-        case .zhHant: return "敵方老鼠逼近大象！立刻調動【\(piece)】將其吃掉，解除大象危機！"
+        case .zhHans: return "对方老鼠逼近大象！立刻调动【\(piece)】将其吃掉，解除大象危机！"
+        case .zhHant: return "對方老鼠逼近大象！立刻調動【\(piece)】將其吃掉，解除大象危機！"
         case .en:     return "Enemy Rat threatens your Elephant! Use [\(piece)] to eliminate the Rat!"
-        case .ja:     return "敵鼠が象に迫っています！[\(piece)]で捕獲して象の危機を救いましょう！"
-        case .ko:     return "적 쥐가 코끼리를 노립니다! [\(piece)] 말로 즉시 처치하여 위기를 넘기세요!"
+        case .ja:     return "相手の鼠が象に迫っています！[\(piece)]で捕獲して象の危機を救いましょう！"
+        case .ko:     return "상대 쥐가 코끼리를 노립니다! [\(piece)] 말로 즉시 포획하여 위기를 넘기세요!"
         case .es:     return "¡Rata enemiga cerca del Elefante! ¡Usa [\(piece)] para atraparla!"
         case .fr:     return "Le rat adverse menace l'Éléphant ! Utilisez [\(piece)] pour le neutraliser !"
         case .de:     return "Gegnerische Ratte bedroht den Elefanten! Mit [\(piece)] Ratte schlagen!"
@@ -1416,8 +1417,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceProtectElephantForecast(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】吃掉敌鼠 ➔ 2️⃣ 大象危机解除 ➔ 3️⃣ 大象势不可挡！"
-        case .zhHant: return "1️⃣ 我方【\(piece)】吃掉敵鼠 ➔ 2️⃣ 大象危機解除 ➔ 3️⃣ 大象勢不可擋！"
+        case .zhHans: return "1️⃣ 我方【\(piece)】吃掉对方老鼠 ➔ 2️⃣ 大象危机解除 ➔ 3️⃣ 大象稳步推进！"
+        case .zhHant: return "1️⃣ 我方【\(piece)】吃掉對方老鼠 ➔ 2️⃣ 大象危機解除 ➔ 3️⃣ 大象穩步推進！"
         case .en:     return "1️⃣ [\(piece)] captures Rat ➔ 2️⃣ Elephant danger resolved ➔ 3️⃣ Elephant charges freely!"
         case .ja:     return "1️⃣ [\(piece)] 敵鼠捕獲 ➔ 2️⃣ 象の危機解除 ➔ 3️⃣ 巨象が猛進撃！"
         case .ko:     return "1️⃣ [\(piece)] 쥐 처치 ➔ 2️⃣ 코끼리 위기 해소 ➔ 3️⃣ 코끼리 거침없는 진격!"
@@ -1442,11 +1443,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceElephantEscapeDetail: String {
         switch currentLanguage {
-        case .zhHans: return "敌方老鼠近在咫尺！大象立刻退开脱离危险！"
-        case .zhHant: return "敵方老鼠近在咫尺！大象立刻退開脫離危險！"
+        case .zhHans: return "对方老鼠近在咫尺！大象立刻退开脱离危险！"
+        case .zhHant: return "對方老鼠近在咫尺！大象立刻退開脫離危險！"
         case .en:     return "Enemy Rat is adjacent! Retreat Elephant immediately to avoid capture!"
-        case .ja:     return "敵鼠が隣にいます！象を一歩引いて危険から逃れましょう！"
-        case .ko:     return "적 쥐가 인접했습니다! 코끼리를 즉시 물러나게 하여 위기를 피하세요!"
+        case .ja:     return "相手の鼠が隣にいます！象を一歩引いて危険から逃れましょう！"
+        case .ko:     return "상대 쥐가 인접했습니다! 코끼리를 즉시 물러나게 하여 위기를 피하세요!"
         case .es:     return "¡La rata enemiga está al lado! ¡Mueve el Elefante para ponerlo a salvo!"
         case .fr:     return "Le rat adverse est adjacent ! Reculez l'Éléphant immédiatement !"
         case .de:     return "Ratte steht direkt daneben! Elefant sofort außer Reichweite ziehen!"
@@ -1467,11 +1468,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceElephantEscapeForecast: String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 大象拉开身位 ➔ 2️⃣ 猫狗包抄 ➔ 3️⃣ 彻底歼灭敌鼠"
-        case .zhHant: return "1️⃣ 大象拉開身位 ➔ 2️⃣ 貓狗包抄 ➔ 3️⃣ 徹底殲滅敵鼠"
+        case .zhHans: return "1️⃣ 大象拉开距离 ➔ 2️⃣ 猫狗配合 ➔ 3️⃣ 稳妥吃掉老鼠"
+        case .zhHant: return "1️⃣ 大象拉開距離 ➔ 2️⃣ 貓狗配合 ➔ 3️⃣ 穩妥吃掉老鼠"
         case .en:     return "1️⃣ Elephant steps back ➔ 2️⃣ Cat/Dog flank ➔ 3️⃣ Eliminate threat"
-        case .ja:     return "1️⃣ 象が距離を取る ➔ 2️⃣ 猫犬で挟撃 ➔ 3️⃣ 敵鼠を完全殲滅"
-        case .ko:     return "1️⃣ 코끼리 거리 벌림 ➔ 2️⃣ 고양이·개 협공 ➔ 3️⃣ 적 쥐 격멸"
+        case .ja:     return "1️⃣ 象が距離を取る ➔ 2️⃣ 猫犬で連携 ➔ 3️⃣ 確実に鼠を捕獲"
+        case .ko:     return "1️⃣ 코끼리 거리 벌림 ➔ 2️⃣ 고양이·개 연계 ➔ 3️⃣ 쥐 안정적 포획"
         case .es:     return "1️⃣ Elefante se aleja ➔ 2️⃣ Gato/Perro flanquean ➔ 3️⃣ Eliminar rata"
         case .fr:     return "1️⃣ L'Éléphant prend distance ➔ 2️⃣ Chat/Chien encerclent ➔ 3️⃣ Neutraliser le rat"
         case .de:     return "1️⃣ Elefant gewinnt Distanz ➔ 2️⃣ Katze/Hund flankieren ➔ 3️⃣ Ratte ausschalten"
@@ -1480,11 +1481,11 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceFlankRatHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🐺【合围敌鼠·护卫大象】"
-        case .zhHant: return "🐺【合圍敵鼠·護衛大象】"
+        case .zhHans: return "🐺【合围老鼠·护卫大象】"
+        case .zhHant: return "🐺【合圍老鼠·護衛大象】"
         case .en:     return "🐺【Flank Rat·Protect Elephant】"
-        case .ja:     return "🐺【敵鼠包囲！象を守護】"
-        case .ko:     return "🐺【적 쥐 포위! 코끼리 호위】"
+        case .ja:     return "🐺【鼠包囲！象を守護】"
+        case .ko:     return "🐺【쥐 포위! 코끼리 호위】"
         case .es:     return "🐺【Acorralar Rata·Guardar Elefante】"
         case .fr:     return "🐺【Encercler le Rat·Garder l'Éléphant】"
         case .de:     return "🐺【Ratte umstellen·Elefant decken】"
@@ -1493,11 +1494,11 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceFlankRatDetail(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "调动【\(piece)】向敌方老鼠包抄，保护大象！"
-        case .zhHant: return "調動【\(piece)】向敵方老鼠包抄，保護大象！"
+        case .zhHans: return "调动【\(piece)】向对方老鼠配合合围，保护大象！"
+        case .zhHant: return "調動【\(piece)】向對方老鼠配合合圍，保護大象！"
         case .en:     return "Move [\(piece)] closer to pinch the enemy Rat and keep Elephant safe!"
-        case .ja:     return "[\(piece)]で敵鼠に接近して包囲網を敷き、象を守りましょう！"
-        case .ko:     return "[\(piece)] 말로 적 쥐를 압박하여 코끼리를 안전하게 지키세요!"
+        case .ja:     return "[\(piece)]で相手の鼠に接近して包囲網を敷き、象を守りましょう！"
+        case .ko:     return "[\(piece)] 말로 상대 쥐를 압박하여 코끼리를 안전하게 지키세요!"
         case .es:     return "¡Mueve [\(piece)] para cortar el paso a la rata y blindar al Elefante!"
         case .fr:     return "Avancez [\(piece)] pour encercler le rat et sécuriser l'Éléphant !"
         case .de:     return "Mit [\(piece)] die Ratte stellen und den Elefanten absichern!"
@@ -1506,9 +1507,9 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceFlankRatBadge: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "🐺 包抄敌鼠"
+        case .zhHans, .zhHant: return "🐺 合围老鼠"
         case .en: return "🐺 Flank Rat"
-        case .ja: return "🐺 敵鼠包囲"
+        case .ja: return "🐺 鼠包囲"
         case .ko: return "🐺 쥐 포위"
         case .es: return "🐺 Acorralar"
         case .fr: return "🐺 Encercler"
@@ -1518,11 +1519,11 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceFlankRatForecast(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】包抄敌鼠 ➔ 2️⃣ 逼退敌鼠 ➔ 3️⃣ 护卫神象"
-        case .zhHant: return "1️⃣ 我方【\(piece)】包抄敵鼠 ➔ 2️⃣ 逼退敵鼠 ➔ 3️⃣ 護衛神象"
+        case .zhHans: return "1️⃣ 我方【\(piece)】合围老鼠 ➔ 2️⃣ 逼退老鼠 ➔ 3️⃣ 护卫大象"
+        case .zhHant: return "1️⃣ 我方【\(piece)】合圍老鼠 ➔ 2️⃣ 逼退老鼠 ➔ 3️⃣ 護衛大象"
         case .en:     return "1️⃣ [\(piece)] corners Rat ➔ 2️⃣ Force Rat back ➔ 3️⃣ Guard Elephant"
-        case .ja:     return "1️⃣ [\(piece)] 包囲網 ➔ 2️⃣ 敵鼠を後退させる ➔ 3️⃣ 象を護衛"
-        case .ko:     return "1️⃣ [\(piece)] 포위 ➔ 2️⃣ 적 쥐 격퇴 ➔ 3️⃣ 코끼리 수호"
+        case .ja:     return "1️⃣ [\(piece)] 包囲 ➔ 2️⃣ 相手の鼠を後退させる ➔ 3️⃣ 象を護衛"
+        case .ko:     return "1️⃣ [\(piece)] 포위 ➔ 2️⃣ 상대 쥐 격퇴 ➔ 3️⃣ 코끼리 수호"
         case .es:     return "1️⃣ [\(piece)] acorrala a rata ➔ 2️⃣ Rata retrocede ➔ 3️⃣ Elefante a salvo"
         case .fr:     return "1️⃣ [\(piece)] cerne le rat ➔ 2️⃣ Fait fuir le rival ➔ 3️⃣ Éléphant protégé"
         case .de:     return "1️⃣ [\(piece)] bedrängt Ratte ➔ 2️⃣ Ratte weicht zurück ➔ 3️⃣ Elefant sicher"
@@ -1532,8 +1533,8 @@ class JungleLanguageManager: ObservableObject {
     func adviceProfitableTradeHeadline(piece: String, cap: String, isRatElephant: Bool) -> String {
         if isRatElephant {
             switch currentLanguage {
-            case .zhHans: return "⚡️【战略大赚·以鼠换象】"
-            case .zhHant: return "⚡️【戰略大賺·以鼠換象】"
+            case .zhHans: return "⚡️【棋局大赚·以鼠换象】"
+            case .zhHant: return "⚡️【棋局大賺·以鼠換象】"
             case .en:     return "⚡️【High-Value Trade: Rat for Elephant!】"
             case .ja:     return "⚡️【超好手！鼠で敵巨象を相討ち】"
             case .ko:     return "⚡️【대이득! 쥐로 코끼리 교환】"
@@ -1543,8 +1544,8 @@ class JungleLanguageManager: ObservableObject {
             }
         } else {
             switch currentLanguage {
-            case .zhHans: return "⚡️【战略兑子·以\(piece)换\(cap)】"
-            case .zhHant: return "⚡️【戰略兌子·以\(piece)換\(cap)】"
+            case .zhHans: return "⚡️【巧妙兑子·以\(piece)换\(cap)】"
+            case .zhHant: return "⚡️【巧妙兌子·以\(piece)換\(cap)】"
             case .en:     return "⚡️【Favorable Trade: [\(piece)] for [\(cap)]】"
             case .ja:     return "⚡️【有利な交換！[\(piece)]で[\(cap)]を取る】"
             case .ko:     return "⚡️【유리한 교환: [\(piece)]로 [\(cap)] 포획】"
@@ -1557,8 +1558,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceProfitableTradeDetail(cap: String, netProfit: Int) -> String {
         switch currentLanguage {
-        case .zhHans: return "吃掉【\(cap)】后虽会被反击，但我方用小换大，净赚 +\(netProfit) 战力，血赚！"
-        case .zhHant: return "吃掉【\(cap)】後雖會被反擊，但我方用小換大，淨賺 +\(netProfit) 戰力，血賺！"
+        case .zhHans: return "吃掉【\(cap)】后虽会被反吃，但我方用小换大，净赚 +\(netProfit) 子力优势，大赚！"
+        case .zhHant: return "吃掉【\(cap)】後雖會被反吃，但我方用小換大，淨賺 +\(netProfit) 子力優勢，大賺！"
         case .en:     return "Trading [\(cap)] will invite counter-attack, but you gain +\(netProfit) net army advantage!"
         case .ja:     return "[\(cap)]捕獲後に反撃を受けますが、戦力差 +\(netProfit) の大幅黒字交換です！"
         case .ko:     return "[\(cap)]을 잡은 후 반격을 받지만, 전투력 +\(netProfit) 이득인 훌륭한 교환입니다!"
@@ -1582,10 +1583,10 @@ class JungleLanguageManager: ObservableObject {
 
     var enemyStrongPiece: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "强敌"
+        case .zhHans, .zhHant: return "对方棋子"
         case .en: return "Enemy"
-        case .ja: return "強敵"
-        case .ko: return "적 강자"
+        case .ja: return "相手の駒"
+        case .ko: return "상대 말"
         case .es: return "Fiera rival"
         case .fr: return "Fauve ennemi"
         case .de: return "Gegner"
@@ -1594,8 +1595,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceProfitableTradeForecast(piece: String, cap: String, capVal: Int, oppKiller: String, pieceVal: Int, netProfit: Int) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】吃【\(cap)】(+\(capVal)) ➔ 2️⃣ 敌方【\(oppKiller)】吃【\(piece)】(-\(pieceVal)) ➔ 3️⃣ 我方净赚 +\(netProfit) 战力！"
-        case .zhHant: return "1️⃣ 我方【\(piece)】吃【\(cap)】(+\(capVal)) ➔ 2️⃣ 敵方【\(oppKiller)】吃【\(piece)】(-\(pieceVal)) ➔ 3️⃣ 我方淨賺 +\(netProfit) 戰力！"
+        case .zhHans: return "1️⃣ 我方【\(piece)】吃【\(cap)】(+\(capVal)) ➔ 2️⃣ 对方【\(oppKiller)】吃【\(piece)】(-\(pieceVal)) ➔ 3️⃣ 我方净赚 +\(netProfit) 子力优势！"
+        case .zhHant: return "1️⃣ 我方【\(piece)】吃【\(cap)】(+\(capVal)) ➔ 2️⃣ 對方【\(oppKiller)】吃【\(piece)】(-\(pieceVal)) ➔ 3️⃣ 我方淨賺 +\(netProfit) 子力優勢！"
         case .en:     return "1️⃣ [\(piece)] eats [\(cap)] (+\(capVal)) ➔ 2️⃣ Opponent [\(oppKiller)] eats [\(piece)] (-\(pieceVal)) ➔ 3️⃣ Net gain +\(netProfit)!"
         case .ja:     return "1️⃣ [\(piece)]が[\(cap)]を捕獲 (+\(capVal)) ➔ 2️⃣ 敵[\(oppKiller)]が反撃 (-\(pieceVal)) ➔ 3️⃣ 差引 +\(netProfit) の大勝利！"
         case .ko:     return "1️⃣ [\(piece)]로 [\(cap)] 잡음 (+\(capVal)) ➔ 2️⃣ 적 [\(oppKiller)] 반격 (-\(pieceVal)) ➔ 3️⃣ 순수 +\(netProfit) 이득!"
@@ -1620,8 +1621,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceBadTradeDetail(cap: String, loss: Int) -> String {
         switch currentLanguage {
-        case .zhHans: return "吃掉【\(cap)】后会被反吃，亏损 \(loss) 战力！"
-        case .zhHant: return "吃掉【\(cap)】後會被反吃，虧損 \(loss) 戰力！"
+        case .zhHans: return "吃掉【\(cap)】后会被反吃，损失 \(loss) 点子力！"
+        case .zhHant: return "吃掉【\(cap)】後會被反吃，損失 \(loss) 點子力！"
         case .en:     return "Capturing [\(cap)] leads to losing valuable piece, net loss -\(loss)!"
         case .ja:     return "[\(cap)]を捕獲すると反撃され、-\(loss) の戦力損失になります！"
         case .ko:     return "[\(cap)]을 잡은 후 반격당해 -\(loss) 손해가 발생합니다!"
@@ -1645,8 +1646,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceBadTradeForecast(cap: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反吃 ➔ 3️⃣ 亏损战力"
-        case .zhHant: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反吃 ➔ 3️⃣ 虧損戰力"
+        case .zhHans: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反吃 ➔ 3️⃣ 损失子力"
+        case .zhHant: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反吃 ➔ 3️⃣ 損失子力"
         case .en:     return "1️⃣ Eat [\(cap)] ➔ 2️⃣ Countered ➔ 3️⃣ Net army loss"
         case .ja:     return "1️⃣ [\(cap)] 捕獲 ➔ 2️⃣ 反撃を受ける ➔ 3️⃣ 戦力低下"
         case .ko:     return "1️⃣ [\(cap)] 포획 ➔ 2️⃣ 반격당함 ➔ 3️⃣ 전력 손실"
@@ -1662,7 +1663,7 @@ class JungleLanguageManager: ObservableObject {
             case .zhHans: return "🌊【飞河巧妙夺取·吃掉\(cap)】"
             case .zhHant: return "🌊【飛河巧妙奪取·吃掉\(cap)】"
             case .en:     return "🌊【River Jump Strike: Capture \(cap)】"
-            case .ja:     return "🌊【渡河急襲！無傷で[\(cap)]撃破】"
+            case .ja:     return "🌊【渡河急襲！無傷で[\(cap)]捕獲】"
             case .ko:     return "🌊【도하 급습! [\(cap)] 무손실 포획】"
             case .es:     return "🌊【Salto Fluvial: Captura a \(cap)】"
             case .fr:     return "🌊【Frappe par Saut : Capture \(cap)】"
@@ -1684,8 +1685,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceFreeCaptureDetail(piece: String, cap: String, value: Int) -> String {
         switch currentLanguage {
-        case .zhHans: return "用【\(piece)】吃掉敌方【\(cap)】后我方绝对安全，白赚 +\(value) 战力！"
-        case .zhHant: return "用【\(piece)】吃掉敵方【\(cap)】後我方絕對安全，白賺 +\(value) 戰力！"
+        case .zhHans: return "用【\(piece)】吃掉对方【\(cap)】后我方绝对安全，净得 +\(value) 点子力优势！"
+        case .zhHant: return "用【\(piece)】吃掉對方【\(cap)】後我方絕對安全，淨得 +\(value) 點子力優勢！"
         case .en:     return "Use [\(piece)] to take [\(cap)] safely! You gain free +\(value) army value!"
         case .ja:     return "[\(piece)]で[\(cap)]を捕獲後も安全！無傷で +\(value) の戦力獲得！"
         case .ko:     return "[\(piece)]로 적 [\(cap)]을 잡은 후 완전히 안전합니다! +\(value) 이득!"
@@ -1709,11 +1710,11 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceFreeCaptureForecast(piece: String, cap: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】无损吃【\(cap)】 ➔ 2️⃣ 敌方防线崩溃 ➔ 3️⃣ 全面压制！"
-        case .zhHant: return "1️⃣ 我方【\(piece)】無損吃【\(cap)】 ➔ 2️⃣ 敵方防線崩潰 ➔ 3️⃣ 全面壓制！"
+        case .zhHans: return "1️⃣ 我方【\(piece)】吃掉【\(cap)】 ➔ 2️⃣ 对方防守受挫 ➔ 3️⃣ 扩大优势！"
+        case .zhHant: return "1️⃣ 我方【\(piece)】吃掉【\(cap)】 ➔ 2️⃣ 對方防守受挫 ➔ 3️⃣ 擴大優勢！"
         case .en:     return "1️⃣ [\(piece)] captures [\(cap)] safely ➔ 2️⃣ Enemy line breaks ➔ 3️⃣ Total control!"
-        case .ja:     return "1️⃣ [\(piece)]が無傷で[\(cap)]捕獲 ➔ 2️⃣ 敵の防衛線崩壊 ➔ 3️⃣ 圧倒的優勢！"
-        case .ko:     return "1️⃣ [\(piece)] 무손실 포획 ➔ 2️⃣ 적 방어선 붕괴 ➔ 3️⃣ 압도적 우위!"
+        case .ja:     return "1️⃣ [\(piece)]が無傷で[\(cap)]捕獲 ➔ 2️⃣ 相手の防衛線崩壊 ➔ 3️⃣ 圧倒的優勢！"
+        case .ko:     return "1️⃣ [\(piece)] 무손실 포획 ➔ 2️⃣ 상대 방어선 붕괴 ➔ 3️⃣ 압도적 우위!"
         case .es:     return "1️⃣ [\(piece)] captura [\(cap)] seguro ➔ 2️⃣ Defensa rival rota ➔ 3️⃣ ¡Control total!"
         case .fr:     return "1️⃣ [\(piece)] prend [\(cap)] sans danger ➔ 2️⃣ Ligne ennemie brisée ➔ 3️⃣ Domination !"
         case .de:     return "1️⃣ [\(piece)] schlägt [\(cap)] sicher ➔ 2️⃣ Gegnertruppe wankt ➔ 3️⃣ Totale Dominanz!"
@@ -1722,65 +1723,65 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceAssaultDenHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🏰【直取兽穴·胜势冲锋】"
-        case .zhHant: return "🏰【直取獸穴·勝勢衝鋒】"
-        case .en:     return "🏰【Den Assault·Final Charge】"
-        case .ja:     return "🏰【敵本陣強襲！突撃の一手】"
-        case .ko:     return "🏰【진영 돌파! 최종 돌격】"
-        case .es:     return "🏰【Asalto a la Guarida·Carga Final】"
-        case .fr:     return "🏰【Assaut du Repaire·Charge Finale】"
-        case .de:     return "🏰【Höhlen-Sturm·Finaler Ansturm】"
+        case .zhHans: return "🏰【直取兽穴·锁定胜局】"
+        case .zhHant: return "🏰【直取獸穴·鎖定勝局】"
+        case .en:     return "🏰【Den Assault·Final Move】"
+        case .ja:     return "🏰【敵本陣到達！勝利の一手】"
+        case .ko:     return "🏰【진영 돌파! 최종 입수】"
+        case .es:     return "🏰【Entrar a la Guarida·Victoria】"
+        case .fr:     return "🏰【Entrée dans le Repaire·Victoire】"
+        case .de:     return "🏰【Höhlen-Besetzung·Siegzug】"
         }
     }
 
     var adviceAssaultDenDetail: String {
         switch currentLanguage {
-        case .zhHans: return "敌方大本营就在眼前！全速扑向大本营锁定胜局！"
-        case .zhHant: return "敵方大本營就在眼前！全速撲向大本營鎖定勝局！"
-        case .en:     return "Enemy Den is right ahead! Charge forward to secure immediate victory!"
-        case .ja:     return "敵の本陣は目の前です！全速力で突入して勝利を決めましょう！"
-        case .ko:     return "적 진영이 바로 앞입니다! 전속력으로 진격하여 승리를 확정하세요!"
-        case .es:     return "¡La guarida rival está a tiro! ¡Carga al frente y sentencia la partida!"
-        case .fr:     return "La tanière adverse est à portée ! Foncez pour sceller la victoire !"
-        case .de:     return "Gegnerische Höhle liegt direkt vor dir! Vorstürmen und Sieg sichern!"
+        case .zhHans: return "对方大本营就在眼前！稳步走入大本营锁定胜局！"
+        case .zhHant: return "對方大本營就在眼前！穩步走入大本營鎖定勝局！"
+        case .en:     return "Enemy Den is right ahead! Step in to secure immediate victory!"
+        case .ja:     return "相手の本陣は目の前です！堂々と突入して勝利を決めましょう！"
+        case .ko:     return "상대 진영이 바로 앞입니다! 진입하여 승리를 확정하세요!"
+        case .es:     return "¡La guarida rival está a tiro! ¡Entra y sentencia la partida!"
+        case .fr:     return "La tanière adverse est à portée ! Entrez pour sceller la victoire !"
+        case .de:     return "Gegnerische Höhle liegt direkt vor dir! Eintreten und Sieg sichern!"
         }
     }
 
     var adviceAssaultDenBadge: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "🏆 冲向兽穴"
-        case .en: return "🏆 Charge Den"
-        case .ja: return "🏆 本陣突撃"
-        case .ko: return "🏆 진영 돌격"
-        case .es: return "🏆 Cargar Guarida"
-        case .fr: return "🏆 Assaut"
-        case .de: return "🏆 Höhlensturm"
+        case .zhHans, .zhHant: return "🏆 进驻兽穴"
+        case .en: return "🏆 Enter Den"
+        case .ja: return "🏆 本陣到達"
+        case .ko: return "🏆 진영 진입"
+        case .es: return "🏆 Entrar Guarida"
+        case .fr: return "🏆 Entrer"
+        case .de: return "🏆 Höhle betreten"
         }
     }
 
     var adviceApproachDenHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "⚡️【直捣黄龙·逼近兽穴】"
-        case .zhHant: return "⚡️【直搗黃龍·逼近獸穴】"
-        case .en:     return "⚡️【Deep Infiltration·Advance】"
-        case .ja:     return "⚡️【敵陣深く進撃！本陣へ接近】"
-        case .ko:     return "⚡️【적진 깊숙이 진격! 진영 압박】"
-        case .es:     return "⚡️【Infiltración Profunda·Avanzar】"
-        case .fr:     return "⚡️【Infiltration Profonde·Avancer】"
-        case .de:     return "⚡️【Tiefe Infiltration·Vorrücken】"
+        case .zhHans: return "⚡️【步步为营·逼近兽穴】"
+        case .zhHant: return "⚡️【步步為營·逼近獸穴】"
+        case .en:     return "⚡️【Strategic Advance·Approach Den】"
+        case .ja:     return "⚡️【陣形推進！本陣へ接近】"
+        case .ko:     return "⚡️【진형 전진! 진영 압박】"
+        case .es:     return "⚡️【Avance Estratégico·Hacia Guarida】"
+        case .fr:     return "⚡️【Avancée Stratégique·Vers Repaire】"
+        case .de:     return "⚡️【Strategischer Vorstoß·Höhle nah】"
         }
     }
 
     func adviceApproachDenDetail(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "【\(piece)】已突入敌后！全速挺进！"
-        case .zhHant: return "【\(piece)】已突入敵後！全速挺進！"
-        case .en:     return "[\(piece)] penetrated enemy lines! Keep pressing forward!"
-        case .ja:     return "[\(piece)]が敵陣深くに切り込みました！このまま突進！"
-        case .ko:     return "[\(piece)] 말이 적진 뒤편으로 침투했습니다! 전속 전진!"
-        case .es:     return "¡[\(piece)] ha penetrado las líneas enemigas! ¡Sigue avanzando!"
-        case .fr:     return "[\(piece)] a percé les lignes ennemies ! Continuez d'avancer !"
-        case .de:     return "[\(piece)] ist durchgebrochen! Weiter vorrücken!"
+        case .zhHans: return "【\(piece)】已深入对方区域！继续推进！"
+        case .zhHant: return "【\(piece)】已深入對方區域！繼續推進！"
+        case .en:     return "[\(piece)] penetrated opponent zone! Keep pressing forward!"
+        case .ja:     return "[\(piece)]が相手陣地へ切り込みました！このまま前進！"
+        case .ko:     return "[\(piece)] 말이 상대 진영으로 진입했습니다! 전속 전진!"
+        case .es:     return "¡[\(piece)] ha penetrado en zona rival! ¡Sigue avanzando!"
+        case .fr:     return "[\(piece)] a percé les lignes adverses ! Continuez d'avancer !"
+        case .de:     return "[\(piece)] ist im gegnerischen Bereich! Weiter vorrücken!"
         }
     }
 

@@ -35,8 +35,8 @@ enum AIDifficulty: String, CaseIterable, Identifiable {
 
 enum StrategicDoctrine: String, CaseIterable {
     case lionBlitz = "🦁 狮王飞河突击"
-    case elephantTank = "🐘 象王中军平推"
-    case ratStealth = "🐭 水鬼潜行偷家"
+    case elephantTank = "🐘 象王稳步推进"
+    case ratStealth = "🐭 灵鼠潜河入穴"
     case packHunt = "🐺 狼豹多路包抄"
 }
 
@@ -1598,7 +1598,7 @@ struct ContentView: View {
             
             Button(action: { engine.activateFrenzySkill() }) {
                 HStack(spacing: 4) {
-                    Image(systemName: "flame.fill")
+                    Image(systemName: "sparkles")
                     Text(lang.frenzySkillText(engine.frenzySkillCount))
                 }
                 .font(.system(size: 11, weight: .black))

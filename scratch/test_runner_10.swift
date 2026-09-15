@@ -647,8 +647,8 @@ let testConfigs: [(red: AIDifficulty, blue: AIDifficulty, label: String)] = [
     (.easy, .hard, "🌱 轻松入门 (红) vs 👑 智谋大师 (蓝)"),
     (.easy, .easy, "🌱 轻松入门 vs 🌱 轻松入门 (新手演练)"),
     (.hard, .hard, "👑 智谋大师 vs 👑 智谋大师 (巅峰对决 2)"),
-    (.hard, .normal, "👑 智谋大师 (红) vs 🌿 棋艺进阶 (蓝·二番战)"),
-    (.hard, .hard, "👑 智谋大师 vs 👑 智谋大师 (终极决战)")
+    (.hard, .normal, "👑 智谋大师 (红) vs 🌿 棋艺进阶 (蓝·二度对决)"),
+    (.hard, .hard, "👑 智谋大师 vs 👑 智谋大师 (巅峰对决)")
 ]
 
 for (index, config) in testConfigs.enumerated() {
@@ -698,7 +698,7 @@ for (index, config) in testConfigs.enumerated() {
     print("   • 胜利方: \(engine.winner?.rawValue ?? "平局") [\(winReason)]")
     print("   • 总回合数: \(engine.totalMoves) 步 | 耗时: \(String(format: "%.3f", gDuration)) 秒")
     print("   • 狮虎飞河次数: \(engine.riverJumpsCount) 次 | 老鼠下水潜伏: \(engine.ratInWaterMoves) 步")
-    print("   • 鼠吞神象奇袭: \(engine.ratAteElephantCount) 次 | 陷阱虚弱捕杀: \(engine.trapCapturesCount) 次")
+    print("   • 鼠吞神象奇袭: \(engine.ratAteElephantCount) 次 | 陷阱虚弱吃子: \(engine.trapCapturesCount) 次")
     print("   • 触发防长捉反循环惩罚: \(engine.repetitionPenaltiesTriggered) 次 (成功杜绝死循环)")
     print("   • 规则违规数: \(engine.ruleViolations.count == 0 ? "✅ 0 违规 (100% 遵守规则)" : "❌ 出现 \(engine.ruleViolations.count) 处违规")")
 }
@@ -718,7 +718,7 @@ print("• 测试总局数: 10 / 10 局 全部顺利完成")
 print("• 崩溃次数: 0 次 (系统 100% 稳定)")
 print("• 规则违规 (Rule Violations): \(totalViolations) 次 (全场零违规，完全合规)")
 print("• 产生总走子步数: \(totalMovesAll) 步")
-print("• 狮虎飞河绝杀总数: \(totalJumpsAll) 次")
+print("• 狮虎飞河吃子总数: \(totalJumpsAll) 次")
 print("• 老鼠下水战术总数: \(totalWaterAll) 次")
 print("• 鼠吞神象高光时刻: \(totalRatEatEleAll) 次")
 print("• 成功化解死循环次数: \(totalLoopPenalties) 次 (死锁长捉机制有效率 100%)")
@@ -828,7 +828,7 @@ for round in 1...10 {
         return engine.canOccupyOrCapture(attacker: blueCat, from: pCat, to: blueTrap)
     }
     
-    // 7. 测试：攻入兽穴直接绝杀判胜
+    // 7. 测试：攻入兽穴直接进穴判胜
     suite.runTest(name: "第\(round)轮: 攻入敌方兽穴一步直接判胜，进己方兽穴严格禁止") {
         let engine = HeadlessJungleEngine(redDiff: .hard, blueDiff: .hard)
         let bluePiece = Piece(type: .dog, owner: .blue)
@@ -872,7 +872,7 @@ print("• 规则 2 [狮虎飞河 & 鼠阻跳河]: ✅ 10/10 次测试完全正�
 print("• 规则 3 [鼠吞神象 & 象不吃鼠]: ✅ 10/10 次测试完全正确")
 print("• 规则 4 [水中老鼠不可咬岸象]: ✅ 10/10 次测试完全正确")
 print("• 规则 5 [同级相遇先手必吃]:   ✅ 10/10 次测试完全正确")
-print("• 规则 6 [陷阱虚弱越级绝杀]:   ✅ 10/10 次测试完全正确")
+print("• 规则 6 [陷阱虚弱越级吃子]:   ✅ 10/10 次测试完全正确")
 print("• 规则 7 [攻入兽穴获胜/拒己穴]: ✅ 10/10 次测试完全正确")
 print("• 规则 8 [防往复死锁反循环]:   ✅ 10/10 次测试完全正确")
 print("================================================================================")
