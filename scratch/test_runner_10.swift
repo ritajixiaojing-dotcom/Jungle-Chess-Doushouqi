@@ -13,8 +13,8 @@ enum Player: String, Codable {
 
 enum AIDifficulty: String, CaseIterable {
     case easy = "🌱 轻松入门"
-    case normal = "⚔️ 势均力敌"
-    case hard = "👑 兽王争霸"
+    case normal = "🌿 棋艺进阶"
+    case hard = "👑 智谋大师"
 }
 
 enum AnimalType: Int, CaseIterable {
@@ -534,9 +534,6 @@ class HeadlessJungleEngine {
         let difficulty = (player == .red ? difficultyRed : difficultyBlue)
         let myDen = (player == .blue ? Position(row: 8, col: 3) : Position(row: 0, col: 3))
         let enemyDen = (player == .blue ? Position(row: 0, col: 3) : Position(row: 8, col: 3))
-        let chokePoints: Set<Position> = (player == .blue ?
-            [Position(row: 8, col: 2), Position(row: 8, col: 4), Position(row: 7, col: 3)] :
-            [Position(row: 0, col: 2), Position(row: 0, col: 4), Position(row: 1, col: 3)])
         
         var candidateMoves: [(from: Position, to: Position, piece: Piece, score: Int)] = []
         let pieces = board.filter { $0.value.owner == player }
@@ -642,16 +639,16 @@ var results: [[String: Any]] = []
 let startTime = Date()
 
 let testConfigs: [(red: AIDifficulty, blue: AIDifficulty, label: String)] = [
-    (.hard, .hard, "👑 兽王争霸 vs 👑 兽王争霸 (巅峰对决 1)"),
-    (.hard, .normal, "👑 兽王争霸 (红) vs ⚔️ 势均力敌 (蓝)"),
-    (.normal, .hard, "⚔️ 势均力敌 (红) vs 👑 兽王争霸 (蓝)"),
-    (.normal, .normal, "⚔️ 势均力敌 vs ⚔️ 势均力敌 (均衡推演)"),
-    (.hard, .easy, "👑 兽王争霸 (红) vs 🌱 轻松入门 (蓝)"),
-    (.easy, .hard, "🌱 轻松入门 (红) vs 👑 兽王争霸 (蓝)"),
+    (.hard, .hard, "👑 智谋大师 vs 👑 智谋大师 (巅峰对决 1)"),
+    (.hard, .normal, "👑 智谋大师 (红) vs 🌿 棋艺进阶 (蓝)"),
+    (.normal, .hard, "🌿 棋艺进阶 (红) vs 👑 智谋大师 (蓝)"),
+    (.normal, .normal, "🌿 棋艺进阶 vs 🌿 棋艺进阶 (均衡推演)"),
+    (.hard, .easy, "👑 智谋大师 (红) vs 🌱 轻松入门 (蓝)"),
+    (.easy, .hard, "🌱 轻松入门 (红) vs 👑 智谋大师 (蓝)"),
     (.easy, .easy, "🌱 轻松入门 vs 🌱 轻松入门 (新手演练)"),
-    (.hard, .hard, "👑 兽王争霸 vs 👑 兽王争霸 (巅峰对决 2)"),
-    (.hard, .normal, "👑 兽王争霸 (红) vs ⚔️ 势均力敌 (蓝·二番战)"),
-    (.hard, .hard, "👑 兽王争霸 vs 👑 兽王争霸 (终极决战)")
+    (.hard, .hard, "👑 智谋大师 vs 👑 智谋大师 (巅峰对决 2)"),
+    (.hard, .normal, "👑 智谋大师 (红) vs 🌿 棋艺进阶 (蓝·二番战)"),
+    (.hard, .hard, "👑 智谋大师 vs 👑 智谋大师 (终极决战)")
 ]
 
 for (index, config) in testConfigs.enumerated() {
@@ -673,7 +670,7 @@ for (index, config) in testConfigs.enumerated() {
             if let lm = lastMove, engine.getTileType(at: lm.to) == .den(owner: w.opponent) {
                 return "🏰 攻占【\(w.opponent.rawValue)】兽穴获胜"
             } else {
-                return "⚔️ 歼灭对手全部棋子获胜"
+                return "🏆 吃光对手全部棋子获胜"
             }
         } else {
             return "🤝 达到150回合上限判和 (攻防平分秋色)"

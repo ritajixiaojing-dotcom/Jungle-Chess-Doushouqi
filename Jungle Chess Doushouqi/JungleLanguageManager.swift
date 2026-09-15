@@ -373,19 +373,19 @@ class JungleLanguageManager: ObservableObject {
             }
         case .normal:
             switch currentLanguage {
-            case .zhHans: return "⚔️ 势均力敌"
-            case .zhHant: return "⚔️ 勢均力敵"
-            case .en:     return "⚔️ Balanced"
-            case .ja:     return "⚔️ 中級"
-            case .ko:     return "⚔️ 중급"
-            case .es:     return "⚔️ Medio"
-            case .fr:     return "⚔️ Moyen"
-            case .de:     return "⚔️ Normal"
+            case .zhHans: return "🌿 棋艺进阶"
+            case .zhHant: return "🌿 棋藝進階"
+            case .en:     return "🌿 Balanced"
+            case .ja:     return "🌿 中級"
+            case .ko:     return "🌿 중급"
+            case .es:     return "🌿 Medio"
+            case .fr:     return "🌿 Moyen"
+            case .de:     return "🌿 Normal"
             }
         case .hard:
             switch currentLanguage {
-            case .zhHans: return "👑 兽王争霸"
-            case .zhHant: return "👑 獸王爭霸"
+            case .zhHans: return "👑 智谋大师"
+            case .zhHant: return "👑 智謀大師"
             case .en:     return "👑 Master"
             case .ja:     return "👑 上級"
             case .ko:     return "👑 상급"
@@ -399,8 +399,8 @@ class JungleLanguageManager: ObservableObject {
     func modeName(isVsAI: Bool) -> String {
         if isVsAI {
             switch currentLanguage {
-            case .zhHans: return "👤 人机对战"
-            case .zhHant: return "👤 人機對戰"
+            case .zhHans: return "👤 人机对决"
+            case .zhHant: return "👤 人機對決"
             case .en:     return "👤 vs AI"
             case .ja:     return "👤 AI対戦"
             case .ko:     return "👤 AI 대전"
@@ -539,8 +539,8 @@ class JungleLanguageManager: ObservableObject {
     
     func frenzySkillText(_ count: Int) -> String {
         switch currentLanguage {
-        case .zhHans: return "🔥 狂暴越级猎杀 (\(count))"
-        case .zhHant: return "🔥 狂暴越級獵殺 (\(count))"
+        case .zhHans: return "🔥 狂暴越级 (\(count))"
+        case .zhHant: return "🔥 狂暴越級 (\(count))"
         case .en:     return "🔥 Beast Frenzy (\(count))"
         case .ja:     return "🔥 猛獣バーサーク (\(count))"
         case .ko:     return "🔥 맹수 광폭화 (\(count))"
@@ -790,7 +790,7 @@ class JungleLanguageManager: ObservableObject {
     
     var winGameBadge: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "绝杀赢"
+        case .zhHans, .zhHant: return "制胜赢"
         case .en: return "Checkmate"
         case .ja: return "詰み・勝利"
         case .ko: return "결정타 승리"
@@ -945,8 +945,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceWinHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🏆 终极大绝杀！"
-        case .zhHant: return "🏆 終極大絕殺！"
+        case .zhHans: return "🏆 锁定胜局！直接入穴！"
+        case .zhHant: return "🏆 鎖定勝局！直接入穴！"
         case .en:     return "🏆 Winning Move!"
         case .ja:     return "🏆 王手・決勝の一手！"
         case .ko:     return "🏆 승리의 결정타!"
@@ -996,8 +996,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceCounterKillHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🚨【绝地反杀·诛杀入侵者】"
-        case .zhHant: return "🚨【絕地反殺·誅殺入侵者】"
+        case .zhHans: return "🚨【绝地反击·驱逐入侵者】"
+        case .zhHant: return "🚨【絕地反擊·驅逐入侵者】"
         case .en:     return "🚨【Intercept & Defend Den】"
         case .ja:     return "🚨【迎撃！本陣の侵入者を撃破】"
         case .ko:     return "🚨【역습! 침입자 처치】"
@@ -1009,8 +1009,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceCounterKillDetail(piece: String, inv: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "立刻用【\(piece)】将敌方【\(inv)】斩杀于大本营门前！"
-        case .zhHant: return "立刻用【\(piece)】將敵方【\(inv)】斬殺於大本營門前！"
+        case .zhHans: return "立刻用【\(piece)】将敌方【\(inv)】吃掉于大本营门前！"
+        case .zhHant: return "立刻用【\(piece)】將敵方【\(inv)】吃掉於大本營門前！"
         case .en:     return "Use [\(piece)] to eliminate enemy [\(inv)] at your Den entrance!"
         case .ja:     return "今すぐ[\(piece)]で本陣前の敵[\(inv)]を撃破しましょう！"
         case .ko:     return "[\(piece)] 말로 본진 앞의 적 [\(inv)] 말을 즉시 처치하세요!"
@@ -1022,13 +1022,13 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceCounterKillBadge: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "⚔️ 诛敌保家"
-        case .en: return "⚔️ Defend Den"
-        case .ja: return "⚔️ 敵撃破"
-        case .ko: return "⚔️ 진영 수호"
-        case .es: return "⚔️ Defender"
-        case .fr: return "⚔️ Défendre"
-        case .de: return "⚔️ Verteidigen"
+        case .zhHans, .zhHant: return "🛡️ 驱敌保家"
+        case .en: return "🛡️ Defend Den"
+        case .ja: return "🛡️ 本陣防衛"
+        case .ko: return "🛡️ 진영 수호"
+        case .es: return "🛡️ Defender"
+        case .fr: return "🛡️ Défendre"
+        case .de: return "🛡️ Verteidigen"
         }
     }
 
@@ -1072,8 +1072,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceFallBackHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🚨【全速回防·截杀敌军】"
-        case .zhHant: return "🚨【全速回防·截殺敵軍】"
+        case .zhHans: return "🚨【全速回防·迎击敌军】"
+        case .zhHant: return "🚨【全速回防·迎擊敵軍】"
         case .en:     return "🚨【Emergency Fallback】"
         case .ja:     return "🚨【全力救援！本陣へ急行】"
         case .ko:     return "🚨【긴급 회방! 진영 복귀】"
@@ -1212,8 +1212,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceRatFleeForecast: String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【鼠】脱离危险区 ➔ 2️⃣ 避开强敌扑杀 ➔ 3️⃣ 保全关键神兽"
-        case .zhHant: return "1️⃣ 我方【鼠】脫離危險區 ➔ 2️⃣ 避開強敵撲殺 ➔ 3️⃣ 保全關鍵神獸"
+        case .zhHans: return "1️⃣ 我方【鼠】脱离危险区 ➔ 2️⃣ 避开强敌捕捉 ➔ 3️⃣ 保全关键神兽"
+        case .zhHant: return "1️⃣ 我方【鼠】脫離危險區 ➔ 2️⃣ 避開強敵捕捉 ➔ 3️⃣ 保全關鍵神獸"
         case .en:     return "1️⃣ Rat leaves danger zone ➔ 2️⃣ Avoid predator ➔ 3️⃣ Keep piece safe"
         case .ja:     return "1️⃣ 鼠が危険域を脱出 ➔ 2️⃣ 強敵の攻撃回避 ➔ 3️⃣ 貴重な戦力を温存"
         case .ko:     return "1️⃣ 쥐 위험 구역 탈출 ➔ 2️⃣ 적 공격 회피 ➔ 3️⃣ 전력 보존"
@@ -1289,8 +1289,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceHuntRiverRatDetail: String {
         switch currentLanguage {
-        case .zhHans: return "敌方老鼠潜伏在水中封锁猛虎跳河！立刻在水中将其咬杀，全面打通飞河航道！"
-        case .zhHant: return "敵方老鼠潛伏在水中封鎖猛虎跳河！立刻在水中將其咬殺，全面打通飛河航道！"
+        case .zhHans: return "敌方老鼠潜伏在水中封锁猛虎跳河！立刻在水中将其吃掉，全面打通飞河航道！"
+        case .zhHant: return "敵方老鼠潛伏在水中封鎖猛虎跳河！立刻在水中將其吃掉，全面打通飛河航道！"
         case .en:     return "Enemy Rat blocks the river! Capture it in water to clear the river-jumping path!"
         case .ja:     return "敵鼠が水中で跳河を妨害しています！水中で撃破して渡河航路を開放しましょう！"
         case .ko:     return "적 쥐가 수중에서 호랑이의 도하를 막고 있습니다! 물속에서 잡아 도하로를 여세요!"
@@ -1314,8 +1314,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceHuntRiverRatForecast: String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【鼠】水中咬杀敌鼠 ➔ 2️⃣ 解除跳河封锁 ➔ 3️⃣ 猛虎狮王飞河绝杀！"
-        case .zhHant: return "1️⃣ 我方【鼠】水中咬殺敵鼠 ➔ 2️⃣ 解除跳河封鎖 ➔ 3️⃣ 猛虎獅王飛河絕殺！"
+        case .zhHans: return "1️⃣ 我方【鼠】水中吃掉敌鼠 ➔ 2️⃣ 解除跳河封锁 ➔ 3️⃣ 猛虎狮王飞河突破！"
+        case .zhHant: return "1️⃣ 我方【鼠】水中吃掉敵鼠 ➔ 2️⃣ 解除跳河封鎖 ➔ 3️⃣ 猛虎獅王飛河突破！"
         case .en:     return "1️⃣ Rat captures enemy Rat ➔ 2️⃣ Unblock river jump ➔ 3️⃣ Tiger & Lion leap across!"
         case .ja:     return "1️⃣ 鼠が敵鼠を捕獲 ➔ 2️⃣ 跳河封鎖解除 ➔ 3️⃣ 獅子虎の渡河突撃！"
         case .ko:     return "1️⃣ 쥐가 적 쥐 포획 ➔ 2️⃣ 도하 봉쇄 해제 ➔ 3️⃣ 호랑이 사자 도하 기습!"
@@ -1391,8 +1391,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceProtectElephantDetail(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "敌方老鼠逼近大象！立刻调动【\(piece)】将其扑杀，解除大象危机！"
-        case .zhHant: return "敵方老鼠逼近大象！立刻調動【\(piece)】將其撲殺，解除大象危機！"
+        case .zhHans: return "敌方老鼠逼近大象！立刻调动【\(piece)】将其吃掉，解除大象危机！"
+        case .zhHant: return "敵方老鼠逼近大象！立刻調動【\(piece)】將其吃掉，解除大象危機！"
         case .en:     return "Enemy Rat threatens your Elephant! Use [\(piece)] to eliminate the Rat!"
         case .ja:     return "敵鼠が象に迫っています！[\(piece)]で捕獲して象の危機を救いましょう！"
         case .ko:     return "적 쥐가 코끼리를 노립니다! [\(piece)] 말로 즉시 처치하여 위기를 넘기세요!"
@@ -1416,8 +1416,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceProtectElephantForecast(piece: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 我方【\(piece)】扑杀敌鼠 ➔ 2️⃣ 大象危机解除 ➔ 3️⃣ 大象势不可挡！"
-        case .zhHant: return "1️⃣ 我方【\(piece)】撲殺敵鼠 ➔ 2️⃣ 大象危機解除 ➔ 3️⃣ 大象勢不可擋！"
+        case .zhHans: return "1️⃣ 我方【\(piece)】吃掉敌鼠 ➔ 2️⃣ 大象危机解除 ➔ 3️⃣ 大象势不可挡！"
+        case .zhHant: return "1️⃣ 我方【\(piece)】吃掉敵鼠 ➔ 2️⃣ 大象危機解除 ➔ 3️⃣ 大象勢不可擋！"
         case .en:     return "1️⃣ [\(piece)] captures Rat ➔ 2️⃣ Elephant danger resolved ➔ 3️⃣ Elephant charges freely!"
         case .ja:     return "1️⃣ [\(piece)] 敵鼠捕獲 ➔ 2️⃣ 象の危機解除 ➔ 3️⃣ 巨象が猛進撃！"
         case .ko:     return "1️⃣ [\(piece)] 쥐 처치 ➔ 2️⃣ 코끼리 위기 해소 ➔ 3️⃣ 코끼리 거침없는 진격!"
@@ -1620,8 +1620,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceBadTradeDetail(cap: String, loss: Int) -> String {
         switch currentLanguage {
-        case .zhHans: return "吃掉【\(cap)】后会被反杀，亏损 \(loss) 战力！"
-        case .zhHant: return "吃掉【\(cap)】後會被反殺，虧損 \(loss) 戰力！"
+        case .zhHans: return "吃掉【\(cap)】后会被反吃，亏损 \(loss) 战力！"
+        case .zhHant: return "吃掉【\(cap)】後會被反吃，虧損 \(loss) 戰力！"
         case .en:     return "Capturing [\(cap)] leads to losing valuable piece, net loss -\(loss)!"
         case .ja:     return "[\(cap)]を捕獲すると反撃され、-\(loss) の戦力損失になります！"
         case .ko:     return "[\(cap)]을 잡은 후 반격당해 -\(loss) 손해가 발생합니다!"
@@ -1645,8 +1645,8 @@ class JungleLanguageManager: ObservableObject {
 
     func adviceBadTradeForecast(cap: String) -> String {
         switch currentLanguage {
-        case .zhHans: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反杀 ➔ 3️⃣ 亏损战力"
-        case .zhHant: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反殺 ➔ 3️⃣ 虧損戰力"
+        case .zhHans: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反吃 ➔ 3️⃣ 亏损战力"
+        case .zhHant: return "1️⃣ 吃【\(cap)】 ➔ 2️⃣ 我方被反吃 ➔ 3️⃣ 虧損戰力"
         case .en:     return "1️⃣ Eat [\(cap)] ➔ 2️⃣ Countered ➔ 3️⃣ Net army loss"
         case .ja:     return "1️⃣ [\(cap)] 捕獲 ➔ 2️⃣ 反撃を受ける ➔ 3️⃣ 戦力低下"
         case .ko:     return "1️⃣ [\(cap)] 포획 ➔ 2️⃣ 반격당함 ➔ 3️⃣ 전력 손실"
@@ -1659,8 +1659,8 @@ class JungleLanguageManager: ObservableObject {
     func adviceFreeCaptureHeadline(cap: String, isJumpRiver: Bool) -> String {
         if isJumpRiver {
             switch currentLanguage {
-            case .zhHans: return "🌊【飞河无损斩杀·吃掉\(cap)】"
-            case .zhHant: return "🌊【飛河無損斬殺·吃掉\(cap)】"
+            case .zhHans: return "🌊【飞河巧妙夺取·吃掉\(cap)】"
+            case .zhHant: return "🌊【飛河巧妙奪取·吃掉\(cap)】"
             case .en:     return "🌊【River Jump Strike: Capture \(cap)】"
             case .ja:     return "🌊【渡河急襲！無傷で[\(cap)]撃破】"
             case .ko:     return "🌊【도하 급습! [\(cap)] 무손실 포획】"
@@ -1670,8 +1670,8 @@ class JungleLanguageManager: ObservableObject {
             }
         } else {
             switch currentLanguage {
-            case .zhHans: return "👑【无损斩杀·吃掉\(cap)】"
-            case .zhHant: return "👑【無損斬殺·吃掉\(cap)】"
+            case .zhHans: return "👑【巧妙夺取·吃掉\(cap)】"
+            case .zhHant: return "👑【巧妙奪取·吃掉\(cap)】"
             case .en:     return "👑【Free Capture: Take [\(cap)]】"
             case .ja:     return "👑【無傷撃破！[\(cap)]を捕獲】"
             case .ko:     return "👑【무손실 포획: [\(cap)] 잡기】"
@@ -1722,8 +1722,8 @@ class JungleLanguageManager: ObservableObject {
 
     var adviceAssaultDenHeadline: String {
         switch currentLanguage {
-        case .zhHans: return "🏰【直取兽穴·绝杀冲锋】"
-        case .zhHant: return "🏰【直取獸穴·絕殺衝鋒】"
+        case .zhHans: return "🏰【直取兽穴·胜势冲锋】"
+        case .zhHant: return "🏰【直取獸穴·勝勢衝鋒】"
         case .en:     return "🏰【Den Assault·Final Charge】"
         case .ja:     return "🏰【敵本陣強襲！突撃の一手】"
         case .ko:     return "🏰【진영 돌파! 최종 돌격】"

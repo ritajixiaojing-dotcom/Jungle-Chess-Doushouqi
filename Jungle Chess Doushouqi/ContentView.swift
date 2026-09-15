@@ -19,16 +19,16 @@ enum Player: String, Codable {
 
 enum AIDifficulty: String, CaseIterable, Identifiable {
     case easy = "🌱 轻松入门"
-    case normal = "⚔️ 势均力敌"
-    case hard = "👑 兽王争霸"
+    case normal = "🌿 棋艺进阶"
+    case hard = "👑 智谋大师"
     
     var id: String { rawValue }
     
     var shortName: String {
         switch self {
-        case .easy: return "🌱 轻松"
-        case .normal: return "⚔️ 均力"
-        case .hard: return "👑 兽王"
+        case .easy: return "🌱 入门"
+        case .normal: return "🌿 进阶"
+        case .hard: return "👑 大师"
         }
     }
 }
@@ -581,7 +581,7 @@ class JungleGameEngine: ObservableObject {
                 simBoard1.removeValue(forKey: from)
                 simBoard1[to] = piece
                 
-                // 🏆 一步直接占穴绝杀获胜
+                // 🏆 一步直接占穴获胜
                 if to == enemyDen {
                     let winAdv = OptimalMoveAdvice(
                         from: from, to: to, piece: piece,
@@ -756,7 +756,7 @@ class JungleGameEngine: ObservableObject {
                         }
                     }
                 }
-                // ⚔️ 8. 【正常吃子与战术兑子分析】
+                // ⚖️ 8. 【正常吃子与战术兑子分析】
                 else if let cap = captured1 {
                     let netProfit = cap.type.pieceValue - piece.type.pieceValue
                     
@@ -870,7 +870,7 @@ class JungleGameEngine: ObservableObject {
                 simBoard1.removeValue(forKey: from)
                 simBoard1[to] = piece
                 
-                // 🏆 绝杀判定：一步进穴直接赢
+                // 🏆 制胜判定：一步进穴直接赢
                 if to == blueDen {
                     self.isThinking = false
                     self.makeMove(from: from, to: to)
@@ -881,7 +881,7 @@ class JungleGameEngine: ObservableObject {
                 let isDangerousDest = calculateDangerousMoves(from: from, moves: [to]).contains(to)
                 let isRiverJump = (piece.type == .lion || piece.type == .tiger) && abs(from.row - to.row) > 1
                 
-                // ⚡️ 3. 【红鼠吃蓝象】：最高天命击杀
+                // ⚡️ 3. 【红鼠吃蓝象】：最高天命捕获
                 if piece.type == .rat, let target = cap1, target.type == .elephant {
                     redScore += 500000
                 }
@@ -950,7 +950,7 @@ class JungleGameEngine: ObservableObject {
                 
                 redScore += (-maxBlueGain)
                 
-                // 👑 8. 【兽王争霸专属 4-Ply 深度推演】
+                // 👑 8. 【智谋大师专属 4-Ply 深度推演】
                 if aiDifficulty == .hard {
                     var simBoard2 = simBoard1
                     if let blueMove = bestBlueCounter {
@@ -1142,9 +1142,9 @@ class JungleGameEngine: ObservableObject {
                 return "⚡️ \(JungleLanguageManager.shared.eatElephantBadge)"
             }
             if target.type == .rat {
-                return "⚔️ \(JungleLanguageManager.shared.protectElephantBadge)"
+                return "🛡️ \(JungleLanguageManager.shared.protectElephantBadge)"
             }
-            return "⚔️ \(JungleLanguageManager.shared.captureTargetBadge(target.type))"
+            return "🎯 \(JungleLanguageManager.shared.captureTargetBadge(target.type))"
         }
         
         if (movingPiece.type == .lion || movingPiece.type == .tiger) && (abs(from.row - pos.row) > 1 || abs(from.col - pos.col) > 1) {
