@@ -53,16 +53,7 @@ enum AnimalType: Int, CaseIterable, Identifiable {
     var id: Int { rawValue }
     
     var name: String {
-        switch self {
-        case .rat: return "鼠"
-        case .cat: return "猫"
-        case .dog: return "狗"
-        case .wolf: return "狼"
-        case .leopard: return "豹"
-        case .tiger: return "虎"
-        case .lion: return "狮"
-        case .elephant: return "象"
-        }
+        return JungleLanguageManager.shared.animalName(self)
     }
     
     var emoji: String {
@@ -71,10 +62,10 @@ enum AnimalType: Int, CaseIterable, Identifiable {
         case .cat: return "🐱"
         case .dog: return "🐶"
         case .wolf: return "🐺"
-        case .leopard: return "豹"
-        case .tiger: return "虎"
-        case .lion: return "狮"
-        case .elephant: return "象"
+        case .leopard: return "🐆"
+        case .tiger: return "🐯"
+        case .lion: return "🦁"
+        case .elephant: return "🐘"
         }
     }
     
@@ -92,16 +83,7 @@ enum AnimalType: Int, CaseIterable, Identifiable {
     }
     
     var ruleCanEatDescription: String {
-        switch self {
-        case .elephant: return "能吃象及以下(🐘🦁🐯🐆🐺🐶🐱，除鼠外)；同级可互吃"
-        case .lion: return "能吃狮及以下(🦁🐯🐆🐺🐶🐱🐭)；可飞跃小河；同级可互吃"
-        case .tiger: return "能吃虎及以下(🐯🐆🐺🐶🐱🐭)；可飞跃小河；同级可互吃"
-        case .leopard: return "能吃豹及以下(🐆🐺🐶🐱🐭)；同级可互吃(先手必胜)"
-        case .wolf: return "能吃狼及以下(🐺🐶🐱🐭)；同级可互吃(先手必胜)"
-        case .dog: return "能吃狗及以下(🐶🐱🐭)；同级可互吃(先手必胜)"
-        case .cat: return "能吃猫及以下(🐱🐭)；同级可互吃(先手必胜)"
-        case .rat: return "⭐克制大象(🐘)！能吃同级鼠；唯一能下水游泳"
-        }
+        return JungleLanguageManager.shared.animalEatRule(self)
     }
 }
 
@@ -240,7 +222,7 @@ class JungleGameEngine: ObservableObject {
         guard frenzySkillCount > 0, currentTurn == .blue else { return }
         frenzySkillCount -= 1
         frenzyRemainingTurns = 2
-        skillBannerText = "🔥【全员狂暴已开启】：2回合内你的所有动物可越级吃掉任何红方强敌！"
+        skillBannerText = JungleLanguageManager.shared.frenzyBannerText
         playSound(type: .win)
         updateRoundEvaluation()
     }
@@ -263,7 +245,7 @@ class JungleGameEngine: ObservableObject {
         if let fromPos = bestPiecePos, let piece = bestPiece {
             board.removeValue(forKey: fromPos)
             board[targetGate] = piece
-            skillBannerText = "🛡️【神兽天降】：【\(piece.type.name)】已瞬间传送回防大本营咽喉要道！"
+            skillBannerText = JungleLanguageManager.shared.shieldBannerText(pieceName: piece.type.name)
             playSound(type: .win)
             updateRoundEvaluation()
         }
@@ -484,7 +466,6 @@ class JungleGameEngine: ObservableObject {
     
     // MARK: - 🧠 棋局估值函数
     private func evaluateBoardScore(customBoard: [Position: Piece], for player: Player) -> Int {
-        let opponent = player.opponent
         let blueDen = Position(row: 8, col: 3)
         let redDen = Position(row: 0, col: 3)
         
@@ -604,10 +585,10 @@ class JungleGameEngine: ObservableObject {
                 if to == enemyDen {
                     let winAdv = OptimalMoveAdvice(
                         from: from, to: to, piece: piece,
-                        headline: "🏆 终极大绝杀！",
-                        detailReason: "大本营空虚！直接一步攻占红方兽穴，立刻赢得比赛！",
-                        forecast3Steps: "1️⃣ 我方【\(piece.type.name)】直插大本营 ➔ 🏆 蓝方获胜！",
-                        badgeText: "🏆 占穴获胜",
+                        headline: JungleLanguageManager.shared.adviceWinHeadline,
+                        detailReason: JungleLanguageManager.shared.adviceWinDetail,
+                        forecast3Steps: JungleLanguageManager.shared.adviceWinForecast(piece: piece.type.name, winner: JungleLanguageManager.shared.playerName(playerSide)),
+                        badgeText: JungleLanguageManager.shared.adviceWinBadge,
                         isEmergency: false, isWin: true, isTrade: false
                     )
                     self.optimalAdvice = winAdv
@@ -636,7 +617,6 @@ class JungleGameEngine: ObservableObject {
                 }
                 
                 // 3. 模拟 Step 3：我方后续最佳反击
-                var bestFollowUp: (from: Position, to: Position, piece: Piece, cap: Piece?)? = nil
                 var maxFollowScore = -9999999
                 
                 var simBoard2 = simBoard1
@@ -650,14 +630,12 @@ class JungleGameEngine: ObservableObject {
                     let myNextMoves = calculateValidMovesOnBoard(boardState: simBoard2, from: mFrom)
                     for mTo in myNextMoves {
                         var simBoard3 = simBoard2
-                        let mCap = simBoard3[mTo]
                         simBoard3.removeValue(forKey: mFrom)
                         simBoard3[mTo] = mPiece
                         
                         let eval3 = evaluateBoardScore(customBoard: simBoard3, for: playerSide)
                         if eval3 > maxFollowScore {
                             maxFollowScore = eval3
-                            bestFollowUp = (mFrom, mTo, mPiece, mCap)
                         }
                     }
                 }
@@ -670,9 +648,9 @@ class JungleGameEngine: ObservableObject {
                 let distReduction = curDist - newDist
                 let toTile = getTileType(at: to)
                 
-                var headline = "👉 推荐进攻: 移动【\(piece.type.name)】"
-                var detail = "向前推进阵型，压制红方！"
-                var badge = "🎯 推荐走这"
+                var headline = JungleLanguageManager.shared.recommendedMoveHeadline(piece.type)
+                var detail = JungleLanguageManager.shared.recommendedMoveDetail
+                var badge = JungleLanguageManager.shared.recommendedMoveBadge
                 var isEm = false
                 var isTr = false
                 var forecastText = ""
@@ -686,26 +664,26 @@ class JungleGameEngine: ObservableObject {
                     
                     if to == inv.pos {
                         totalScore += 500000
-                        headline = "🚨【绝地反杀·诛杀入侵者】"
-                        detail = "立刻用【\(piece.type.name)】将敌方【\(inv.piece.type.name)】斩杀于大本营门前！"
-                        badge = "⚔️ 诛敌保家"
+                        headline = JungleLanguageManager.shared.adviceCounterKillHeadline
+                        detail = JungleLanguageManager.shared.adviceCounterKillDetail(piece: piece.type.name, inv: inv.piece.type.name)
+                        badge = JungleLanguageManager.shared.adviceCounterKillBadge
                         isEm = true
                     } else if to == myDen || myChokePoints.contains(to) {
                         totalScore += 400000
-                        headline = "🚨【誓死堵门·保卫大本营】"
-                        detail = "敌方【\(inv.piece.type.name)】直逼大本营！立刻移动【\(piece.type.name)】堵住要道！"
-                        badge = "🛡️ 堵门保家"
+                        headline = JungleLanguageManager.shared.adviceBlockGateHeadline
+                        detail = JungleLanguageManager.shared.adviceBlockGateDetail(piece: piece.type.name, inv: inv.piece.type.name)
+                        badge = JungleLanguageManager.shared.adviceBlockGateBadge
                         isEm = true
                     } else if newDistToDen < curDistToDen || newDistToInv < curDistToInv {
                         totalScore += 300000
-                        headline = "🚨【全速回防·截杀敌军】"
-                        detail = "大本营告急！立刻调动【\(piece.type.name)】全速回防阻截【\(inv.piece.type.name)】！"
-                        badge = "🛡️ 紧急回防"
+                        headline = JungleLanguageManager.shared.adviceFallBackHeadline
+                        detail = JungleLanguageManager.shared.adviceFallBackDetail(piece: piece.type.name, inv: inv.piece.type.name)
+                        badge = JungleLanguageManager.shared.adviceFallBackBadge
                         isEm = true
                     } else {
                         totalScore -= 400000
                     }
-                    forecastText = "1️⃣ 我方【\(piece.type.name)】紧急回防 ➔ 2️⃣ 敌方进攻受阻 ➔ 3️⃣ 稳固大本营"
+                    forecastText = JungleLanguageManager.shared.adviceHomeDefenseForecast(piece: piece.type.name)
                 }
                 // 🛡️ 5. 【己方受威胁棋子紧急避险/逃入河中 (高危保命铁律)】
                 else if isCurrentPieceUnderThreat && !isDangerousDest {
@@ -713,39 +691,39 @@ class JungleGameEngine: ObservableObject {
                     isEm = true
                     
                     if toTile == .river && piece.type == .rat {
-                        headline = "🌊【潜水避险·【鼠】遁入水中】"
-                        detail = "敌方强敌已贴身逼近！立刻跳入河中避险，陆地猛兽无法下水，绝对安全！"
-                        badge = "🌊 遁水避险"
-                        forecastText = "1️⃣ 我方【鼠】跳入河中 ➔ 2️⃣ 敌兽无法追击 ➔ 3️⃣ 伺机渡河偷家"
+                        headline = JungleLanguageManager.shared.adviceRatSwimEvadeHeadline
+                        detail = JungleLanguageManager.shared.adviceRatSwimEvadeDetail
+                        badge = JungleLanguageManager.shared.adviceRatSwimEvadeBadge
+                        forecastText = JungleLanguageManager.shared.adviceRatSwimEvadeForecast
                     } else if piece.type == .rat {
-                        headline = "🚨【猛兽逼近·【鼠】撤离避险】"
-                        detail = "敌方强敌就在旁边！立刻向后/向小河方向撤退一步脱离危险！"
-                        badge = "🛡️ 老鼠快跑"
-                        forecastText = "1️⃣ 我方【鼠】脱离危险区 ➔ 2️⃣ 避开强敌扑杀 ➔ 3️⃣ 保全关键神兽"
+                        headline = JungleLanguageManager.shared.adviceRatFleeHeadline
+                        detail = JungleLanguageManager.shared.adviceRatFleeDetail
+                        badge = JungleLanguageManager.shared.adviceRatFleeBadge
+                        forecastText = JungleLanguageManager.shared.adviceRatFleeForecast
                     } else {
-                        headline = "🚨【紧急避险·【\(piece.type.name)】快撤】"
-                        detail = "敌方天敌正虎视眈眈！立刻将【\(piece.type.name)】转移到安全格子避开锋芒！"
-                        badge = "🛡️ 紧急避险"
-                        forecastText = "1️⃣ 我方【\(piece.type.name)】避险撤退 ➔ 2️⃣ 敌方扑空 ➔ 3️⃣ 保留战力"
+                        headline = JungleLanguageManager.shared.advicePieceRetreatHeadline(piece: piece.type.name)
+                        detail = JungleLanguageManager.shared.advicePieceRetreatDetail(piece: piece.type.name)
+                        badge = JungleLanguageManager.shared.advicePieceRetreatBadge
+                        forecastText = JungleLanguageManager.shared.advicePieceRetreatForecast(piece: piece.type.name)
                     }
                 }
                 // 🌊 6. 【水中清障·解除跳河封锁】
                 else if isOppRatInRiver, let rPos = oppRatPos, piece.type == .rat {
                     if to == rPos {
                         totalScore += 480000
-                        headline = "🐭【水中猎鼠·打通航道】"
-                        detail = "敌方老鼠潜伏在水中封锁猛虎跳河！立刻在水中将其咬杀，全面打通飞河航道！"
-                        badge = "🌊 破除水障"
-                        forecastText = "1️⃣ 我方【鼠】水中咬杀敌鼠 ➔ 2️⃣ 解除跳河封锁 ➔ 3️⃣ 猛虎狮王飞河绝杀！"
+                        headline = JungleLanguageManager.shared.adviceHuntRiverRatHeadline
+                        detail = JungleLanguageManager.shared.adviceHuntRiverRatDetail
+                        badge = JungleLanguageManager.shared.adviceHuntRiverRatBadge
+                        forecastText = JungleLanguageManager.shared.adviceHuntRiverRatForecast
                     } else {
                         let curD = abs(from.row - rPos.row) + abs(from.col - rPos.col)
                         let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
                         if newD < curD {
                             totalScore += 220000 + (curD - newD) * 20000
-                            headline = "🐭【水下潜行·合围水鬼】"
-                            detail = "调动老鼠向水中敌鼠靠近，准备清除水障！"
-                            badge = "🌊 水下追击"
-                            forecastText = "1️⃣ 我方【鼠】下水进逼 ➔ 2️⃣ 逼退敌方水鬼 ➔ 3️⃣ 打通跳河路线"
+                            headline = JungleLanguageManager.shared.adviceUnderwaterPursuitHeadline
+                            detail = JungleLanguageManager.shared.adviceUnderwaterPursuitDetail
+                            badge = JungleLanguageManager.shared.adviceUnderwaterPursuitBadge
+                            forecastText = JungleLanguageManager.shared.adviceUnderwaterPursuitForecast
                         }
                     }
                 }
@@ -753,28 +731,28 @@ class JungleGameEngine: ObservableObject {
                 else if ratDistToMyElephant <= 2, let rPos = oppRatPos {
                     if piece.type != .elephant && to == rPos {
                         totalScore += 450000
-                        headline = "🐱【天敌诛鼠·护卫神象】"
-                        detail = "敌方老鼠逼近大象！立刻调动【\(piece.type.name)】将其扑杀，解除大象危机！"
-                        badge = "🐱 捕鼠护象"
-                        forecastText = "1️⃣ 我方【\(piece.type.name)】扑杀敌鼠 ➔ 2️⃣ 大象危机解除 ➔ 3️⃣ 大象势不可挡！"
+                        headline = JungleLanguageManager.shared.adviceProtectElephantHeadline
+                        detail = JungleLanguageManager.shared.adviceProtectElephantDetail(piece: piece.type.name)
+                        badge = JungleLanguageManager.shared.adviceProtectElephantBadge
+                        forecastText = JungleLanguageManager.shared.adviceProtectElephantForecast(piece: piece.type.name)
                     } else if ratDistToMyElephant == 1 && piece.type == .elephant {
                         let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
                         if newD > 1 && !isDangerousDest {
                             totalScore += 420000
-                            headline = "🐘【大象避险·紧急脱离】"
-                            detail = "敌方老鼠近在咫尺！大象立刻退开脱离危险！"
-                            badge = "🐘 大象避险"
-                            forecastText = "1️⃣ 大象拉开身位 ➔ 2️⃣ 猫狗包抄 ➔ 3️⃣ 彻底歼灭敌鼠"
+                            headline = JungleLanguageManager.shared.adviceElephantEscapeHeadline
+                            detail = JungleLanguageManager.shared.adviceElephantEscapeDetail
+                            badge = JungleLanguageManager.shared.adviceElephantEscapeBadge
+                            forecastText = JungleLanguageManager.shared.adviceElephantEscapeForecast
                         }
                     } else if ratDistToMyElephant == 2 && piece.type != .elephant {
                         let curD = abs(from.row - rPos.row) + abs(from.col - rPos.col)
                         let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
                         if newD < curD {
                             totalScore += 180000 + (curD - newD) * 15000
-                            headline = "🐺【合围敌鼠·护卫大象】"
-                            detail = "调动【\(piece.type.name)】向敌方老鼠包抄，保护大象！"
-                            badge = "🐺 包抄敌鼠"
-                            forecastText = "1️⃣ 我方【\(piece.type.name)】包抄敌鼠 ➔ 2️⃣ 逼退敌鼠 ➔ 3️⃣ 护卫神象"
+                            headline = JungleLanguageManager.shared.adviceFlankRatHeadline
+                            detail = JungleLanguageManager.shared.adviceFlankRatDetail(piece: piece.type.name)
+                            badge = JungleLanguageManager.shared.adviceFlankRatBadge
+                            forecastText = JungleLanguageManager.shared.adviceFlankRatForecast(piece: piece.type.name)
                         }
                     }
                 }
@@ -785,42 +763,49 @@ class JungleGameEngine: ObservableObject {
                     if isDangerousDest {
                         if netProfit > 0 {
                             totalScore += 180000 + netProfit * 40
-                            headline = (piece.type == .rat && cap.type == .elephant) ?
-                                "⚡️【战略大赚·以鼠换象】" : "⚡️【战略兑子·以\(piece.type.name)换\(cap.type.name)】"
-                            detail = "吃掉【\(cap.type.name)】后虽会被反击，但我方用小换大，净赚 +\(netProfit) 战力，血赚！"
-                            badge = "🟣 净赚+\(netProfit)"
+                            let isRatElephant = (piece.type == .rat && cap.type == .elephant)
+                            headline = JungleLanguageManager.shared.adviceProfitableTradeHeadline(piece: piece.type.name, cap: cap.type.name, isRatElephant: isRatElephant)
+                            detail = JungleLanguageManager.shared.adviceProfitableTradeDetail(cap: cap.type.name, netProfit: netProfit)
+                            badge = JungleLanguageManager.shared.adviceProfitableTradeBadge(netProfit: netProfit)
                             isTr = true
-                            let oppKillerName = bestOppMove?.piece.type.name ?? "强敌"
-                            forecastText = "1️⃣ 我方【\(piece.type.name)】吃【\(cap.type.name)】(+\(cap.type.pieceValue)) ➔ 2️⃣ 敌方【\(oppKillerName)】吃【\(piece.type.name)】(-\(piece.type.pieceValue)) ➔ 3️⃣ 我方净赚 +\(netProfit) 战力！"
+                            let oppKillerName = bestOppMove?.piece.type.name ?? JungleLanguageManager.shared.enemyStrongPiece
+                            forecastText = JungleLanguageManager.shared.adviceProfitableTradeForecast(
+                                piece: piece.type.name,
+                                cap: cap.type.name,
+                                capVal: cap.type.pieceValue,
+                                oppKiller: oppKillerName,
+                                pieceVal: piece.type.pieceValue,
+                                netProfit: netProfit
+                            )
                         } else {
                             totalScore -= 200000
-                            headline = "⚠️【亏本兑子·不建议走】"
-                            detail = "吃掉【\(cap.type.name)】后会被反杀，亏损 \(abs(netProfit)) 战力！"
-                            badge = "⚠️ 亏损兑子"
-                            forecastText = "1️⃣ 吃【\(cap.type.name)】 ➔ 2️⃣ 我方被反杀 ➔ 3️⃣ 亏损战力"
+                            headline = JungleLanguageManager.shared.adviceBadTradeHeadline
+                            detail = JungleLanguageManager.shared.adviceBadTradeDetail(cap: cap.type.name, loss: abs(netProfit))
+                            badge = JungleLanguageManager.shared.adviceBadTradeBadge
+                            forecastText = JungleLanguageManager.shared.adviceBadTradeForecast(cap: cap.type.name)
                         }
                     } else {
                         totalScore += 150000 + cap.type.pieceValue * 50
-                        headline = (piece.type == .lion || piece.type == .tiger) && (abs(from.row - to.row) > 1) ?
-                            "🌊【飞河无损斩杀·吃掉\(cap.type.name)】" : "👑【无损斩杀·吃掉\(cap.type.name)】"
-                        detail = "用【\(piece.type.name)】吃掉敌方【\(cap.type.name)】后我方绝对安全，白赚 +\(cap.type.pieceValue) 战力！"
-                        badge = "👑 无损吃\(cap.type.name)"
-                        forecastText = "1️⃣ 我方【\(piece.type.name)】无损吃【\(cap.type.name)】 ➔ 2️⃣ 敌方防线崩溃 ➔ 3️⃣ 全面压制！"
+                        let isRiverJump = (piece.type == .lion || piece.type == .tiger) && (abs(from.row - to.row) > 1)
+                        headline = JungleLanguageManager.shared.adviceFreeCaptureHeadline(cap: cap.type.name, isJumpRiver: isRiverJump)
+                        detail = JungleLanguageManager.shared.adviceFreeCaptureDetail(piece: piece.type.name, cap: cap.type.name, value: cap.type.pieceValue)
+                        badge = JungleLanguageManager.shared.adviceFreeCaptureBadge(cap: cap.type.name)
+                        forecastText = JungleLanguageManager.shared.adviceFreeCaptureForecast(piece: piece.type.name, cap: cap.type.name)
                     }
                 }
                 // 🚶 9. 正常推进
                 else {
                     if inEnemyTerritory && distReduction > 0 && !isDangerousDest {
                         totalScore += 45000 + (10 - newDist) * 3500
-                        headline = (newDist <= 2) ? "🏰【直取兽穴·绝杀冲锋】" : "⚡️【直捣黄龙·逼近兽穴】"
-                        detail = (newDist <= 2) ? "敌方大本营就在眼前！全速扑向大本营锁定胜局！" : "【\(piece.type.name)】已突入敌后！全速挺进！"
-                        badge = (newDist <= 2) ? "🏆 冲向兽穴" : "🎯 逼近兽穴"
+                        headline = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenHeadline : JungleLanguageManager.shared.adviceApproachDenHeadline
+                        detail = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenDetail : JungleLanguageManager.shared.adviceApproachDenDetail(piece: piece.type.name)
+                        badge = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenBadge : JungleLanguageManager.shared.adviceApproachDenBadge
                     }
                     if isDangerousDest { totalScore -= 150000 }
                     
-                    let step1Desc = "1️⃣ 我方【\(piece.type.name)】向前推进"
-                    let step2Desc = bestOppMove != nil ? "2️⃣ 敌方【\(bestOppMove!.piece.type.name)】应对" : "2️⃣ 敌方应对"
-                    let step3Desc = "3️⃣ 我方掌控主动"
+                    let step1Desc = JungleLanguageManager.shared.forecastStep1(piece.type)
+                    let step2Desc = JungleLanguageManager.shared.forecastStep2(bestOppMove?.piece.type)
+                    let step3Desc = JungleLanguageManager.shared.forecastStep3
                     forecastText = "\(step1Desc) ➔ \(step2Desc) ➔ \(step3Desc)"
                 }
                 
@@ -1154,23 +1139,20 @@ class JungleGameEngine: ObservableObject {
         
         if let target = board[pos], target.owner != movingPiece.owner {
             if movingPiece.type == .rat && target.type == .elephant {
-                return "⚡️ 吃大象"
+                return "⚡️ \(JungleLanguageManager.shared.eatElephantBadge)"
             }
             if target.type == .rat {
-                return "⚔️ 灭鼠护象"
+                return "⚔️ \(JungleLanguageManager.shared.protectElephantBadge)"
             }
-            if movingPiece.type == target.type {
-                return "⚔️ 吃\(target.type.name)"
-            }
-            return "⚔️ 吃\(target.type.name)"
+            return "⚔️ \(JungleLanguageManager.shared.captureTargetBadge(target.type))"
         }
         
         if (movingPiece.type == .lion || movingPiece.type == .tiger) && (abs(from.row - pos.row) > 1 || abs(from.col - pos.col) > 1) {
-            return "🌊 飞跃小河"
+            return "🌊 \(JungleLanguageManager.shared.jumpRiverBadge)"
         }
         
         if case .den(let owner) = getTileType(at: pos), owner != movingPiece.owner {
-            return "🏆 绝杀赢"
+            return "🏆 \(JungleLanguageManager.shared.winGameBadge)"
         }
         
         return nil
@@ -1346,6 +1328,7 @@ class JungleGameEngine: ObservableObject {
 
 struct ContentView: View {
     @StateObject private var engine = JungleGameEngine()
+    @ObservedObject private var lang = JungleLanguageManager.shared
     @State private var showRules = false
     
     var body: some View {
@@ -1383,16 +1366,61 @@ struct ContentView: View {
     private var headerView: some View {
         HStack {
             VStack(alignment: .leading, spacing: 1) {
-                Text("🌲 快乐斗兽棋")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
+                Text(lang.appTitle)
+                    .font(.system(size: 18, weight: .black, design: .rounded))
                     .foregroundColor(Color(red: 0.15, green: 0.38, blue: 0.15))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+                    .layoutPriority(1)
                 
-                Text("🔵 蓝方胜算: \(engine.winAdvantagePercent)% (\(engine.currentDoctrine.rawValue))")
+                Text("🔵 \(lang.playerName(.blue)): \(engine.winAdvantagePercent)% (\(lang.doctrineName(engine.currentDoctrine)))")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.blue)
+                    .lineLimit(1)
             }
             
             Spacer()
+            
+            Menu {
+                Button(action: {
+                    lang.setFollowSystem()
+                    engine.computePlayerOptimalMove()
+                }) {
+                    HStack {
+                        Text(lang.systemDefaultText)
+                        if lang.isFollowingSystem {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+                
+                Divider()
+                
+                ForEach(JungleLanguage.allCases) { item in
+                    Button(action: {
+                        lang.setLanguage(item)
+                        engine.computePlayerOptimalMove()
+                    }) {
+                        HStack {
+                            Text(item.displayName)
+                            if !lang.isFollowingSystem && lang.currentLanguage == item {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 3) {
+                    Text(lang.currentLanguage.flag)
+                    Image(systemName: "globe")
+                        .font(.system(size: 12, weight: .bold))
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .background(Color.white)
+                .cornerRadius(16)
+                .shadow(color: .black.opacity(0.06), radius: 2)
+            }
             
             Button(action: {
                 engine.isVsAI.toggle()
@@ -1400,10 +1428,10 @@ struct ContentView: View {
             }) {
                 HStack(spacing: 4) {
                     Image(systemName: engine.isVsAI ? "person.fill" : "person.2.fill")
-                    Text(engine.isVsAI ? "人机对战" : "双人同屏")
+                    Text(lang.modeName(isVsAI: engine.isVsAI))
                 }
-                .font(.system(size: 13, weight: .bold))
-                .padding(.horizontal, 10)
+                .font(.system(size: 12, weight: .bold))
+                .padding(.horizontal, 8)
                 .padding(.vertical, 5)
                 .background(Color.white)
                 .cornerRadius(16)
@@ -1420,8 +1448,8 @@ struct ContentView: View {
                     engine.aiDifficulty = diff
                     engine.resetGame()
                 }) {
-                    Text(diff.rawValue)
-                        .font(.system(size: 12, weight: engine.aiDifficulty == diff ? .black : .bold))
+                    Text(lang.difficultyName(diff))
+                        .font(.system(size: 11, weight: engine.aiDifficulty == diff ? .black : .bold))
                         .foregroundColor(engine.aiDifficulty == diff ? .white : .primary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 5)
@@ -1469,7 +1497,7 @@ struct ContentView: View {
                     Button(action: {
                         engine.autoSelectRecommendedPiece()
                     }) {
-                        Text("高亮显示")
+                        Text(lang.highlightBtn)
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.blue)
                             .padding(.horizontal, 6)
@@ -1486,7 +1514,7 @@ struct ContentView: View {
                     .fixedSize(horizontal: false, vertical: true)
                 
                 HStack(spacing: 4) {
-                    Text("🔮 3步深度推演:")
+                    Text(lang.depth3DeductionTitle)
                         .font(.system(size: 10, weight: .black))
                         .foregroundColor(.purple)
                     Text(advice.forecast3Steps)
@@ -1496,7 +1524,7 @@ struct ContentView: View {
                 }
                 .padding(.top, 2)
             } else {
-                Text("正在推演全局最优路线...")
+                Text(lang.deducingBestMove)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
             }
@@ -1518,18 +1546,19 @@ struct ContentView: View {
     private var ruleHelperCheatBar: some View {
         HStack(spacing: 6) {
             if let p = engine.inspectPiece {
-                Text("\(p.type.emoji)【\(p.type.name)】:")
+                Text("\(p.type.emoji)【\(lang.animalName(p.type))】:")
                     .font(.system(size: 12, weight: .black))
                     .foregroundColor(p.owner.color)
                 
-                Text("\(p.type.ruleCanEatDescription)")
+                Text("\(lang.animalEatRule(p.type))")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(1)
             } else {
-                Text("📖 点击棋盘上任意动物，实时查看它能吃谁、怎么走。")
+                Text(lang.rulePromptHint)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
             }
             Spacer()
         }
@@ -1545,9 +1574,9 @@ struct ContentView: View {
             Button(action: { engine.activateShieldRecallSkill() }) {
                 HStack(spacing: 4) {
                     Image(systemName: "shield.righthalf.filled")
-                    Text("🛡️ 神兽天降守穴 (\(engine.shieldSkillCount))")
+                    Text(lang.shieldSkillText(engine.shieldSkillCount))
                 }
-                .font(.system(size: 12, weight: .black))
+                .font(.system(size: 11, weight: .black))
                 .foregroundColor(engine.shieldSkillCount > 0 ? .white : .secondary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 7)
@@ -1560,9 +1589,9 @@ struct ContentView: View {
             Button(action: { engine.activateFrenzySkill() }) {
                 HStack(spacing: 4) {
                     Image(systemName: "flame.fill")
-                    Text("🔥 狂暴越级猎杀 (\(engine.frenzySkillCount))")
+                    Text(lang.frenzySkillText(engine.frenzySkillCount))
                 }
-                .font(.system(size: 12, weight: .black))
+                .font(.system(size: 11, weight: .black))
                 .foregroundColor(engine.frenzySkillCount > 0 ? .white : .secondary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 7)
@@ -1576,17 +1605,17 @@ struct ContentView: View {
     }
     
     private var bottomControls: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Button(action: { engine.executeBestAdvice() }) {
-                HStack(spacing: 5) {
+                HStack(spacing: 4) {
                     Image(systemName: engine.optimalAdvice?.isEmergency == true ? "shield.fill" : (engine.optimalAdvice?.isWin == true ? "trophy.fill" : "sparkles"))
-                    Text(engine.optimalAdvice?.isEmergency == true ? "🚨 帮我紧急避险" :
-                         (engine.optimalAdvice?.isWin == true ? "🏆 一键直接获胜" :
-                          (engine.optimalAdvice?.isTrade == true ? "⚡️ 帮我战术大赚" : "🚀 帮我走这步(破局)")))
+                    Text(lang.moveForMeBtn)
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: 12, weight: .black))
+                        .lineLimit(2)
                 }
-                .font(.system(size: 15, weight: .black))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 8)
                 .background(
                     engine.optimalAdvice?.isEmergency == true ?
                     LinearGradient(colors: [Color.red, Color.orange], startPoint: .topLeading, endPoint: .bottomTrailing) :
@@ -1595,15 +1624,15 @@ struct ContentView: View {
                      LinearGradient(colors: [Color.green, Color(red: 0.1, green: 0.6, blue: 0.3)], startPoint: .topLeading, endPoint: .bottomTrailing))
                 )
                 .foregroundColor(.white)
-                .cornerRadius(14)
+                .cornerRadius(12)
                 .shadow(color: .green.opacity(0.35), radius: 4, y: 2)
             }
             
             Button(action: { engine.undo() }) {
-                Label("悔棋", systemImage: "arrow.uturn.backward.circle.fill")
-                    .font(.system(size: 14, weight: .bold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 12)
+                Label(lang.undoBtn, systemImage: "arrow.uturn.backward.circle.fill")
+                    .font(.system(size: 13, weight: .bold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 10)
                     .background(Color.white)
                     .foregroundColor(.blue)
                     .cornerRadius(12)
@@ -1611,10 +1640,10 @@ struct ContentView: View {
             }
             
             Button(action: { engine.resetGame() }) {
-                Label("重来", systemImage: "arrow.clockwise.circle.fill")
-                    .font(.system(size: 14, weight: .bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 12)
+                Label(lang.restartBtn, systemImage: "arrow.clockwise.circle.fill")
+                    .font(.system(size: 13, weight: .bold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 10)
                     .background(Color.white)
                     .foregroundColor(.red)
                     .cornerRadius(12)
@@ -1624,7 +1653,7 @@ struct ContentView: View {
             Button(action: { showRules = true }) {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 18, weight: .bold))
-                    .padding(12)
+                    .padding(10)
                     .background(Color.white)
                     .foregroundColor(.purple)
                     .cornerRadius(12)
@@ -1733,16 +1762,20 @@ struct TileView: View {
             case .trap(let owner):
                 VStack(spacing: -2) {
                     Text("⚠️").font(.system(size: 10))
-                    Text(owner == .red ? "红陷" : "蓝陷")
-                        .font(.system(size: 8, weight: .bold))
+                    Text(owner == .red ? JungleLanguageManager.shared.redTrapLabel : JungleLanguageManager.shared.blueTrapLabel)
+                        .font(.system(size: 7, weight: .bold))
                         .foregroundColor(owner.color.opacity(0.8))
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(1)
                 }
             case .den(let owner):
                 VStack(spacing: -2) {
                     Text("🏰").font(.system(size: 12))
-                    Text(owner == .red ? "红穴" : "蓝穴")
-                        .font(.system(size: 8, weight: .bold))
+                    Text(owner == .red ? JungleLanguageManager.shared.redDenLabel : JungleLanguageManager.shared.blueDenLabel)
+                        .font(.system(size: 7, weight: .bold))
                         .foregroundColor(owner.color)
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(1)
                 }
             case .land:
                 EmptyView()
@@ -1770,18 +1803,18 @@ struct TileView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 3)
                     .padding(.vertical, 2)
-                    .background(badge.contains("净赚") ? Color.purple : (isGlobalOptimalTarget ? Color(red: 0.1, green: 0.6, blue: 0.2) : Color(red: 0.15, green: 0.55, blue: 0.2)))
+                    .background((badge.contains("净赚") || badge.contains("+")) ? Color.purple : (isGlobalOptimalTarget ? Color(red: 0.1, green: 0.6, blue: 0.2) : Color(red: 0.15, green: 0.55, blue: 0.2)))
                     .cornerRadius(4)
                     .shadow(radius: 2)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(badge.contains("净赚") ? Color.pink : Color.green, lineWidth: 2)
+                            .stroke((badge.contains("净赚") || badge.contains("+")) ? Color.pink : Color.green, lineWidth: 2)
                     )
             }
             // 🔴 3. 红色危险格子
             else if isValidTarget && isDangerous {
-                Text("⚠️危险")
-                    .font(.system(size: 9, weight: .black))
+                Text("⚠️")
+                    .font(.system(size: 10, weight: .black))
                     .foregroundColor(.white)
                     .padding(.horizontal, 3)
                     .padding(.vertical, 2)
@@ -1815,6 +1848,7 @@ struct TileView: View {
 
 // 棋子视图
 struct PieceBadgeView: View {
+    @ObservedObject private var lang = JungleLanguageManager.shared
     let piece: Piece
     let isSelected: Bool
     let isOptimalSourcePiece: Bool
@@ -1832,20 +1866,22 @@ struct PieceBadgeView: View {
                         lineWidth: isEmergencyPiece ? 4 : (isOptimalSourcePiece ? 3.5 : 3))
             
             VStack(spacing: -2) {
-                Text(piece.type.emoji).font(.system(size: 20))
-                Text(piece.type.name)
+                Text(piece.type.emoji).font(.system(size: 18))
+                Text(lang.animalName(piece.type))
                     .font(.system(size: 10, weight: .black))
                     .foregroundColor(piece.owner.color)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
             }
             
             if isEmergencyPiece {
                 VStack {
                     HStack {
                         Spacer()
-                        Text("🚨快逃")
+                        Text("🚨")
                             .font(.system(size: 8, weight: .black))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 3)
+                            .padding(.horizontal, 2)
                             .padding(.vertical, 1)
                             .background(Color.red)
                             .cornerRadius(4)
@@ -1858,10 +1894,10 @@ struct PieceBadgeView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Text("1️⃣动它")
+                        Text("1️⃣")
                             .font(.system(size: 8, weight: .black))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 3)
+                            .padding(.horizontal, 2)
                             .padding(.vertical, 1)
                             .background(Color.green)
                             .cornerRadius(4)
@@ -1877,6 +1913,7 @@ struct PieceBadgeView: View {
 
 // 胜利祝贺弹窗
 struct VictoryOverlay: View {
+    @ObservedObject private var lang = JungleLanguageManager.shared
     let winner: Player
     let onRestart: () -> Void
     
@@ -1885,20 +1922,16 @@ struct VictoryOverlay: View {
             Color.black.opacity(0.5).ignoresSafeArea()
             
             VStack(spacing: 16) {
-                Text("👑 彻底攻占敌方兽穴！ 👑")
+                Text(lang.victoryTitle)
                     .font(.system(size: 23, weight: .black, design: .rounded))
                     .foregroundColor(.orange)
                 
-                Text("🎉 恭喜 【\(winner.rawValue)】 赢了！")
+                Text("👑 \(lang.playerName(winner))")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(winner.color)
                 
-                Text("🌟 破阵斩将，大获全胜！")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.secondary)
-                
                 Button(action: onRestart) {
-                    Text("再玩一局")
+                    Text(lang.playAgainBtn)
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.horizontal, 32)
@@ -1919,6 +1952,7 @@ struct VictoryOverlay: View {
 
 // 规则指引
 struct RuleGuideView: View {
+    @ObservedObject private var lang = JungleLanguageManager.shared
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -1926,32 +1960,45 @@ struct RuleGuideView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Group {
-                        sectionTitle("🎯 怎么赢？")
-                        Text("1. 走到对方家里的【兽穴 🏰】直接获胜！\n2. 或者把对方所有动物全部吃光！")
+                        sectionTitle("🎯 \(lang.ruleWinConditionTitle)")
+                        Text(lang.ruleWinConditionDesc)
                     }
                     Divider()
                     Group {
-                        sectionTitle("🦁 食物链大小与互吃规则")
-                        Text("象 ＞ 狮 ＞ 虎 ＞ 豹 ＞ 狼 ＞ 狗 ＞ 猫 ＞ 鼠")
-                            .font(.system(size: 15, weight: .bold))
+                        sectionTitle("🦁 \(lang.ruleHierarchyTitle)")
+                        Text("🐘 ＞ 🦁 ＞ 🐯 ＞ 🐆 ＞ 🐺 ＞ 🐶 ＞ 🐱 ＞ 🐭")
+                            .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.blue)
-                        Text("• ⭐ 同级互吃铁律：【豹吃豹、狼吃狼、狗吃狗】！同级相遇先下手为强（谁先走谁吃对方）！\n• ⭐ 绝杀克制：【🐭小老鼠】可以吃【🐘大象】！")
+                        ForEach(AnimalType.allCases) { type in
+                            HStack(alignment: .top, spacing: 6) {
+                                Text("\(type.emoji) \(lang.animalName(type)):")
+                                    .font(.system(size: 12, weight: .black))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 80, alignment: .leading)
+                                Text(lang.animalEatRule(type))
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                     Divider()
                     Group {
-                        sectionTitle("⚡️ 玩家专属【神兽绝技】超能力")
-                        Text("• 🛡️【神兽天降】：瞬间召唤主力空降大本营门口，紧急诛灭偷家敌人！\n• 🔥【狂暴猎杀】：开启后2回合内，己方小动物可越级吃掉任何红方强敌！\n• 🔮【3步推演】：系统每回合为您深度推演未来3步局势走势！")
+                        sectionTitle("⚡️ \(lang.ruleSpecialAbilitiesTitle)")
+                        Text("• 🌊: \(lang.animalName(.rat)) - \(lang.animalEatRule(.rat))")
+                        Text("• 🦁 / 🐯: \(lang.animalEatRule(.lion))")
+                        Text("• \(lang.shieldSkillText(1))")
+                        Text("• \(lang.frenzySkillText(1))")
                     }
                 }
-                .font(.system(size: 14))
+                .font(.system(size: 13))
                 .padding(18)
             }
-            .navigationTitle("📖 斗兽棋新手必胜指南")
+            .navigationTitle(lang.ruleSheetTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("我知道了") { dismiss() }
-                        .font(.system(size: 15, weight: .bold))
+                    Button(lang.closeBtn) { dismiss() }
+                        .font(.system(size: 14, weight: .bold))
                 }
             }
         }
@@ -1959,7 +2006,7 @@ struct RuleGuideView: View {
     
     private func sectionTitle(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 16, weight: .bold))
+            .font(.system(size: 15, weight: .bold))
             .foregroundColor(Color(red: 0.15, green: 0.38, blue: 0.15))
     }
 }
