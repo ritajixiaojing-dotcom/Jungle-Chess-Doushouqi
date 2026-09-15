@@ -73,6 +73,15 @@ class JungleLanguageManager: ObservableObject {
             self.isFollowingSystem = true
             self.currentLanguage = JungleLanguageManager.detectSystemLanguage()
         }
+        
+        NotificationCenter.default.addObserver(
+            forName: NSLocale.currentLocaleDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self, self.isFollowingSystem else { return }
+            self.currentLanguage = JungleLanguageManager.detectSystemLanguage()
+        }
     }
     
     static func detectSystemLanguage() -> JungleLanguage {

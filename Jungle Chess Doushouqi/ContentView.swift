@@ -1314,11 +1314,21 @@ class JungleGameEngine: ObservableObject {
     private func playSound(type: SoundEffect) {
         #if os(iOS)
         switch type {
-        case .select: AudioServicesPlaySystemSound(1104)
-        case .move: AudioServicesPlaySystemSound(1057)
-        case .capture: AudioServicesPlaySystemSound(1054)
-        case .undo: AudioServicesPlaySystemSound(1105)
-        case .win: AudioServicesPlaySystemSound(1025)
+        case .select:
+            AudioServicesPlaySystemSound(1104)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        case .move:
+            AudioServicesPlaySystemSound(1057)
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        case .capture:
+            AudioServicesPlaySystemSound(1054)
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        case .undo:
+            AudioServicesPlaySystemSound(1105)
+            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        case .win:
+            AudioServicesPlaySystemSound(1025)
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
         #endif
     }
