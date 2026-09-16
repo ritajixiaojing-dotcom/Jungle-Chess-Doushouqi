@@ -1999,6 +1999,19 @@ struct RuleGuideView: View {
                         Text("• \(lang.shieldSkillText(1))")
                         Text("• \(lang.frenzySkillText(1))")
                     }
+                    Divider()
+                    VStack(spacing: 4) {
+                        Text(lang.appTitle)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.primary)
+                        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.3"
+                        let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+                        Text("v\(appVersion) (Build \(buildNumber))")
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
                 }
                 .font(.system(size: 13))
                 .padding(18)
