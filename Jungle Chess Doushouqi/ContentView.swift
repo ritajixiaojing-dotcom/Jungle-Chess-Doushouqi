@@ -152,6 +152,7 @@ class JungleGameEngine: ObservableObject {
     @Published var aiDifficulty: AIDifficulty = .hard
     @Published var isThinking: Bool = false
     @Published var history: [MoveRecord] = []
+    @Published var lastOpponentMove: MoveRecord? = nil
     
     init() {
         resetGame()
@@ -181,6 +182,7 @@ class JungleGameEngine: ObservableObject {
     func resetGame() {
         board.removeAll()
         history.removeAll()
+        lastOpponentMove = nil
         selectedPos = nil
         validMoves = []
         dangerousMoves = []
@@ -290,6 +292,7 @@ class JungleGameEngine: ObservableObject {
         
         let record = MoveRecord(from: from, to: to, movedPiece: movingPiece, capturedPiece: capturedPiece)
         history.append(record)
+        lastOpponentMove = record
         
         board.removeValue(forKey: from)
         board[to] = movingPiece
@@ -349,6 +352,7 @@ class JungleGameEngine: ObservableObject {
         validMoves = []
         dangerousMoves = []
         threatenedPieces = []
+        lastOpponentMove = history.last(where: { $0.movedPiece.owner != currentTurn })
         updateRoundEvaluation()
         playSound(type: .undo)
     }
@@ -1703,13 +1707,17 @@ struct BoardView: View {
                                     return nil
                                 }()
                                 
+                                let lastOpMove = engine.lastOpponentMove
+                                let isOpponentSource = (lastOpMove?.from == pos) && (lastOpMove?.movedPiece.owner != engine.currentTurn) && (engine.board[pos] == nil)
+                                
                                 TileView(tileType: tileType,
                                          isValidTarget: engine.validMoves.contains(pos),
                                          isDangerous: engine.dangerousMoves.contains(pos),
                                          actionBadgeText: actionBadge,
                                          isGlobalOptimalTarget: engine.optimalAdvice?.to == pos,
                                          isEmergencyTarget: engine.optimalAdvice?.isEmergency == true && engine.optimalAdvice?.to == pos,
-                                         isSelected: engine.selectedPos == pos)
+                                         isSelected: engine.selectedPos == pos,
+                                         isOpponentSource: isOpponentSource)
                                     .frame(width: cellSize, height: cellSize)
                                     .onTapGesture {
                                         engine.handleTileTap(at: pos)
@@ -1729,11 +1737,13 @@ struct BoardView: View {
                 ForEach(Array(engine.board.keys), id: \.self) { pos in
                     if let piece = engine.board[pos] {
                         let isPlayerPiece = (piece.owner == .blue || !engine.isVsAI)
+                        let isOpponentTarget = (engine.lastOpponentMove?.to == pos) && (piece.owner != engine.currentTurn)
                         
                         PieceBadgeView(piece: piece,
                                        isSelected: engine.selectedPos == pos,
                                        isOptimalSourcePiece: isPlayerPiece && (engine.optimalAdvice?.from == pos),
-                                       isEmergencyPiece: isPlayerPiece && (engine.optimalAdvice?.isEmergency == true && engine.optimalAdvice?.from == pos))
+                                       isEmergencyPiece: isPlayerPiece && (engine.optimalAdvice?.isEmergency == true && engine.optimalAdvice?.from == pos),
+                                       isOpponentTarget: isOpponentTarget)
                             .frame(width: cellSize * 0.88, height: cellSize * 0.88)
                             .offset(x: CGFloat(pos.col) * cellSize + cellSize * 0.06,
                                     y: CGFloat(pos.row) * cellSize + cellSize * 0.06)
@@ -1759,6 +1769,7 @@ struct TileView: View {
     let isGlobalOptimalTarget: Bool
     let isEmergencyTarget: Bool
     let isSelected: Bool
+    var isOpponentSource: Bool = false
     
     var body: some View {
         ZStack {
@@ -1838,6 +1849,26 @@ struct TileView: View {
                     .frame(width: 18, height: 18)
                     .overlay(Circle().stroke(Color.green, lineWidth: 2))
             }
+            // 📍 5. 对方行棋起点标记
+            else if isOpponentSource {
+                VStack(spacing: 1) {
+                    Text("📍")
+                        .font(.system(size: 9))
+                    Text(JungleLanguageManager.shared.lastOpponentSourceBadge)
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundColor(Color.red.opacity(0.85))
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(1)
+                }
+                .padding(.horizontal, 2)
+                .padding(.vertical, 1)
+                .background(Color(red: 1.0, green: 0.92, blue: 0.92).opacity(0.9))
+                .cornerRadius(4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.red.opacity(0.4), lineWidth: 1)
+                )
+            }
             
             if isSelected {
                 RoundedRectangle(cornerRadius: 6)
@@ -1847,6 +1878,9 @@ struct TileView: View {
     }
     
     var tileBackgroundColor: Color {
+        if isOpponentSource {
+            return Color(red: 1.0, green: 0.94, blue: 0.94)
+        }
         switch tileType {
         case .river: return Color(red: 0.65, green: 0.85, blue: 0.95)
         case .trap: return Color(red: 0.98, green: 0.92, blue: 0.8)
@@ -1863,23 +1897,38 @@ struct PieceBadgeView: View {
     let isSelected: Bool
     let isOptimalSourcePiece: Bool
     let isEmergencyPiece: Bool
+    var isOpponentTarget: Bool = false
+    @State private var isPulsing: Bool = false
     
     var body: some View {
         ZStack {
-            Circle()
-                .fill(isEmergencyPiece ? Color(red: 1.0, green: 0.85, blue: 0.85) :
-                      (isOptimalSourcePiece ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color.white))
-                .shadow(color: .black.opacity(0.2), radius: isSelected ? 5 : 2, x: 0, y: isSelected ? 3 : 1.5)
+            // 对方走步光晕外圈
+            if isOpponentTarget {
+                Circle()
+                    .stroke(Color(red: 1.0, green: 0.1, blue: 0.25).opacity(isPulsing ? 0.85 : 0.35), lineWidth: 3.5)
+                    .scaleEffect(isPulsing ? 1.18 : 1.04)
+            }
             
             Circle()
-                .stroke(isEmergencyPiece ? Color.red : (isOptimalSourcePiece ? Color.green : piece.owner.color),
-                        lineWidth: isEmergencyPiece ? 4 : (isOptimalSourcePiece ? 3.5 : 3))
+                .fill(isEmergencyPiece ? Color(red: 1.0, green: 0.85, blue: 0.85) :
+                      (isOpponentTarget ? Color(red: 1.0, green: 0.93, blue: 0.93) :
+                      (isOptimalSourcePiece ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color.white)))
+                .shadow(color: isOpponentTarget ? Color.red.opacity(0.4) : Color.black.opacity(0.2),
+                        radius: isSelected ? 5 : (isOpponentTarget ? 4 : 2),
+                        x: 0,
+                        y: isSelected ? 3 : 1.5)
+            
+            Circle()
+                .stroke(isEmergencyPiece ? Color.red :
+                        (isOpponentTarget ? Color(red: 1.0, green: 0.1, blue: 0.25) :
+                        (isOptimalSourcePiece ? Color.green : piece.owner.color)),
+                        lineWidth: isEmergencyPiece ? 4 : (isOpponentTarget ? 3.5 : (isOptimalSourcePiece ? 3.5 : 3)))
             
             VStack(spacing: -2) {
                 Text(piece.type.emoji).font(.system(size: 18))
                 Text(lang.animalName(piece.type))
                     .font(.system(size: 10, weight: .black))
-                    .foregroundColor(piece.owner.color)
+                    .foregroundColor(isOpponentTarget ? Color(red: 0.9, green: 0.1, blue: 0.2) : piece.owner.color)
                     .minimumScaleFactor(0.7)
                     .lineLimit(1)
             }
@@ -1895,6 +1944,23 @@ struct PieceBadgeView: View {
                             .padding(.vertical, 1)
                             .background(Color.red)
                             .cornerRadius(4)
+                            .offset(x: 4, y: -4)
+                    }
+                    Spacer()
+                }
+            }
+            else if isOpponentTarget {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text(lang.lastOpponentMoveBadge)
+                            .font(.system(size: 8, weight: .black))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 3)
+                            .padding(.vertical, 1.5)
+                            .background(Color(red: 1.0, green: 0.1, blue: 0.25))
+                            .cornerRadius(4)
+                            .shadow(radius: 2)
                             .offset(x: 4, y: -4)
                     }
                     Spacer()
@@ -1917,7 +1983,14 @@ struct PieceBadgeView: View {
                 }
             }
         }
-        .scaleEffect(isSelected ? 1.18 : (isEmergencyPiece ? 1.12 : (isOptimalSourcePiece ? 1.08 : 1.0)))
+        .scaleEffect(isSelected ? 1.18 : (isEmergencyPiece ? 1.12 : (isOpponentTarget ? (isPulsing ? 1.12 : 1.02) : (isOptimalSourcePiece ? 1.08 : 1.0))))
+        .onAppear {
+            if isOpponentTarget {
+                withAnimation(Animation.easeInOut(duration: 0.65).repeatForever(autoreverses: true)) {
+                    isPulsing = true
+                }
+            }
+        }
     }
 }
 
@@ -2004,7 +2077,7 @@ struct RuleGuideView: View {
                         Text(lang.appTitle)
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.primary)
-                        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.3"
+                        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4"
                         let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
                         Text("v\(appVersion) (Build \(buildNumber))")
                             .font(.system(size: 11, weight: .medium, design: .monospaced))

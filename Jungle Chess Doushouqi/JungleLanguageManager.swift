@@ -862,6 +862,30 @@ class JungleLanguageManager: ObservableObject {
         }
     }
     
+    var lastOpponentMoveBadge: String {
+        switch currentLanguage {
+        case .zhHans, .zhHant: return "⚡敌步"
+        case .en: return "⚡Opponent"
+        case .ja: return "⚡相手の手"
+        case .ko: return "⚡상대의 수"
+        case .es: return "⚡Último"
+        case .fr: return "⚡Adversaire"
+        case .de: return "⚡Gegner"
+        }
+    }
+    
+    var lastOpponentSourceBadge: String {
+        switch currentLanguage {
+        case .zhHans, .zhHant: return "起点"
+        case .en: return "From"
+        case .ja: return "始点"
+        case .ko: return "시작"
+        case .es: return "Desde"
+        case .fr: return "Départ"
+        case .de: return "Start"
+        }
+    }
+    
     func recommendedMoveHeadline(_ type: AnimalType) -> String {
         let name = animalName(type)
         switch currentLanguage {
