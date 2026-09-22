@@ -156,6 +156,46 @@ class JungleGameEngine: ObservableObject {
     
     init() {
         resetGame()
+        if CommandLine.arguments.contains("-mockOpponentMove") {
+            setupMockOpponentMove()
+        } else if CommandLine.arguments.contains("-mockMidGame") {
+            setupMockMidGame()
+        }
+    }
+    
+    func setupMockOpponentMove() {
+        let from = Position(row: 2, col: 2)
+        let to = Position(row: 3, col: 2)
+        let piece = Piece(type: .leopard, owner: .red)
+        board.removeValue(forKey: from)
+        board[to] = piece
+        lastOpponentMove = MoveRecord(from: from, to: to, movedPiece: piece, capturedPiece: nil)
+        currentTurn = .blue
+        updateRoundEvaluation()
+    }
+    
+    func setupMockMidGame() {
+        board.removeAll()
+        board[Position(row: 0, col: 0)] = Piece(type: .lion, owner: .red)
+        board[Position(row: 0, col: 6)] = Piece(type: .tiger, owner: .red)
+        board[Position(row: 1, col: 1)] = Piece(type: .dog, owner: .red)
+        board[Position(row: 3, col: 3)] = Piece(type: .wolf, owner: .red)
+        board[Position(row: 2, col: 6)] = Piece(type: .elephant, owner: .red)
+        board[Position(row: 3, col: 1)] = Piece(type: .rat, owner: .red)
+        
+        board[Position(row: 4, col: 2)] = Piece(type: .leopard, owner: .blue)
+        board[Position(row: 5, col: 4)] = Piece(type: .rat, owner: .blue)
+        board[Position(row: 6, col: 0)] = Piece(type: .elephant, owner: .blue)
+        board[Position(row: 5, col: 6)] = Piece(type: .lion, owner: .blue)
+        board[Position(row: 7, col: 1)] = Piece(type: .cat, owner: .blue)
+        board[Position(row: 7, col: 5)] = Piece(type: .dog, owner: .blue)
+        board[Position(row: 8, col: 0)] = Piece(type: .tiger, owner: .blue)
+        
+        currentTurn = .blue
+        selectedPos = Position(row: 4, col: 2)
+        validMoves = [Position(row: 3, col: 2), Position(row: 4, col: 3), Position(row: 5, col: 2)]
+        dangerousMoves = [Position(row: 3, col: 3)]
+        updateRoundEvaluation()
     }
     
     func getTileType(at pos: Position) -> TileType {
@@ -469,59 +509,131 @@ class JungleGameEngine: ObservableObject {
     }
     
     // MARK: - 🧠 棋局估值函数
-    private func evaluateBoardScore(customBoard: [Position: Piece], for player: Player) -> Int {
+    func evaluateBoardScore(customBoard: [Position: Piece], for player: Player) -> Int {
         let blueDen = Position(row: 8, col: 3)
         let redDen = Position(row: 0, col: 3)
         
         if customBoard[redDen]?.owner == .blue {
-            return (player == .blue ? 10000000 : -10000000)
+            return (player == .blue ? 10_000_000 : -10_000_000)
         }
         if customBoard[blueDen]?.owner == .red {
-            return (player == .red ? 10000000 : -10000000)
+            return (player == .red ? 10_000_000 : -10_000_000)
         }
         
-        let enemyDen = (player == .blue ? redDen : blueDen)
-        let myDen = (player == .blue ? blueDen : redDen)
+        let myDen = (player == .red ? redDen : blueDen)
+        let enemyDen = (player == .red ? blueDen : redDen)
+        let myTraps: Set<Position> = (player == .red ?
+            [Position(row: 0, col: 2), Position(row: 0, col: 4), Position(row: 1, col: 3)] :
+            [Position(row: 8, col: 2), Position(row: 8, col: 4), Position(row: 7, col: 3)])
+        let enemyTraps: Set<Position> = (player == .red ?
+            [Position(row: 8, col: 2), Position(row: 8, col: 4), Position(row: 7, col: 3)] :
+            [Position(row: 0, col: 2), Position(row: 0, col: 4), Position(row: 1, col: 3)])
         
         var score = 0
         
+        func pieceBaseValue(_ type: AnimalType) -> Int {
+            switch type {
+            case .rat: return 3500
+            case .cat: return 2000
+            case .dog: return 3000
+            case .wolf: return 4000
+            case .leopard: return 5500
+            case .tiger: return 8000
+            case .lion: return 9500
+            case .elephant: return 10000
+            }
+        }
+        
+        var myElephantPos: Position? = nil
+        var oppRatPos: Position? = nil
+        var oppElephantPos: Position? = nil
+        var myRatPos: Position? = nil
+        
+        for (pos, piece) in customBoard {
+            if piece.owner == player {
+                if piece.type == .elephant { myElephantPos = pos }
+                if piece.type == .rat { myRatPos = pos }
+            } else {
+                if piece.type == .elephant { oppElephantPos = pos }
+                if piece.type == .rat { oppRatPos = pos }
+            }
+        }
+        
         for (pos, piece) in customBoard {
             let isMine = (piece.owner == player)
-            let multiplier = isMine ? 1 : -1
-            
-            var pieceVal = piece.type.pieceValue * 10
+            let baseVal = pieceBaseValue(piece.type)
+            var positionalBonus = 0
             
             let targetDen = isMine ? enemyDen : myDen
-            let distToDen = abs(pos.row - targetDen.row) + abs(pos.col - targetDen.col)
+            let distToTarget = abs(pos.row - targetDen.row) + abs(pos.col - targetDen.col)
             
-            if isMine && (player == .blue ? pos.row <= 3 : pos.row >= 5) {
-                pieceVal += (10 - distToDen) * 1200
-            } else {
-                pieceVal += (15 - distToDen) * 40
-            }
-            
-            if !isMine {
-                let distToMyDen = abs(pos.row - myDen.row) + abs(pos.col - myDen.col)
-                if distToMyDen == 1 {
-                    score -= 500000
-                } else if distToMyDen == 2 {
-                    score -= 200000
-                } else if distToMyDen == 3 {
-                    score -= 80000
+            if isMine {
+                // A. 进攻推进动力：全盘所有格子，越靠近敌营分数越高！
+                positionalBonus += (12 - distToTarget) * 200
+                
+                // B. 兵临城下绝杀冲刺
+                if distToTarget == 1 {
+                    positionalBonus += 30000
+                } else if distToTarget == 2 {
+                    positionalBonus += 12000
+                } else if distToTarget <= 4 {
+                    positionalBonus += (5 - distToTarget) * 3000
                 }
+                
+                // C. 关键地形控制
+                if pos.col == 3 {
+                    positionalBonus += 400
+                }
+                if (piece.type == .lion || piece.type == .tiger) && (pos.row == 2 || pos.row == 6) {
+                    positionalBonus += 1500
+                }
+                if piece.type == .rat && getTileType(at: pos) == .river {
+                    positionalBonus += 1800
+                }
+                if enemyTraps.contains(pos) {
+                    positionalBonus -= 8000
+                }
+                
+                score += (baseVal + positionalBonus)
+            } else {
+                // 敌方棋子
+                positionalBonus += (12 - distToTarget) * 200
+                
+                if distToTarget == 1 {
+                    positionalBonus += 35000
+                } else if distToTarget == 2 {
+                    positionalBonus += 15000
+                } else if distToTarget <= 4 {
+                    positionalBonus += (5 - distToTarget) * 3500
+                }
+                if myTraps.contains(pos) {
+                    positionalBonus -= 7000
+                }
+                
+                score -= (baseVal + positionalBonus)
             }
-            
-            if (piece.type == .lion || piece.type == .tiger) && (pos.row == 2 || pos.row == 6) {
-                pieceVal += 450
+        }
+        
+        // D. 象鼠克制动态加权
+        if let ePos = myElephantPos, let rPos = oppRatPos {
+            let dist = abs(ePos.row - rPos.row) + abs(ePos.col - rPos.col)
+            if getTileType(at: rPos) != .river {
+                if dist == 1 { score -= 15000 }
+                else if dist == 2 { score -= 6000 }
             }
-            
-            score += pieceVal * multiplier
+        }
+        if let rPos = myRatPos, let ePos = oppElephantPos {
+            let dist = abs(rPos.row - ePos.row) + abs(rPos.col - ePos.col)
+            if getTileType(at: rPos) != .river {
+                if dist == 1 { score += 15000 }
+                else if dist == 2 { score += 6000 }
+            }
         }
         
         return score
     }
     
-    private func isSquareCoveredByFriendly(boardState: [Position: Piece], pos: Position, owner: Player) -> Bool {
+    func isSquareCoveredByFriendly(boardState: [Position: Piece], pos: Position, owner: Player) -> Bool {
         for (friendPos, friendPiece) in boardState where friendPiece.owner == owner && friendPos != pos {
             let moves = calculateValidMovesOnBoard(boardState: boardState, from: friendPos)
             if moves.contains(pos) {
@@ -805,8 +917,6 @@ class JungleGameEngine: ObservableObject {
                         detail = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenDetail : JungleLanguageManager.shared.adviceApproachDenDetail(piece: piece.type.name)
                         badge = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenBadge : JungleLanguageManager.shared.adviceApproachDenBadge
                     }
-                    if isDangerousDest { totalScore -= 150000 }
-                    
                     let step1Desc = JungleLanguageManager.shared.forecastStep1(piece.type)
                     let step2Desc = JungleLanguageManager.shared.forecastStep2(bestOppMove?.piece.type)
                     let step3Desc = JungleLanguageManager.shared.forecastStep3
@@ -833,47 +943,16 @@ class JungleGameEngine: ObservableObject {
     }
     
     // MARK: - 🤖 红方电脑走棋
-    private func triggerAIMove() {
+    func triggerAIMove() {
         var allCandidateMoves: [(from: Position, to: Position, piece: Piece, score: Int)] = []
         let blueDen = Position(row: 8, col: 3)
         let redDen = Position(row: 0, col: 3)
-        let redChokePoints: Set<Position> = [Position(row: 0, col: 2), Position(row: 0, col: 4), Position(row: 1, col: 3), Position(row: 1, col: 2), Position(row: 1, col: 4)]
-        
-        // 🚨 1. 大本营受威胁检测
-        var urgentBlueInvaders: [(pos: Position, piece: Piece, dist: Int)] = []
-        for (bPos, bPiece) in board where bPiece.owner == .blue {
-            let dist = abs(bPos.row - redDen.row) + abs(bPos.col - redDen.col)
-            if dist <= 3 {
-                urgentBlueInvaders.append((bPos, bPiece, dist))
-            }
-        }
-        let isRedDenUnderSiege = !urgentBlueInvaders.isEmpty
-        
-        // 🚨 2. 红象受蓝鼠威胁检测 (大象与老鼠距离)
-        var elephantPos: Position? = nil
-        var blueRatPos: Position? = nil
-        for (pos, piece) in board {
-            if piece.owner == .red && piece.type == .elephant { elephantPos = pos }
-            if piece.owner == .blue && piece.type == .rat { blueRatPos = pos }
-        }
-        var ratDistToElephant = 99
-        if let ePos = elephantPos, let rPos = blueRatPos {
-            ratDistToElephant = abs(ePos.row - rPos.row) + abs(ePos.col - rPos.col)
-        }
-        
         let redPieces = board.filter { $0.value.owner == .red }
         
         for (from, piece) in redPieces {
             let moves = calculateValidMoves(from: from)
-            let inPlayerTerritory = from.row >= 5
-            let isCurrentPieceUnderThreat = isPositionThreatened(pos: from, piece: piece, boardState: board)
             
             for to in moves {
-                var simBoard1 = board
-                let cap1 = simBoard1[to]
-                simBoard1.removeValue(forKey: from)
-                simBoard1[to] = piece
-                
                 // 🏆 制胜判定：一步进穴直接赢
                 if to == blueDen {
                     self.isThinking = false
@@ -881,62 +960,16 @@ class JungleGameEngine: ObservableObject {
                     return
                 }
                 
-                var redScore = 0
-                let isDangerousDest = calculateDangerousMoves(from: from, moves: [to]).contains(to)
-                let isRiverJump = (piece.type == .lion || piece.type == .tiger) && abs(from.row - to.row) > 1
+                var simBoard1 = board
+                let cap1 = simBoard1[to]
+                simBoard1.removeValue(forKey: from)
+                simBoard1[to] = piece
                 
-                // ⚡️ 3. 【红鼠吃蓝象】：最高天命捕获
-                if piece.type == .rat, let target = cap1, target.type == .elephant {
-                    redScore += 500000
-                }
-                
-                // 🛡️ 4. 【大本营肉盾死守与狮王回防】
-                if isRedDenUnderSiege, let closestInvader = urgentBlueInvaders.min(by: { $0.dist < $1.dist }) {
-                    if to == closestInvader.pos && canOccupyOrCapture(attacker: piece, from: from, to: to) {
-                        redScore += 350000 + piece.type.pieceValue * 30
-                    } else if piece.type == .lion || piece.type == .tiger || piece.type == .elephant {
-                        let curD = abs(from.row - closestInvader.pos.row) + abs(from.col - closestInvader.pos.col)
-                        let newD = abs(to.row - closestInvader.pos.row) + abs(to.col - closestInvader.pos.col)
-                        if newD < curD {
-                            redScore += 300000
-                        }
-                    } else {
-                        if redChokePoints.contains(from) && !redChokePoints.contains(to) {
-                            redScore -= 400000
-                        }
-                        if redChokePoints.contains(to) {
-                            redScore += 260000
-                        }
-                    }
-                }
-                
-                // 🐘 5. 【大象遭遇老鼠生死危机 - 绝对防守铁律】
-                if ratDistToElephant <= 2, let rPos = blueRatPos {
-                    if piece.type != .elephant && to == rPos {
-                        redScore += 450000 + piece.type.pieceValue * 20
-                    } else if ratDistToElephant == 1 && piece.type == .elephant {
-                        let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
-                        if newD > 1 && !isDangerousDest {
-                            redScore += 400000
-                        }
-                    } else if ratDistToElephant == 2 && piece.type != .elephant {
-                        let curD = abs(from.row - rPos.row) + abs(from.col - rPos.col)
-                        let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
-                        if newD < curD {
-                            redScore += 160000 + (curD - newD) * 12000
-                        }
-                    }
-                }
-                
-                // 🛡️ 6. 【红方受威胁棋子避险逃生】
-                if isCurrentPieceUnderThreat && !isDangerousDest {
-                    redScore += 300000 + piece.type.pieceValue * 20
-                }
-                
-                // 7. 模拟第二步：预测蓝方玩家的最强应对 (2-Ply)
-                var maxBlueGain = -9999999
-                var bestBlueCounter: (from: Position, to: Position, piece: Piece)? = nil
+                // 2-Ply Minimax: 预测蓝方玩家的最强反制
                 let bluePieces = simBoard1.filter { $0.value.owner == .blue }
+                var worstRedScoreAfterBlue = Int.max
+                var bestBlueCounter: (from: Position, to: Position, piece: Piece)? = nil
+                
                 for (bFrom, bPiece) in bluePieces {
                     let bMoves = calculateValidMovesOnBoard(boardState: simBoard1, from: bFrom)
                     for bTo in bMoves {
@@ -944,104 +977,78 @@ class JungleGameEngine: ObservableObject {
                         simBoard2.removeValue(forKey: bFrom)
                         simBoard2[bTo] = bPiece
                         
-                        let blueEval = evaluateBoardScore(customBoard: simBoard2, for: .blue)
-                        if blueEval > maxBlueGain {
-                            maxBlueGain = blueEval
+                        // 若蓝方一步进红营，红方直接输
+                        if bTo == redDen {
+                            worstRedScoreAfterBlue = -10_000_000
+                            bestBlueCounter = (bFrom, bTo, bPiece)
+                            break
+                        }
+                        
+                        let redEval = evaluateBoardScore(customBoard: simBoard2, for: .red)
+                        if redEval < worstRedScoreAfterBlue {
+                            worstRedScoreAfterBlue = redEval
                             bestBlueCounter = (bFrom, bTo, bPiece)
                         }
                     }
+                    if worstRedScoreAfterBlue == -10_000_000 { break }
                 }
                 
-                redScore += (-maxBlueGain)
+                if bluePieces.isEmpty {
+                    worstRedScoreAfterBlue = 10_000_000
+                }
                 
-                // 👑 8. 【智谋大师专属 4-Ply 深度推演】
-                if aiDifficulty == .hard {
+                var redScore = worstRedScoreAfterBlue
+                
+                // 3-Ply 深度反击推演 (智谋大师专属)
+                if aiDifficulty == .hard, let blueMove = bestBlueCounter, worstRedScoreAfterBlue > -10_000_000 {
                     var simBoard2 = simBoard1
-                    if let blueMove = bestBlueCounter {
-                        simBoard2.removeValue(forKey: blueMove.from)
-                        simBoard2[blueMove.to] = blueMove.piece
-                        
-                        var redFollowUpBest = -9999999
-                        let redP3 = simBoard2.filter { $0.value.owner == .red }
-                        for (r3From, r3Piece) in redP3 {
-                            let r3Moves = calculateValidMovesOnBoard(boardState: simBoard2, from: r3From)
-                            for r3To in r3Moves {
-                                var simBoard3 = simBoard2
-                                simBoard3.removeValue(forKey: r3From)
-                                simBoard3[r3To] = r3Piece
-                                let r3Score = evaluateBoardScore(customBoard: simBoard3, for: .red)
-                                if r3Score > redFollowUpBest {
-                                    redFollowUpBest = r3Score
-                                }
+                    simBoard2.removeValue(forKey: blueMove.from)
+                    simBoard2[blueMove.to] = blueMove.piece
+                    
+                    var redFollowUpBest = -9999999
+                    let redP3 = simBoard2.filter { $0.value.owner == .red }
+                    for (r3From, r3Piece) in redP3 {
+                        let r3Moves = calculateValidMovesOnBoard(boardState: simBoard2, from: r3From)
+                        for r3To in r3Moves {
+                            var simBoard3 = simBoard2
+                            simBoard3.removeValue(forKey: r3From)
+                            simBoard3[r3To] = r3Piece
+                            
+                            if r3To == blueDen {
+                                redFollowUpBest = 10_000_000
+                                break
+                            }
+                            let r3Score = evaluateBoardScore(customBoard: simBoard3, for: .red)
+                            if r3Score > redFollowUpBest {
+                                redFollowUpBest = r3Score
                             }
                         }
-                        if redFollowUpBest > -9999999 {
-                            redScore += (redFollowUpBest / 3)
-                        }
+                        if redFollowUpBest == 10_000_000 { break }
                     }
-                    
-                    if (piece.type == .lion || piece.type == .tiger) {
-                        if (to.row == 2 || to.row == 6) && (to.col == 1 || to.col == 2 || to.col == 4 || to.col == 5) {
-                            redScore += 35000
-                        }
-                    }
-                    
-                    if isSquareCoveredByFriendly(boardState: simBoard1, pos: to, owner: .red) {
-                        redScore += 25000
-                    }
-                    
-                    if to.row >= 5 && !isDangerousDest {
-                        let distToBlueDen = abs(to.row - blueDen.row) + abs(to.col - blueDen.col)
-                        if distToBlueDen <= 2 {
-                            redScore += 160000 + (3 - distToBlueDen) * 40000
-                        } else if distToBlueDen <= 4 {
-                            redScore += 50000 + (6 - distToBlueDen) * 8000
-                        }
-                    }
-                    
-                    if let target = cap1, (target.type == .elephant || target.type == .lion || target.type == .tiger) {
-                        redScore += 60000
-                    }
-                    
-                    let blueTraps: Set<Position> = [Position(row: 8, col: 2), Position(row: 8, col: 4), Position(row: 7, col: 3)]
-                    if blueTraps.contains(to) && !isDangerousDest {
-                        redScore += 100000
+                    if redFollowUpBest > -9999999 {
+                        redScore += (redFollowUpBest - worstRedScoreAfterBlue) / 3
                     }
                 }
                 
-                let curDist = abs(from.row - blueDen.row) + abs(from.col - blueDen.col)
-                let newDist = abs(to.row - blueDen.row) + abs(to.col - blueDen.col)
-                let distReduction = curDist - newDist
-                
-                if isDangerousDest {
-                    let netProfit = (cap1?.type.pieceValue ?? 0) - piece.type.pieceValue
-                    if netProfit > 0 {
-                        redScore += 120000 + netProfit * 30
-                    } else {
-                        redScore -= (aiDifficulty == .hard ? 500000 : 350000)
-                    }
-                    if isRiverJump {
-                        redScore -= (aiDifficulty == .hard ? 450000 : 300000)
-                    }
-                } else {
-                    if inPlayerTerritory && distReduction > 0 {
-                        redScore += 50000 + (10 - newDist) * 4000
-                    }
-                    if isRiverJump {
-                        redScore += (aiDifficulty == .hard ? 28000 : 12000)
-                    }
-                }
-                
+                // 战术吃子加成 (优先吃掉高战力敌子)
                 if let target = cap1 {
-                    redScore += 15000 + target.type.pieceValue * 30
+                    redScore += (target.type.rawValue * 300)
                 }
                 
+                // 狮虎隔河飞跃主动进攻奖励
+                let isRiverJump = (piece.type == .lion || piece.type == .tiger) && (abs(from.row - to.row) > 1 || abs(from.col - to.col) > 1)
+                if isRiverJump {
+                    redScore += 800
+                }
+                
+                // 防重复来回巡逻惩罚
                 let repPenalty = calculateRepetitionPenalty(from: from, to: to, piece: piece)
                 redScore -= repPenalty
                 
+                // 难度微调扰动
                 switch aiDifficulty {
-                case .easy: redScore += Int.random(in: -150...150)
-                case .normal: redScore += 0
+                case .easy: redScore += Int.random(in: -600...600)
+                case .normal: redScore += Int.random(in: -150...150)
                 case .hard: redScore += 0
                 }
                 
@@ -1058,7 +1065,7 @@ class JungleGameEngine: ObservableObject {
     }
     
     // MARK: - 辅助模拟函数 (用于 Minimax 棋盘状态推演)
-    private func calculateValidMovesOnBoard(boardState: [Position: Piece], from: Position) -> [Position] {
+    func calculateValidMovesOnBoard(boardState: [Position: Piece], from: Position) -> [Position] {
         guard let piece = boardState[from] else { return [] }
         var result: [Position] = []
         let directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -1098,36 +1105,42 @@ class JungleGameEngine: ObservableObject {
         var currC = from.col + dc
         while (0...8).contains(currR) && (0...6).contains(currC) {
             let pos = Position(row: currR, col: currC)
-            if getTileType(at: pos) == .river {
-                if boardState[pos] != nil { return nil }
-                currR += dr
-                currC += dc
-            } else {
+            let tile = getTileType(at: pos)
+            if tile != .river {
                 return pos
             }
+            if let p = boardState[pos], p.type == .rat {
+                return nil
+            }
+            currR += dr
+            currC += dc
         }
         return nil
     }
     
     private func canOccupyOrCaptureOnBoard(boardState: [Position: Piece], attacker: Piece, from: Position, to: Position) -> Bool {
         guard let defender = boardState[to] else { return true }
-        if defender.owner == attacker.owner { return false }
+        guard defender.owner != attacker.owner else { return false }
         
-        let fromTile = getTileType(at: from)
         let toTile = getTileType(at: to)
-        
         if case .trap(let trapOwner) = toTile, trapOwner == attacker.owner {
             return true
         }
+        
+        let fromTile = getTileType(at: from)
+        if fromTile == .river && toTile != .river {
+            return false
+        }
+        if fromTile != .river && toTile == .river {
+            return false
+        }
+        
         if attacker.type == .rat && defender.type == .elephant {
-            if fromTile == .river && toTile != .river { return false }
             return true
         }
         if attacker.type == .elephant && defender.type == .rat {
             return false
         }
-        if fromTile == .river && toTile != .river { return false }
-        if fromTile != .river && toTile == .river { return false }
         
         return attacker.type.rawValue >= defender.type.rawValue
     }
@@ -1182,6 +1195,11 @@ class JungleGameEngine: ObservableObject {
     private func calculateValidMovesHypothetical(from: Position, piece: Piece, ignorePos: Position, replacePos: (Position, Piece)) -> [Position] {
         var result: [Position] = []
         let directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        
+        var simBoard = board
+        simBoard.removeValue(forKey: ignorePos)
+        simBoard[replacePos.0] = replacePos.1
+        
         for (dr, dc) in directions {
             let nr = from.row + dr
             let nc = from.col + dc
@@ -1195,7 +1213,7 @@ class JungleGameEngine: ObservableObject {
             if targetPos == replacePos.0 {
                 destPiece = replacePos.1
             } else if targetPos != ignorePos {
-                destPiece = board[targetPos]
+                destPiece = simBoard[targetPos]
             }
             
             if targetTile == .river {
@@ -1206,6 +1224,12 @@ class JungleGameEngine: ObservableObject {
                         }
                     } else {
                         result.append(targetPos)
+                    }
+                } else if piece.type == .lion || piece.type == .tiger {
+                    if let landing = getRiverJumpLandingOnBoard(boardState: simBoard, from: from, dr: dr, dc: dc) {
+                        if canOccupyOrCaptureOnBoard(boardState: simBoard, attacker: piece, from: from, to: landing) {
+                            result.append(landing)
+                        }
                     }
                 }
             } else {
@@ -1343,7 +1367,7 @@ class JungleGameEngine: ObservableObject {
 struct ContentView: View {
     @StateObject private var engine = JungleGameEngine()
     @ObservedObject private var lang = JungleLanguageManager.shared
-    @State private var showRules = false
+    @State private var showRules = CommandLine.arguments.contains("-showRules")
     
     var body: some View {
         ZStack {
@@ -1682,6 +1706,7 @@ struct ContentView: View {
 
 struct BoardView: View {
     @ObservedObject var engine: JungleGameEngine
+    @State private var isPulsing: Bool = false
     
     var body: some View {
         GeometryReader { geo in
@@ -1737,13 +1762,15 @@ struct BoardView: View {
                 ForEach(Array(engine.board.keys), id: \.self) { pos in
                     if let piece = engine.board[pos] {
                         let isPlayerPiece = (piece.owner == .blue || !engine.isVsAI)
+                        let isOptimalSourcePiece = isPlayerPiece && (engine.currentTurn == piece.owner) && (engine.optimalAdvice?.from == pos)
                         let isOpponentTarget = (engine.lastOpponentMove?.to == pos) && (piece.owner != engine.currentTurn)
                         
                         PieceBadgeView(piece: piece,
                                        isSelected: engine.selectedPos == pos,
-                                       isOptimalSourcePiece: isPlayerPiece && (engine.optimalAdvice?.from == pos),
-                                       isEmergencyPiece: isPlayerPiece && (engine.optimalAdvice?.isEmergency == true && engine.optimalAdvice?.from == pos),
-                                       isOpponentTarget: isOpponentTarget)
+                                       isOptimalSourcePiece: isOptimalSourcePiece,
+                                       isEmergencyPiece: isOptimalSourcePiece && (engine.optimalAdvice?.isEmergency == true),
+                                       isOpponentTarget: isOpponentTarget,
+                                       isPulsing: isPulsing)
                             .frame(width: cellSize * 0.88, height: cellSize * 0.88)
                             .offset(x: CGFloat(pos.col) * cellSize + cellSize * 0.06,
                                     y: CGFloat(pos.row) * cellSize + cellSize * 0.06)
@@ -1755,6 +1782,11 @@ struct BoardView: View {
                 }
             }
             .frame(width: totalWidth, height: totalHeight)
+            .onAppear {
+                withAnimation(Animation.easeInOut(duration: 0.75).repeatForever(autoreverses: true)) {
+                    isPulsing = true
+                }
+            }
         }
         .aspectRatio(7.0 / 9.0, contentMode: .fit)
     }
@@ -1898,41 +1930,53 @@ struct PieceBadgeView: View {
     let isOptimalSourcePiece: Bool
     let isEmergencyPiece: Bool
     var isOpponentTarget: Bool = false
-    @State private var isPulsing: Bool = false
+    let isPulsing: Bool
+    
+    private var shouldPulse: Bool {
+        return isOptimalSourcePiece || isOpponentTarget
+    }
     
     var body: some View {
         ZStack {
-            // 对方走步光晕外圈
-            if isOpponentTarget {
+            // 1. 闪烁光晕外圈 (只针对：蓝方推荐走棋 或 对方刚走过的棋子)
+            if isOptimalSourcePiece {
                 Circle()
-                    .stroke(Color(red: 1.0, green: 0.1, blue: 0.25).opacity(isPulsing ? 0.85 : 0.35), lineWidth: 3.5)
+                    .stroke(Color.green.opacity(isPulsing ? 0.85 : 0.25), lineWidth: 3.5)
+                    .scaleEffect(isPulsing ? 1.18 : 1.04)
+            } else if isOpponentTarget {
+                Circle()
+                    .stroke(Color(red: 1.0, green: 0.1, blue: 0.25).opacity(isPulsing ? 0.85 : 0.25), lineWidth: 3.5)
                     .scaleEffect(isPulsing ? 1.18 : 1.04)
             }
             
+            // 2. 棋子圆盘底色
             Circle()
                 .fill(isEmergencyPiece ? Color(red: 1.0, green: 0.85, blue: 0.85) :
                       (isOpponentTarget ? Color(red: 1.0, green: 0.93, blue: 0.93) :
                       (isOptimalSourcePiece ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color.white)))
-                .shadow(color: isOpponentTarget ? Color.red.opacity(0.4) : Color.black.opacity(0.2),
-                        radius: isSelected ? 5 : (isOpponentTarget ? 4 : 2),
+                .shadow(color: isOpponentTarget ? Color.red.opacity(0.4) : (isOptimalSourcePiece ? Color.green.opacity(0.35) : Color.black.opacity(0.2)),
+                        radius: isSelected ? 5 : (shouldPulse ? 4 : 2),
                         x: 0,
                         y: isSelected ? 3 : 1.5)
             
+            // 3. 棋子边缘描边
             Circle()
                 .stroke(isEmergencyPiece ? Color.red :
                         (isOpponentTarget ? Color(red: 1.0, green: 0.1, blue: 0.25) :
                         (isOptimalSourcePiece ? Color.green : piece.owner.color)),
                         lineWidth: isEmergencyPiece ? 4 : (isOpponentTarget ? 3.5 : (isOptimalSourcePiece ? 3.5 : 3)))
             
+            // 4. 动物图标与名称
             VStack(spacing: -2) {
                 Text(piece.type.emoji).font(.system(size: 18))
                 Text(lang.animalName(piece.type))
                     .font(.system(size: 10, weight: .black))
-                    .foregroundColor(isOpponentTarget ? Color(red: 0.9, green: 0.1, blue: 0.2) : piece.owner.color)
+                    .foregroundColor(isOpponentTarget ? Color(red: 0.9, green: 0.1, blue: 0.2) : (isOptimalSourcePiece ? Color(red: 0.05, green: 0.55, blue: 0.15) : piece.owner.color))
                     .minimumScaleFactor(0.7)
                     .lineLimit(1)
             }
             
+            // 5. 角标提示 (紧急/敌步/推荐)
             if isEmergencyPiece {
                 VStack {
                     HStack {
@@ -1983,14 +2027,7 @@ struct PieceBadgeView: View {
                 }
             }
         }
-        .scaleEffect(isSelected ? 1.18 : (isEmergencyPiece ? 1.12 : (isOpponentTarget ? (isPulsing ? 1.12 : 1.02) : (isOptimalSourcePiece ? 1.08 : 1.0))))
-        .onAppear {
-            if isOpponentTarget {
-                withAnimation(Animation.easeInOut(duration: 0.65).repeatForever(autoreverses: true)) {
-                    isPulsing = true
-                }
-            }
-        }
+        .scaleEffect(isSelected ? 1.16 : (shouldPulse ? (isPulsing ? 1.09 : 1.0) : 1.0))
     }
 }
 
