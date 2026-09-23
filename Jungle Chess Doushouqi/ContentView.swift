@@ -482,10 +482,12 @@ class JungleGameEngine: ObservableObject {
         return false
     }
     
-    // 检查重复往复循环步数 (禁长捉/破死循环)
-    private func calculateRepetitionPenalty(from: Position, to: Position, piece: Piece) -> Int {
+    // 检查重复往复循环步数 (禁长捉/破死循环 - 智能版：逃命与吃子绝不惩罚)
+    private func calculateRepetitionPenalty(from: Position, to: Position, piece: Piece, isUnderThreat: Bool, isCapture: Bool) -> Int {
+        if isUnderThreat || isCapture { return 0 }
+        
         var penalty = 0
-        let recentMoves = history.suffix(12).filter { $0.movedPiece.owner == piece.owner }
+        let recentMoves = history.suffix(10).filter { $0.movedPiece.owner == piece.owner }
         
         var backAndForthCount = 0
         var visitedCount = 0
@@ -500,24 +502,24 @@ class JungleGameEngine: ObservableObject {
         }
         
         if backAndForthCount >= 1 {
-            penalty += 150000 * backAndForthCount
+            penalty += 2500 * backAndForthCount
         }
         if visitedCount >= 2 {
-            penalty += 90000 * (visitedCount - 1)
+            penalty += 1200 * (visitedCount - 1)
         }
         return penalty
     }
     
-    // MARK: - 🧠 棋局估值函数
+    // MARK: - 🧠 棋局估值函数 (宗师级位置热力图与战术矩阵)
     func evaluateBoardScore(customBoard: [Position: Piece], for player: Player) -> Int {
         let blueDen = Position(row: 8, col: 3)
         let redDen = Position(row: 0, col: 3)
         
         if customBoard[redDen]?.owner == .blue {
-            return (player == .blue ? 10_000_000 : -10_000_000)
+            return (player == .blue ? 1_000_000 : -1_000_000)
         }
         if customBoard[blueDen]?.owner == .red {
-            return (player == .red ? 10_000_000 : -10_000_000)
+            return (player == .red ? 1_000_000 : -1_000_000)
         }
         
         let myDen = (player == .red ? redDen : blueDen)
@@ -529,21 +531,20 @@ class JungleGameEngine: ObservableObject {
             [Position(row: 8, col: 2), Position(row: 8, col: 4), Position(row: 7, col: 3)] :
             [Position(row: 0, col: 2), Position(row: 0, col: 4), Position(row: 1, col: 3)])
         
-        var score = 0
-        
         func pieceBaseValue(_ type: AnimalType) -> Int {
             switch type {
-            case .rat: return 3500
+            case .rat: return 3800       // 下水控河、捕杀巨象、侦察突破
             case .cat: return 2000
-            case .dog: return 3000
-            case .wolf: return 4000
-            case .leopard: return 5500
-            case .tiger: return 8000
-            case .lion: return 9500
-            case .elephant: return 10000
+            case .dog: return 3000       // 守护犬、捕鼠护象
+            case .wolf: return 4200
+            case .leopard: return 5800   // 中期强力战力
+            case .tiger: return 8800     // 纵横飞河伏击
+            case .lion: return 10000     // 万兽之王，绝对控盘核心
+            case .elephant: return 9200  // 陆地重炮，需防老鼠
             }
         }
         
+        var score = 0
         var myElephantPos: Position? = nil
         var oppRatPos: Position? = nil
         var oppElephantPos: Position? = nil
@@ -557,76 +558,78 @@ class JungleGameEngine: ObservableObject {
                 if piece.type == .elephant { oppElephantPos = pos }
                 if piece.type == .rat { oppRatPos = pos }
             }
-        }
-        
-        for (pos, piece) in customBoard {
+            
             let isMine = (piece.owner == player)
             let baseVal = pieceBaseValue(piece.type)
-            var positionalBonus = 0
+            var posBonus = 0
             
             let targetDen = isMine ? enemyDen : myDen
             let distToTarget = abs(pos.row - targetDen.row) + abs(pos.col - targetDen.col)
             
+            // 1. 战略推进动力 (平滑梯度)
+            posBonus += (12 - distToTarget) * 50
+            
+            // 2. 攻入大本营绝杀威胁
+            if distToTarget == 1 {
+                posBonus += 4000
+            } else if distToTarget == 2 {
+                posBonus += 1800
+            } else if distToTarget <= 3 {
+                posBonus += 700
+            }
+            
+            // 3. 狮虎抢占跳河发射平台 (河岸关键发射阵位)
+            if piece.type == .lion || piece.type == .tiger {
+                if pos.row == 2 || pos.row == 6 {
+                    posBonus += 600
+                    if [1, 2, 4, 5].contains(pos.col) {
+                        posBonus += 700 // 正对河道发射阵地
+                    }
+                }
+            }
+            
+            // 4. 老鼠入河战术价值 (封锁狮虎跳河 + 隐蔽机动)
+            if piece.type == .rat && getTileType(at: pos) == .river {
+                posBonus += 750
+            }
+            
+            // 5. 陷阱禁区与防守认知
             if isMine {
-                // A. 进攻推进动力：全盘所有格子，越靠近敌营分数越高！
-                positionalBonus += (12 - distToTarget) * 200
-                
-                // B. 兵临城下绝杀冲刺
-                if distToTarget == 1 {
-                    positionalBonus += 30000
-                } else if distToTarget == 2 {
-                    positionalBonus += 12000
-                } else if distToTarget <= 4 {
-                    positionalBonus += (5 - distToTarget) * 3000
-                }
-                
-                // C. 关键地形控制
-                if pos.col == 3 {
-                    positionalBonus += 400
-                }
-                if (piece.type == .lion || piece.type == .tiger) && (pos.row == 2 || pos.row == 6) {
-                    positionalBonus += 1500
-                }
-                if piece.type == .rat && getTileType(at: pos) == .river {
-                    positionalBonus += 1800
-                }
                 if enemyTraps.contains(pos) {
-                    positionalBonus -= 8000
-                }
-                
-                score += (baseVal + positionalBonus)
-            } else {
-                // 敌方棋子
-                positionalBonus += (12 - distToTarget) * 200
-                
-                if distToTarget == 1 {
-                    positionalBonus += 35000
-                } else if distToTarget == 2 {
-                    positionalBonus += 15000
-                } else if distToTarget <= 4 {
-                    positionalBonus += (5 - distToTarget) * 3500
+                    // 处于敌方陷阱中：极度虚弱，战力降为0，极为危险
+                    posBonus -= 3500
                 }
                 if myTraps.contains(pos) {
-                    positionalBonus -= 7000
+                    // 驻守己方陷阱：守门人
+                    posBonus += 400
                 }
-                
-                score -= (baseVal + positionalBonus)
+                score += (baseVal + posBonus)
+            } else {
+                if myTraps.contains(pos) {
+                    // 敌方落入我方陷阱：敌方被大幅削弱
+                    posBonus -= 3500
+                }
+                if enemyTraps.contains(pos) {
+                    // 敌方守其自家陷阱
+                    posBonus += 400
+                }
+                score -= (baseVal + posBonus)
             }
         }
         
-        // D. 象鼠克制动态加权
+        // 6. 象鼠克制动态加权
         if let ePos = myElephantPos, let rPos = oppRatPos {
             let dist = abs(ePos.row - rPos.row) + abs(ePos.col - rPos.col)
             if getTileType(at: rPos) != .river {
-                if dist == 1 { score -= 15000 }
-                else if dist == 2 { score -= 6000 }
+                if dist == 1 { score -= 5000 }
+                else if dist == 2 { score -= 2200 }
             }
         }
         if let rPos = myRatPos, let ePos = oppElephantPos {
             let dist = abs(rPos.row - ePos.row) + abs(rPos.col - ePos.col)
             if getTileType(at: rPos) != .river {
-                if dist == 1 { score += 15000 }
-                else if dist == 2 { score += 6000 }
+                if dist == 1 { score += 5000 }
+                else if dist == 2 { score += 2200 }
             }
         }
         
@@ -643,7 +646,104 @@ class JungleGameEngine: ObservableObject {
         return false
     }
     
-    // MARK: - 🏆 核心最优解推演中枢 (红方 AI & 蓝方教学建议 共享的对称博弈引擎)
+    // MARK: - 👑 宗师级 Alpha-Beta 搜索核心辅助模型与算法
+    struct SimMove: Equatable {
+        let from: Position
+        let to: Position
+        let piece: Piece
+        let captured: Piece?
+        var isWin: Bool = false
+    }
+    
+    private func getAllSimMovesForPlayer(boardState: [Position: Piece], for player: Player) -> [SimMove] {
+        var moves: [SimMove] = []
+        for (pos, piece) in boardState where piece.owner == player {
+            let dests = calculateValidMovesOnBoard(boardState: boardState, from: pos)
+            for dest in dests {
+                let cap = boardState[dest]
+                var isWin = false
+                if case .den(let owner) = getTileType(at: dest), owner != player {
+                    isWin = true
+                }
+                moves.append(SimMove(from: pos, to: dest, piece: piece, captured: cap, isWin: isWin))
+            }
+        }
+        return moves
+    }
+    
+    private func orderSimMoves(moves: [SimMove], boardState: [Position: Piece], player: Player) -> [SimMove] {
+        return moves.sorted { m1, m2 in
+            var s1 = 0
+            var s2 = 0
+            if m1.isWin { s1 += 1_000_000 }
+            if m2.isWin { s2 += 1_000_000 }
+            if let cap1 = m1.captured {
+                s1 += cap1.type.rawValue * 1000 - m1.piece.type.rawValue * 50
+            }
+            if let cap2 = m2.captured {
+                s2 += cap2.type.rawValue * 1000 - m2.piece.type.rawValue * 50
+            }
+            if (m1.piece.type == .lion || m1.piece.type == .tiger) && abs(m1.from.row - m1.to.row) > 1 {
+                s1 += 3000
+            }
+            if (m2.piece.type == .lion || m2.piece.type == .tiger) && abs(m2.from.row - m2.to.row) > 1 {
+                s2 += 3000
+            }
+            return s1 > s2
+        }
+    }
+    
+    // 静态吃子延伸搜索 (Quiescence Search: 彻底消灭地平线效应与贪吃被杀)
+    private func quiescenceSearch(boardState: [Position: Piece], alpha: Int, beta: Int, player: Player, maxQDepth: Int) -> Int {
+        var currentAlpha = alpha
+        let standPat = evaluateBoardScore(customBoard: boardState, for: player)
+        if standPat >= beta { return beta }
+        if standPat > currentAlpha { currentAlpha = standPat }
+        if maxQDepth <= 0 { return standPat }
+        
+        let allMoves = getAllSimMovesForPlayer(boardState: boardState, for: player)
+        let tacticalMoves = allMoves.filter { $0.captured != nil || $0.isWin }
+        if tacticalMoves.isEmpty { return standPat }
+        
+        let ordered = orderSimMoves(moves: tacticalMoves, boardState: boardState, player: player)
+        for m in ordered {
+            if m.isWin { return 900_000 }
+            var nextBoard = boardState
+            nextBoard.removeValue(forKey: m.from)
+            nextBoard[m.to] = m.piece
+            
+            let score = -quiescenceSearch(boardState: nextBoard, alpha: -beta, beta: -currentAlpha, player: player.opponent, maxQDepth: maxQDepth - 1)
+            if score >= beta { return beta }
+            if score > currentAlpha { currentAlpha = score }
+        }
+        return currentAlpha
+    }
+    
+    // Alpha-Beta 剪枝搜索
+    private func alphaBetaSearch(boardState: [Position: Piece], depth: Int, alpha: Int, beta: Int, player: Player) -> Int {
+        if depth <= 0 {
+            return quiescenceSearch(boardState: boardState, alpha: alpha, beta: beta, player: player, maxQDepth: 2)
+        }
+        
+        var currentAlpha = alpha
+        let allMoves = getAllSimMovesForPlayer(boardState: boardState, for: player)
+        if allMoves.isEmpty { return -900_000 }
+        
+        let ordered = orderSimMoves(moves: allMoves, boardState: boardState, player: player)
+        for m in ordered {
+            if m.isWin { return 900_000 + depth }
+            var nextBoard = boardState
+            nextBoard.removeValue(forKey: m.from)
+            nextBoard[m.to] = m.piece
+            
+            let score = -alphaBetaSearch(boardState: nextBoard, depth: depth - 1, alpha: -beta, beta: -currentAlpha, player: player.opponent)
+            if score >= beta { return beta }
+            if score > currentAlpha { currentAlpha = score }
+        }
+        return currentAlpha
+    }
+    
+    // MARK: - 🏆 核心最优解推演中枢 (红方 AI & 蓝方教学建议 共享的宗师博弈引擎)
     func searchOptimalMoveCandidates(for playerSide: Player) -> [(from: Position, to: Position, piece: Piece, score: Int, advice: OptimalMoveAdvice)] {
         let enemyDen = (playerSide == .blue ? Position(row: 0, col: 3) : Position(row: 8, col: 3))
         let myDen = (playerSide == .blue ? Position(row: 8, col: 3) : Position(row: 0, col: 3))
@@ -686,7 +786,6 @@ class JungleGameEngine: ObservableObject {
         
         for (from, piece) in board where piece.owner == playerSide {
             let moves = calculateValidMoves(from: from)
-            let inEnemyTerritory = (playerSide == .blue ? from.row <= 3 : from.row >= 5)
             let isCurrentPieceUnderThreat = isPositionThreatened(pos: from, piece: piece, boardState: board)
             
             for to in moves {
@@ -709,80 +808,19 @@ class JungleGameEngine: ObservableObject {
                 simBoard1.removeValue(forKey: from)
                 simBoard1[to] = piece
                 
-                // 2. 模拟 Step 2：预测敌方最强反制 (Minimax Min)
-                var bestOppMove: (from: Position, to: Position, piece: Piece, cap: Piece?)? = nil
-                var maxOppGain = -9999999
+                // 2. Alpha-Beta + Quiescence 主力战术评估 (深度 3 步 + 延伸吃子，耗时仅 ~25ms)
+                let minimaxScore = -alphaBetaSearch(boardState: simBoard1, depth: 2, alpha: -9_999_999, beta: 9_999_999, player: playerSide.opponent)
                 
-                let oppPieces = simBoard1.filter { $0.value.owner == playerSide.opponent }
-                for (oppFrom, oppPiece) in oppPieces {
-                    let oppMoves = calculateValidMovesOnBoard(boardState: simBoard1, from: oppFrom)
-                    for oppTo in oppMoves {
-                        var simBoard2 = simBoard1
-                        let oppCap = simBoard2[oppTo]
-                        simBoard2.removeValue(forKey: oppFrom)
-                        simBoard2[oppTo] = oppPiece
-                        
-                        // 若敌方一步能直接入穴夺冠，我方这一步必须被极度重罚
-                        if oppTo == myDen {
-                            maxOppGain = 10_000_000
-                            bestOppMove = (oppFrom, oppTo, oppPiece, oppCap)
-                            break
-                        }
-                        
-                        let oppEval = evaluateBoardScore(customBoard: simBoard2, for: playerSide.opponent)
-                        if oppEval > maxOppGain {
-                            maxOppGain = oppEval
-                            bestOppMove = (oppFrom, oppTo, oppPiece, oppCap)
-                        }
-                    }
-                    if maxOppGain == 10_000_000 { break }
-                }
-                
-                if oppPieces.isEmpty {
-                    maxOppGain = -10_000_000
-                }
-                
-                // 3. 模拟 Step 3：我方后续最佳反击 (Minimax Max)
-                var maxFollowScore = -9999999
-                var simBoard2 = simBoard1
-                if let oppM = bestOppMove {
-                    simBoard2.removeValue(forKey: oppM.from)
-                    simBoard2[oppM.to] = oppM.piece
-                }
-                
-                let myFollowPieces = simBoard2.filter { $0.value.owner == playerSide }
-                for (mFrom, mPiece) in myFollowPieces {
-                    let myNextMoves = calculateValidMovesOnBoard(boardState: simBoard2, from: mFrom)
-                    for mTo in myNextMoves {
-                        var simBoard3 = simBoard2
-                        simBoard3.removeValue(forKey: mFrom)
-                        simBoard3[mTo] = mPiece
-                        
-                        if mTo == enemyDen {
-                            maxFollowScore = 10_000_000
-                            break
-                        }
-                        
-                        let eval3 = evaluateBoardScore(customBoard: simBoard3, for: playerSide)
-                        if eval3 > maxFollowScore {
-                            maxFollowScore = eval3
-                        }
-                    }
-                    if maxFollowScore == 10_000_000 { break }
-                }
-                
-                // 综合 3-Ply 期望净值得分
-                var totalScore = maxFollowScore - (maxOppGain / 2)
-                if maxOppGain == 10_000_000 {
-                    totalScore = -10_000_000
-                }
+                // 3. 提取主变例 (敌方最强战术反制预测)
+                let oppMoves = getAllSimMovesForPlayer(boardState: simBoard1, for: playerSide.opponent)
+                let bestOppMove = orderSimMoves(moves: oppMoves, boardState: simBoard1, player: playerSide.opponent).first
                 
                 let isDangerousDest = calculateDangerousMoves(from: from, moves: [to]).contains(to)
+                let toTile = getTileType(at: to)
                 let curDist = abs(from.row - enemyDen.row) + abs(from.col - enemyDen.col)
                 let newDist = abs(to.row - enemyDen.row) + abs(to.col - enemyDen.col)
-                let distReduction = curDist - newDist
-                let toTile = getTileType(at: to)
                 
+                var totalScore = minimaxScore
                 var headline = JungleLanguageManager.shared.recommendedMoveHeadline(piece.type)
                 var detail = JungleLanguageManager.shared.recommendedMoveDetail
                 var badge = JungleLanguageManager.shared.recommendedMoveBadge
@@ -798,31 +836,29 @@ class JungleGameEngine: ObservableObject {
                     let newDistToInv = abs(to.row - inv.pos.row) + abs(to.col - inv.pos.col)
                     
                     if to == inv.pos {
-                        totalScore += 500000
+                        totalScore += 25000
                         headline = JungleLanguageManager.shared.adviceCounterKillHeadline
                         detail = JungleLanguageManager.shared.adviceCounterKillDetail(piece: piece.type.name, inv: inv.piece.type.name)
                         badge = JungleLanguageManager.shared.adviceCounterKillBadge
                         isEm = true
                     } else if to == myDen || myChokePoints.contains(to) {
-                        totalScore += 400000
+                        totalScore += 18000
                         headline = JungleLanguageManager.shared.adviceBlockGateHeadline
                         detail = JungleLanguageManager.shared.adviceBlockGateDetail(piece: piece.type.name, inv: inv.piece.type.name)
                         badge = JungleLanguageManager.shared.adviceBlockGateBadge
                         isEm = true
                     } else if newDistToDen < curDistToDen || newDistToInv < curDistToInv {
-                        totalScore += 300000
+                        totalScore += 10000
                         headline = JungleLanguageManager.shared.adviceFallBackHeadline
                         detail = JungleLanguageManager.shared.adviceFallBackDetail(piece: piece.type.name, inv: inv.piece.type.name)
                         badge = JungleLanguageManager.shared.adviceFallBackBadge
                         isEm = true
-                    } else {
-                        totalScore -= 400000
                     }
                     forecastText = JungleLanguageManager.shared.adviceHomeDefenseForecast(piece: piece.type.name)
                 }
-                // 🛡️ 5. 【己方受威胁棋子紧急避险/逃入河中 (高危保命铁律)】
+                // 🛡️ 5. 【己方受威胁棋子紧急避险/逃入河中】
                 else if isCurrentPieceUnderThreat && !isDangerousDest {
-                    totalScore += 380000 + piece.type.pieceValue * 30
+                    totalScore += 8000 + piece.type.pieceValue / 2
                     isEm = true
                     
                     if toTile == .river && piece.type == .rat {
@@ -845,7 +881,7 @@ class JungleGameEngine: ObservableObject {
                 // 🌊 6. 【水中清障·解除跳河封锁】
                 else if isOppRatInRiver, let rPos = oppRatPos, piece.type == .rat {
                     if to == rPos {
-                        totalScore += 480000
+                        totalScore += 15000
                         headline = JungleLanguageManager.shared.adviceHuntRiverRatHeadline
                         detail = JungleLanguageManager.shared.adviceHuntRiverRatDetail
                         badge = JungleLanguageManager.shared.adviceHuntRiverRatBadge
@@ -854,7 +890,7 @@ class JungleGameEngine: ObservableObject {
                         let curD = abs(from.row - rPos.row) + abs(from.col - rPos.col)
                         let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
                         if newD < curD {
-                            totalScore += 220000 + (curD - newD) * 20000
+                            totalScore += 4000
                             headline = JungleLanguageManager.shared.adviceUnderwaterPursuitHeadline
                             detail = JungleLanguageManager.shared.adviceUnderwaterPursuitDetail
                             badge = JungleLanguageManager.shared.adviceUnderwaterPursuitBadge
@@ -865,7 +901,7 @@ class JungleGameEngine: ObservableObject {
                 // 🐘 7. 【大象遭遇老鼠生死危机】
                 else if ratDistToMyElephant <= 2, let rPos = oppRatPos {
                     if piece.type != .elephant && to == rPos {
-                        totalScore += 450000
+                        totalScore += 18000
                         headline = JungleLanguageManager.shared.adviceProtectElephantHeadline
                         detail = JungleLanguageManager.shared.adviceProtectElephantDetail(piece: piece.type.name)
                         badge = JungleLanguageManager.shared.adviceProtectElephantBadge
@@ -873,7 +909,7 @@ class JungleGameEngine: ObservableObject {
                     } else if ratDistToMyElephant == 1 && piece.type == .elephant {
                         let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
                         if newD > 1 && !isDangerousDest {
-                            totalScore += 420000
+                            totalScore += 16000
                             headline = JungleLanguageManager.shared.adviceElephantEscapeHeadline
                             detail = JungleLanguageManager.shared.adviceElephantEscapeDetail
                             badge = JungleLanguageManager.shared.adviceElephantEscapeBadge
@@ -883,7 +919,7 @@ class JungleGameEngine: ObservableObject {
                         let curD = abs(from.row - rPos.row) + abs(from.col - rPos.col)
                         let newD = abs(to.row - rPos.row) + abs(to.col - rPos.col)
                         if newD < curD {
-                            totalScore += 180000 + (curD - newD) * 15000
+                            totalScore += 5000
                             headline = JungleLanguageManager.shared.adviceFlankRatHeadline
                             detail = JungleLanguageManager.shared.adviceFlankRatDetail(piece: piece.type.name)
                             badge = JungleLanguageManager.shared.adviceFlankRatBadge
@@ -897,7 +933,6 @@ class JungleGameEngine: ObservableObject {
                     
                     if isDangerousDest {
                         if netProfit > 0 {
-                            totalScore += 180000 + netProfit * 40
                             let isRatElephant = (piece.type == .rat && cap.type == .elephant)
                             headline = JungleLanguageManager.shared.adviceProfitableTradeHeadline(piece: piece.type.name, cap: cap.type.name, isRatElephant: isRatElephant)
                             detail = JungleLanguageManager.shared.adviceProfitableTradeDetail(cap: cap.type.name, netProfit: netProfit)
@@ -913,14 +948,13 @@ class JungleGameEngine: ObservableObject {
                                 netProfit: netProfit
                             )
                         } else {
-                            totalScore -= 200000
+                            totalScore -= 6000
                             headline = JungleLanguageManager.shared.adviceBadTradeHeadline
                             detail = JungleLanguageManager.shared.adviceBadTradeDetail(cap: cap.type.name, loss: abs(netProfit))
                             badge = JungleLanguageManager.shared.adviceBadTradeBadge
                             forecastText = JungleLanguageManager.shared.adviceBadTradeForecast(cap: cap.type.name)
                         }
                     } else {
-                        totalScore += 150000 + cap.type.pieceValue * 50
                         let isRiverJump = (piece.type == .lion || piece.type == .tiger) && (abs(from.row - to.row) > 1)
                         headline = JungleLanguageManager.shared.adviceFreeCaptureHeadline(cap: cap.type.name, isJumpRiver: isRiverJump)
                         detail = JungleLanguageManager.shared.adviceFreeCaptureDetail(piece: piece.type.name, cap: cap.type.name, value: cap.type.pieceValue)
@@ -930,20 +964,22 @@ class JungleGameEngine: ObservableObject {
                 }
                 // 🚶 9. 正常推进
                 else {
-                    if inEnemyTerritory && distReduction > 0 && !isDangerousDest {
-                        totalScore += 45000 + (10 - newDist) * 3500
+                    if newDist < curDist && !isDangerousDest {
                         headline = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenHeadline : JungleLanguageManager.shared.adviceApproachDenHeadline
                         detail = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenDetail : JungleLanguageManager.shared.adviceApproachDenDetail(piece: piece.type.name)
                         badge = (newDist <= 2) ? JungleLanguageManager.shared.adviceAssaultDenBadge : JungleLanguageManager.shared.adviceApproachDenBadge
                     }
+                }
+                
+                if forecastText.isEmpty {
                     let step1Desc = JungleLanguageManager.shared.forecastStep1(piece.type)
                     let step2Desc = JungleLanguageManager.shared.forecastStep2(bestOppMove?.piece.type)
                     let step3Desc = JungleLanguageManager.shared.forecastStep3
                     forecastText = "\(step1Desc) ➔ \(step2Desc) ➔ \(step3Desc)"
                 }
                 
-                // 🛑 10. 禁长捉惩罚
-                let repPenalty = calculateRepetitionPenalty(from: from, to: to, piece: piece)
+                // 🛑 10. 智能禁长捉防循环死锁惩罚 (逃命与吃子绝不惩罚)
+                let repPenalty = calculateRepetitionPenalty(from: from, to: to, piece: piece, isUnderThreat: isCurrentPieceUnderThreat, isCapture: captured1 != nil)
                 totalScore -= repPenalty
                 
                 let adv = OptimalMoveAdvice(
@@ -986,11 +1022,13 @@ class JungleGameEngine: ObservableObject {
                 // 👑 智谋大师：绝对最优解，0扰动，最高期望净值走法
                 return first
             case .normal:
-                // 🌿 棋艺进阶：在评分前列招法中加入极微弱扰动
-                return candidates.max(by: { ($0.score + Int.random(in: -120...120)) < ($1.score + Int.random(in: -120...120)) }) ?? first
+                // 🌿 棋艺进阶：在评分前列招法中微调
+                let topGroup = candidates.filter { $0.score >= first.score - 300 }
+                return topGroup.randomElement() ?? first
             case .easy:
-                // 🌱 轻松入门：中度探索扰动
-                return candidates.max(by: { ($0.score + Int.random(in: -400...400)) < ($1.score + Int.random(in: -400...400)) }) ?? first
+                // 🌱 轻松入门：中度探索
+                let topGroup = candidates.filter { $0.score >= first.score - 750 }
+                return topGroup.randomElement() ?? first
             }
         }()
         
