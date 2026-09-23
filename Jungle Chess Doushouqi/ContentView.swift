@@ -643,9 +643,8 @@ class JungleGameEngine: ObservableObject {
         return false
     }
     
-    // 🎯 玩家最优解决策 (全面覆盖：大本营保卫 + 己方受威胁紧急逃生/入河避险 + 水中清障 + 战术进攻)
-    func computePlayerOptimalMove() {
-        let playerSide: Player = isVsAI ? .blue : currentTurn
+    // MARK: - 🏆 核心最优解推演中枢 (红方 AI & 蓝方教学建议 共享的对称博弈引擎)
+    func searchOptimalMoveCandidates(for playerSide: Player) -> [(from: Position, to: Position, piece: Piece, score: Int, advice: OptimalMoveAdvice)] {
         let enemyDen = (playerSide == .blue ? Position(row: 0, col: 3) : Position(row: 8, col: 3))
         let myDen = (playerSide == .blue ? Position(row: 8, col: 3) : Position(row: 0, col: 3))
         let myChokePoints: Set<Position> = (playerSide == .blue ?
@@ -683,7 +682,7 @@ class JungleGameEngine: ObservableObject {
             return false
         }()
         
-        var evaluatedAdvices: [(advice: OptimalMoveAdvice, score: Int)] = []
+        var evaluatedMoves: [(from: Position, to: Position, piece: Piece, score: Int, advice: OptimalMoveAdvice)] = []
         
         for (from, piece) in board where piece.owner == playerSide {
             let moves = calculateValidMoves(from: from)
@@ -691,13 +690,7 @@ class JungleGameEngine: ObservableObject {
             let isCurrentPieceUnderThreat = isPositionThreatened(pos: from, piece: piece, boardState: board)
             
             for to in moves {
-                // 1. 模拟 Step 1：我方走棋
-                var simBoard1 = board
-                let captured1 = simBoard1[to]
-                simBoard1.removeValue(forKey: from)
-                simBoard1[to] = piece
-                
-                // 🏆 一步直接占穴获胜
+                // 🏆 一步直接占穴获胜 (绝对终局最优解)
                 if to == enemyDen {
                     let winAdv = OptimalMoveAdvice(
                         from: from, to: to, piece: piece,
@@ -707,11 +700,16 @@ class JungleGameEngine: ObservableObject {
                         badgeText: JungleLanguageManager.shared.adviceWinBadge,
                         isEmergency: false, isWin: true, isTrade: false
                     )
-                    self.optimalAdvice = winAdv
-                    return
+                    return [(from, to, piece, 10_000_000, winAdv)]
                 }
                 
-                // 2. 模拟 Step 2：预测敌方最强反制
+                // 1. 模拟 Step 1：我方走棋
+                var simBoard1 = board
+                let captured1 = simBoard1[to]
+                simBoard1.removeValue(forKey: from)
+                simBoard1[to] = piece
+                
+                // 2. 模拟 Step 2：预测敌方最强反制 (Minimax Min)
                 var bestOppMove: (from: Position, to: Position, piece: Piece, cap: Piece?)? = nil
                 var maxOppGain = -9999999
                 
@@ -724,17 +722,28 @@ class JungleGameEngine: ObservableObject {
                         simBoard2.removeValue(forKey: oppFrom)
                         simBoard2[oppTo] = oppPiece
                         
+                        // 若敌方一步能直接入穴夺冠，我方这一步必须被极度重罚
+                        if oppTo == myDen {
+                            maxOppGain = 10_000_000
+                            bestOppMove = (oppFrom, oppTo, oppPiece, oppCap)
+                            break
+                        }
+                        
                         let oppEval = evaluateBoardScore(customBoard: simBoard2, for: playerSide.opponent)
                         if oppEval > maxOppGain {
                             maxOppGain = oppEval
                             bestOppMove = (oppFrom, oppTo, oppPiece, oppCap)
                         }
                     }
+                    if maxOppGain == 10_000_000 { break }
                 }
                 
-                // 3. 模拟 Step 3：我方后续最佳反击
-                var maxFollowScore = -9999999
+                if oppPieces.isEmpty {
+                    maxOppGain = -10_000_000
+                }
                 
+                // 3. 模拟 Step 3：我方后续最佳反击 (Minimax Max)
+                var maxFollowScore = -9999999
                 var simBoard2 = simBoard1
                 if let oppM = bestOppMove {
                     simBoard2.removeValue(forKey: oppM.from)
@@ -749,14 +758,24 @@ class JungleGameEngine: ObservableObject {
                         simBoard3.removeValue(forKey: mFrom)
                         simBoard3[mTo] = mPiece
                         
+                        if mTo == enemyDen {
+                            maxFollowScore = 10_000_000
+                            break
+                        }
+                        
                         let eval3 = evaluateBoardScore(customBoard: simBoard3, for: playerSide)
                         if eval3 > maxFollowScore {
                             maxFollowScore = eval3
                         }
                     }
+                    if maxFollowScore == 10_000_000 { break }
                 }
                 
+                // 综合 3-Ply 期望净值得分
                 var totalScore = maxFollowScore - (maxOppGain / 2)
+                if maxOppGain == 10_000_000 {
+                    totalScore = -10_000_000
+                }
                 
                 let isDangerousDest = calculateDangerousMoves(from: from, moves: [to]).contains(to)
                 let curDist = abs(from.row - enemyDen.row) + abs(from.col - enemyDen.col)
@@ -933,135 +952,49 @@ class JungleGameEngine: ObservableObject {
                     forecast3Steps: forecastText, badgeText: badge,
                     isEmergency: isEm, isWin: false, isTrade: isTr
                 )
-                evaluatedAdvices.append((adv, totalScore))
+                evaluatedMoves.append((from, to, piece, totalScore, adv))
             }
         }
         
-        if let best = evaluatedAdvices.max(by: { $0.score < $1.score }) {
+        return evaluatedMoves.sorted(by: { $0.score > $1.score })
+    }
+    
+    // 🎯 玩家最优解决策 (全面覆盖：大本营保卫 + 己方受威胁紧急逃生/入河避险 + 水中清障 + 战术进攻)
+    func computePlayerOptimalMove() {
+        let playerSide: Player = isVsAI ? .blue : currentTurn
+        let candidates = searchOptimalMoveCandidates(for: playerSide)
+        if let best = candidates.first {
             self.optimalAdvice = best.advice
+        } else {
+            self.optimalAdvice = nil
         }
     }
     
     // MARK: - 🤖 红方电脑走棋
     func triggerAIMove() {
-        var allCandidateMoves: [(from: Position, to: Position, piece: Piece, score: Int)] = []
-        let blueDen = Position(row: 8, col: 3)
-        let redDen = Position(row: 0, col: 3)
-        let redPieces = board.filter { $0.value.owner == .red }
-        
-        for (from, piece) in redPieces {
-            let moves = calculateValidMoves(from: from)
-            
-            for to in moves {
-                // 🏆 制胜判定：一步进穴直接赢
-                if to == blueDen {
-                    self.isThinking = false
-                    self.makeMove(from: from, to: to)
-                    return
-                }
-                
-                var simBoard1 = board
-                let cap1 = simBoard1[to]
-                simBoard1.removeValue(forKey: from)
-                simBoard1[to] = piece
-                
-                // 2-Ply Minimax: 预测蓝方玩家的最强反制
-                let bluePieces = simBoard1.filter { $0.value.owner == .blue }
-                var worstRedScoreAfterBlue = Int.max
-                var bestBlueCounter: (from: Position, to: Position, piece: Piece)? = nil
-                
-                for (bFrom, bPiece) in bluePieces {
-                    let bMoves = calculateValidMovesOnBoard(boardState: simBoard1, from: bFrom)
-                    for bTo in bMoves {
-                        var simBoard2 = simBoard1
-                        simBoard2.removeValue(forKey: bFrom)
-                        simBoard2[bTo] = bPiece
-                        
-                        // 若蓝方一步进红营，红方直接输
-                        if bTo == redDen {
-                            worstRedScoreAfterBlue = -10_000_000
-                            bestBlueCounter = (bFrom, bTo, bPiece)
-                            break
-                        }
-                        
-                        let redEval = evaluateBoardScore(customBoard: simBoard2, for: .red)
-                        if redEval < worstRedScoreAfterBlue {
-                            worstRedScoreAfterBlue = redEval
-                            bestBlueCounter = (bFrom, bTo, bPiece)
-                        }
-                    }
-                    if worstRedScoreAfterBlue == -10_000_000 { break }
-                }
-                
-                if bluePieces.isEmpty {
-                    worstRedScoreAfterBlue = 10_000_000
-                }
-                
-                var redScore = worstRedScoreAfterBlue
-                
-                // 3-Ply 深度反击推演 (智谋大师专属)
-                if aiDifficulty == .hard, let blueMove = bestBlueCounter, worstRedScoreAfterBlue > -10_000_000 {
-                    var simBoard2 = simBoard1
-                    simBoard2.removeValue(forKey: blueMove.from)
-                    simBoard2[blueMove.to] = blueMove.piece
-                    
-                    var redFollowUpBest = -9999999
-                    let redP3 = simBoard2.filter { $0.value.owner == .red }
-                    for (r3From, r3Piece) in redP3 {
-                        let r3Moves = calculateValidMovesOnBoard(boardState: simBoard2, from: r3From)
-                        for r3To in r3Moves {
-                            var simBoard3 = simBoard2
-                            simBoard3.removeValue(forKey: r3From)
-                            simBoard3[r3To] = r3Piece
-                            
-                            if r3To == blueDen {
-                                redFollowUpBest = 10_000_000
-                                break
-                            }
-                            let r3Score = evaluateBoardScore(customBoard: simBoard3, for: .red)
-                            if r3Score > redFollowUpBest {
-                                redFollowUpBest = r3Score
-                            }
-                        }
-                        if redFollowUpBest == 10_000_000 { break }
-                    }
-                    if redFollowUpBest > -9999999 {
-                        redScore += (redFollowUpBest - worstRedScoreAfterBlue) / 3
-                    }
-                }
-                
-                // 战术吃子加成 (优先吃掉高战力敌子)
-                if let target = cap1 {
-                    redScore += (target.type.rawValue * 300)
-                }
-                
-                // 狮虎隔河飞跃主动进攻奖励
-                let isRiverJump = (piece.type == .lion || piece.type == .tiger) && (abs(from.row - to.row) > 1 || abs(from.col - to.col) > 1)
-                if isRiverJump {
-                    redScore += 800
-                }
-                
-                // 防重复来回巡逻惩罚
-                let repPenalty = calculateRepetitionPenalty(from: from, to: to, piece: piece)
-                redScore -= repPenalty
-                
-                // 难度微调扰动
-                switch aiDifficulty {
-                case .easy: redScore += Int.random(in: -600...600)
-                case .normal: redScore += Int.random(in: -150...150)
-                case .hard: redScore += 0
-                }
-                
-                allCandidateMoves.append((from, to, piece, redScore))
-            }
-        }
-        
+        let candidates = searchOptimalMoveCandidates(for: .red)
         self.isThinking = false
-        if let best = allCandidateMoves.max(by: { $0.score < $1.score }) {
-            self.makeMove(from: best.from, to: best.to)
-        } else {
+        
+        guard let first = candidates.first else {
             self.winner = .blue
+            return
         }
+        
+        let chosen: (from: Position, to: Position, piece: Piece, score: Int, advice: OptimalMoveAdvice) = {
+            switch aiDifficulty {
+            case .hard:
+                // 👑 智谋大师：绝对最优解，0扰动，最高期望净值走法
+                return first
+            case .normal:
+                // 🌿 棋艺进阶：在评分前列招法中加入极微弱扰动
+                return candidates.max(by: { ($0.score + Int.random(in: -120...120)) < ($1.score + Int.random(in: -120...120)) }) ?? first
+            case .easy:
+                // 🌱 轻松入门：中度探索扰动
+                return candidates.max(by: { ($0.score + Int.random(in: -400...400)) < ($1.score + Int.random(in: -400...400)) }) ?? first
+            }
+        }()
+        
+        self.makeMove(from: chosen.from, to: chosen.to)
     }
     
     // MARK: - 辅助模拟函数 (用于 Minimax 棋盘状态推演)
