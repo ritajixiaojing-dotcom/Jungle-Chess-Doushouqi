@@ -1,6 +1,4 @@
 # Xcode
-#
-# gitignore contributors: paste your entry with code formatting and optionally add an explanation
 # Build generated
 build/
 DerivedData/
@@ -20,6 +18,7 @@ xcuserdata/
 *.moved-aside
 *.xcuserstate
 *.xcbkptlist
+.DS_Store
 
 # CocoaPods
 Pods/
@@ -35,3 +34,21 @@ fastlane/test_output
 
 # Code Injection
 iOSInjectionProject/
+
+# Scratch & Temporary
+scratch/
+
+# Android
+.gradle/
+android/.gradle/
+android/**/build/
+android/.kotlin/
+android/local.properties
+android/keystore/
+*.jks
+*.keystore
+*.aab
+*.apk
+.idea/
+*.iml
+
