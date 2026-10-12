@@ -2,11 +2,11 @@
 
 [![iOS Platform](https://img.shields.io/badge/Platform-iOS%2016%2B%20%7C%20iPadOS%20%7C%20macOS-blue?logo=apple)](https://apps.apple.com)
 [![Android Platform](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--36)-green?logo=android)](https://play.google.com)
-[![iOS Status](https://img.shields.io/badge/App%20Store-Live%20v1.6%20%7C%20v1.6.1%20In%20Review-success?logo=apple)]()
-[![Android Status](https://img.shields.io/badge/Google%20Play-Closed%20Testing%20(v1.5)-orange?logo=google-play)]()
+[![iOS Status](https://img.shields.io/badge/App%20Store-Live%20v1.6.1%20%7C%20v1.7.0%20Ready-success?logo=apple)]()
+[![Android Status](https://img.shields.io/badge/Google%20Play-Closed%20Testing%20(v1.7.0)-orange?logo=google-play)]()
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
-> 一款基于 **双原生架构 (iOS SwiftUI + Android Jetpack Compose)** 深度打造的现代化经典单机益智斗兽棋游戏。内置统一的 4-Ply / 6-Ply Alpha-Beta 剪枝博弈 AI 引擎、实时深度战术推演预判、神兽逆袭技能与纯净零广告体验。
+> 一款基于 **双原生架构 (iOS SwiftUI + Android Jetpack Compose)** 深度打造的现代化经典单机益智斗兽棋游戏。内置统一的 4-Ply / 6-Ply Alpha-Beta 剪枝博弈 AI 引擎、实时深度战术推演预判、三大神兽战略绝技（神兽天降、妙手越级、寒冰禁锢）与纯净零广告体验。
 
 ---
 
@@ -14,8 +14,8 @@
 
 | 平台 | 技术栈 | 当前版本 | 状态 / 渠道 | 说明 |
 | :--- | :--- | :--- | :--- | :--- |
-| 🍏 **iOS / iPadOS / macOS** | SwiftUI / Swift 6 | **v1.6 / v1.6.1** | 🚀 **App Store 正式上架** | 支持 iPhone、iPad 及 Apple Silicon Mac |
-| 🤖 **Android** | Jetpack Compose / Kotlin | **v1.5 (Build 4)** | 🧪 **Google Play 封闭测试 (Closed Testing)** | 覆盖全球 177 个国家/地区，火热测试中 |
+| 🍏 **iOS / iPadOS / macOS** | SwiftUI / Swift 6 | **v1.7.0 (Build 2)** | 🚀 **App Store 提审版本** | 支持 iPhone、iPad 及 Apple Silicon Mac |
+| 🤖 **Android** | Jetpack Compose / Kotlin | **v1.7.0 (Build 5)** | 🧪 **Google Play 封闭测试 (Closed Testing)** | 覆盖全球 178 个国家/地区，火热测试中 |
 
 ### 🤖 Android 封闭测试 (Google Play Closed Testing) 参与方式
 Android 版本目前已正式发布至 Google Play 封闭测试（Closed Testing - Alpha Track）阶段，采用 Google Groups 自动化分发机制：
@@ -34,12 +34,14 @@ Android 版本目前已正式发布至 Google Play 封闭测试（Closed Testing
 * **🔮 深度战术推演 (Tactical Foresight Advice)**:
   * 实时评估候选着法性质：`👑 无损吃子`、`⚡️ 巧妙兑子 (+净得子力优势)`、`🛡️ 战术避险`；
   * 独创清障过河检测：智能预警敌鼠阻河，引导猛虎与雄狮腾空飞渡！
-* **⚡️ 独创神兽绝技 (Superpower Skills)**:
-  * 🛡️ **神兽天降**: 兽穴危急时刻瞬间召回主力猛兽守护中枢咽喉；
-  * ✨ **妙手越级**: 2 回合内全员激活越级捕食特权，以弱克强逆转战局！
+* **⚡️ 独创三大神兽绝技 (Symmetric Superpower Skills)**:
+  * 🛡️ **神兽天降 (Guardian Teleport)**: 兽穴危急时刻瞬间召回主力猛兽守护中枢咽喉；
+  * ✨ **妙手越级 (Master Leap)**: 2 回合内全员激活越级捕食特权，以弱克强逆转战局；
+  * ❄️ **寒冰禁锢 (Frost Freeze)**: 战术级强控技能，直接冰封对方核心主力 1 回合无法移动！
+  * 🤖 **双向技能博弈**: 玩家与 AI 均拥有各自独立技能槽，AI 会主动护穴、越级突袭与冰控反制，对弈更富智慧。
 * **👥 丰富的对战交互**:
   * 包含 **人机单人博弈 (PvE)** 与 **双人同屏对战 (PvP)**；
-  * 完整音效与震动反馈，支持多语言动态即时切换（简体中文、繁体中文、English、日本語）。
+  * 完整音效与震动反馈，支持 8 种语言动态即时切换（简体中文、繁体中文、English、日本語、한국어、Español、Français、Deutsch）。
 * **🍃 纯净绿色**:
   * 100% 离线单机运行，零个人隐私收集，零第三方 SDK 追踪，零广告弹窗。
 
