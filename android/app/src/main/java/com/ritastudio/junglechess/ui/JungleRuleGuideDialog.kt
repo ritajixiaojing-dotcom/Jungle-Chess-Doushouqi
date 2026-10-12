@@ -178,7 +178,7 @@ fun JungleRuleGuideDialog(
                             color = Color.DarkGray
                         )
                         Text(
-                            text = "v1.3 (Build 1)",
+                            text = "v1.7.0 (Build 5)",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Medium,
