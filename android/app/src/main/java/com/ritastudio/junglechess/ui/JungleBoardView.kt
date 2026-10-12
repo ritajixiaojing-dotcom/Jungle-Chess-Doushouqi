@@ -409,6 +409,22 @@ fun TileCellView(
                         Text("!", fontSize = 7.5.sp, color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
+
+                // Frozen piece indicator "❄️"
+                if (pos == engine.frozenPiecePos) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(Color(0x5500E5FF)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "❄️",
+                            fontSize = 18.sp
+                        )
+                    }
+                }
             }
         }
 

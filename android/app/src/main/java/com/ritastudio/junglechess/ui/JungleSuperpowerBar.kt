@@ -50,37 +50,15 @@ fun JungleSuperpowerBar(
             }
         }
 
-        // Row 1: The two Superpowers
+        // Row 1: The Three Superpowers
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Frenzy Skill
-            Button(
-                onClick = { engine.activateFrenzySkill() },
-                enabled = engine.frenzySkillCount > 0 && engine.currentTurn == PlayerColor.BLUE,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE65100),
-                    disabledContainerColor = Color(0xFFE0E0E0)
-                ),
-                shape = RoundedCornerShape(10.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = lang.frenzySkillText(engine.frenzySkillCount),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (engine.frenzySkillCount > 0) Color.White else Color.Gray
-                )
-            }
-
             // Shield Skill
             Button(
-                onClick = { engine.activateShieldRecallSkill() },
-                enabled = engine.shieldSkillCount > 0 && engine.currentTurn == PlayerColor.BLUE,
+                onClick = { engine.activateShieldRecallSkill(PlayerColor.BLUE) },
+                enabled = engine.blueShieldSkillCount > 0 && engine.currentTurn == PlayerColor.BLUE,
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp),
@@ -89,13 +67,60 @@ fun JungleSuperpowerBar(
                     disabledContainerColor = Color(0xFFE0E0E0)
                 ),
                 shape = RoundedCornerShape(10.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp)
             ) {
                 Text(
-                    text = lang.shieldSkillText(engine.shieldSkillCount),
-                    fontSize = 11.sp,
+                    text = lang.shieldSkillText(engine.blueShieldSkillCount),
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (engine.shieldSkillCount > 0) Color.White else Color.Gray
+                    color = if (engine.blueShieldSkillCount > 0) Color.White else Color.Gray,
+                    maxLines = 1
+                )
+            }
+
+            // Frenzy Skill
+            Button(
+                onClick = { engine.activateFrenzySkill(PlayerColor.BLUE) },
+                enabled = engine.blueFrenzySkillCount > 0 && engine.currentTurn == PlayerColor.BLUE,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(36.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE65100),
+                    disabledContainerColor = Color(0xFFE0E0E0)
+                ),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = lang.frenzySkillText(engine.blueFrenzySkillCount),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (engine.blueFrenzySkillCount > 0) Color.White else Color.Gray,
+                    maxLines = 1
+                )
+            }
+
+            // Freeze Skill
+            Button(
+                onClick = { engine.activateFreezeSkill(PlayerColor.BLUE) },
+                enabled = engine.blueFreezeSkillCount > 0 && engine.currentTurn == PlayerColor.BLUE,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(36.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00838F),
+                    disabledContainerColor = Color(0xFFE0E0E0)
+                ),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = lang.freezeSkillText(engine.blueFreezeSkillCount),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (engine.blueFreezeSkillCount > 0) Color.White else Color.Gray,
+                    maxLines = 1
                 )
             }
         }

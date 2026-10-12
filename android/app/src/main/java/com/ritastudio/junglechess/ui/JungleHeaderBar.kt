@@ -147,7 +147,7 @@ fun JungleHeaderBar(
             }
         }
 
-        // Sub-row: Advantage & Doctrine
+        // Sub-row: Advantage & Doctrine & AI Skills
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -171,6 +171,13 @@ fun JungleHeaderBar(
                 Text(
                     text = "🤖 ${lang.deducingBestMove}",
                     fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = RedPlayerColor
+                )
+            } else if (engine.isVsAI) {
+                Text(
+                    text = "🔴 ${lang.aiSkillsTitle}: 🛡️${engine.redShieldSkillCount} ✨${engine.redFrenzySkillCount} ❄️${engine.redFreezeSkillCount}",
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = RedPlayerColor
                 )

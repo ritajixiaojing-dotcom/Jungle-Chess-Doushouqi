@@ -550,6 +550,32 @@ class JungleLanguageManager: ObservableObject {
         }
     }
     
+    func freezeSkillText(_ count: Int) -> String {
+        switch currentLanguage {
+        case .zhHans: return "❄️ 寒冰禁锢 (\(count))"
+        case .zhHant: return "❄️ 寒冰禁錮 (\(count))"
+        case .en:     return "❄️ Frost Freeze (\(count))"
+        case .ja:     return "❄️ 氷霜結界 (\(count))"
+        case .ko:     return "❄️ 빙결 결계 (\(count))"
+        case .es:     return "❄️ Congelación (\(count))"
+        case .fr:     return "❄️ Gel Glacial (\(count))"
+        case .de:     return "❄️ Frosteinfrierung (\(count))"
+        }
+    }
+    
+    var aiSkillsTitle: String {
+        switch currentLanguage {
+        case .zhHans: return "AI 绝技"
+        case .zhHant: return "AI 絕技"
+        case .en:     return "AI Skills"
+        case .ja:     return "AI 技"
+        case .ko:     return "AI 스킬"
+        case .es:     return "Habilidades IA"
+        case .fr:     return "Compétences IA"
+        case .de:     return "KI-Skills"
+        }
+    }
+    
     var victoryTitle: String {
         switch currentLanguage {
         case .zhHans: return "🎉 对决胜利！"
@@ -737,6 +763,58 @@ class JungleLanguageManager: ObservableObject {
         case .es:     return "🛡️【Teletransporte Guardián】: ¡[\(pieceName)] se ha teletransportado para defender la guarida!"
         case .fr:     return "🛡️【Téléportation Défensive】: [\(pieceName)] téléporté pour défendre la tanière !"
         case .de:     return "🛡️【Wächter-Teleport】: [\(pieceName)] zum Schutz der Höhle teleportiert!"
+        }
+    }
+    
+    func freezeBannerText(pieceName: String) -> String {
+        switch currentLanguage {
+        case .zhHans: return "❄️【寒冰禁锢】：对方【\(pieceName)】已被冰封 1 回合，无法移动！"
+        case .zhHant: return "❄️【寒冰禁錮】：對方【\(pieceName)】已被冰封 1 回合，無法移動！"
+        case .en:     return "❄️【Frost Freeze】: Opponent's [\(pieceName)] is frozen for 1 turn and cannot move!"
+        case .ja:     return "❄️【氷霜結界】：相手の[\(pieceName)]が1ターンの間氷結し移動不能！"
+        case .ko:     return "❄️【빙결 결계】：상대방의 [\(pieceName)] 말이 1턴 동안 얼어붙어 이동할 수 없습니다!"
+        case .es:     return "❄️【Congelación】：¡El [\(pieceName)] enemigo está congelado por 1 turno!"
+        case .fr:     return "❄️【Gel Glacial】：[\(pieceName)] ennemi est gelé pendant 1 tour !"
+        case .de:     return "❄️【Frosteinfrierung】：Gegnerischer [\(pieceName)] für 1 Zug eingefroren!"
+        }
+    }
+    
+    func aiShieldBannerText(pieceName: String) -> String {
+        switch currentLanguage {
+        case .zhHans: return "🤖 敌方 AI 启动【神兽天降】！【\(pieceName)】回防大本营前哨！"
+        case .zhHant: return "🤖 敵方 AI 啟動【神獸天降】！【\(pieceName)】回防大本營前哨！"
+        case .en:     return "🤖 Enemy AI triggered【Guardian Teleport】! [\(pieceName)] recalled to defend den!"
+        case .ja:     return "🤖 相手AIが【神獣防衛ワープ】を発動！[\(pieceName)]が自陣獣穴へ回防！"
+        case .ko:     return "🤖 상대 AI가 【수호신 소환】을 발동했습니다! [\(pieceName)] 진영 복귀!"
+        case .es:     return "🤖 ¡La IA enemiga activó【Teletransporte Guardián】! [\(pieceName)] defiende la guarida!"
+        case .fr:     return "🤖 L'IA ennemie a activé【Téléportation Défensive】! [\(pieceName)] défend la tanière !"
+        case .de:     return "🤖 Gegnerische KI aktiviert【Wächter-Teleport】! [\(pieceName)] verteidigt Höhle!"
+        }
+    }
+    
+    var aiFrenzyBannerText: String {
+        switch currentLanguage {
+        case .zhHans: return "🤖 敌方 AI 启动【妙手越级】！全员激活逆袭捕食特权！"
+        case .zhHant: return "🤖 敵方 AI 啟動【妙手越級】！全員激活逆襲捕食特權！"
+        case .en:     return "🤖 Enemy AI triggered【Master Leap】! All red pieces can leapfrog capture!"
+        case .ja:     return "🤖 相手AIが【妙手跳躍】を発動！全赤駒が格上捕獲可能に！"
+        case .ko:     return "🤖 상대 AI가 【묘수 도약】을 발동했습니다! 전원 역습 포식 가능!"
+        case .es:     return "🤖 ¡La IA enemiga activó【Salto Magistral】! ¡Cualquier pieza puede capturar!"
+        case .fr:     return "🤖 L'IA ennemie a activé【Saut Magistral】! Les pièces rouges peuvent capturer !"
+        case .de:     return "🤖 Gegnerische KI aktiviert【Meister-Sprung】! Alle roten Figuren können schlagen!"
+        }
+    }
+    
+    func aiFreezeBannerText(pieceName: String) -> String {
+        switch currentLanguage {
+        case .zhHans: return "🤖 敌方 AI 启动【寒冰禁锢】！你的【\(pieceName)】被冰封 1 回合无法移动！"
+        case .zhHant: return "🤖 敵方 AI 啟動【寒冰禁錮】！你的【\(pieceName)】被冰封 1 回合無法移動！"
+        case .en:     return "🤖 Enemy AI triggered【Frost Freeze】! Your [\(pieceName)] is frozen for 1 turn!"
+        case .ja:     return "🤖 相手AIが【氷霜結界】を発動！あなたの[\(pieceName)]が1ターン氷結！"
+        case .ko:     return "🤖 상대 AI가 【빙결 결계】를 발동했습니다! 당신의 [\(pieceName)] 말이 1턴 동안 빙결!"
+        case .es:     return "🤖 ¡La IA enemiga activó【Congelación】! ¡Tu [\(pieceName)] está congelado!"
+        case .fr:     return "🤖 L'IA ennemie a activé【Gel Glacial】! Votre [\(pieceName)] est gelé !"
+        case .de:     return "🤖 Gegnerische KI aktiviert【Frosteinfrierung】! Dein [\(pieceName)] ist eingefroren!"
         }
     }
     

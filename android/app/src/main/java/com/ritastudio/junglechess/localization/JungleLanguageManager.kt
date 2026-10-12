@@ -459,6 +459,33 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
         }
     }
     
+    fun freezeSkillText(count: Int): String {
+        return when (currentLanguage) {
+        JungleLanguage.ZH_HANS -> "❄️ 寒冰禁锢 (${count})"
+        JungleLanguage.ZH_HANT -> "❄️ 寒冰禁錮 (${count})"
+        JungleLanguage.EN -> "❄️ Frost Freeze (${count})"
+        JungleLanguage.JA -> "❄️ 氷霜結界 (${count})"
+        JungleLanguage.KO -> "❄️ 빙결 결계 (${count})"
+        JungleLanguage.ES -> "❄️ Congelación (${count})"
+        JungleLanguage.FR -> "❄️ Gel Glacial (${count})"
+        JungleLanguage.DE -> "❄️ Frosteinfrierung (${count})"
+        }
+    }
+
+    val aiSkillsTitle: String
+        get() {
+        return when (currentLanguage) {
+        JungleLanguage.ZH_HANS -> "AI 绝技"
+        JungleLanguage.ZH_HANT -> "AI 絕技"
+        JungleLanguage.EN -> "AI Skills"
+        JungleLanguage.JA -> "AI 技"
+        JungleLanguage.KO -> "AI 스킬"
+        JungleLanguage.ES -> "Habilidades IA"
+        JungleLanguage.FR -> "Compétences IA"
+        JungleLanguage.DE -> "KI-Skills"
+        }
+    }
+    
     val victoryTitle: String
         get() {
         return when (currentLanguage ) {
@@ -660,6 +687,59 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
         JungleLanguage.ES -> "🛡️【Teletransporte Guardián】: ¡[${pieceName}] se ha teletransportado para defender la guarida!"
         JungleLanguage.FR -> "🛡️【Téléportation Défensive】: [${pieceName}] téléporté pour défendre la tanière !"
         JungleLanguage.DE -> "🛡️【Wächter-Teleport】: [${pieceName}] zum Schutz der Höhle teleportiert!"
+        }
+    }
+
+    fun freezeBannerText(pieceName: String): String {
+        return when (currentLanguage) {
+        JungleLanguage.ZH_HANS -> "❄️【寒冰禁锢】：敌方【${pieceName}】已被完全冰封，下回合无法移动！"
+        JungleLanguage.ZH_HANT -> "❄️【寒冰禁錮】：敵方【${pieceName}】已被完全冰封，下回合無法移動！"
+        JungleLanguage.EN -> "❄️【Frost Freeze】: Enemy [${pieceName}] is frozen solid and cannot move next turn!"
+        JungleLanguage.JA -> "❄️【氷霜結界】：敵の[${pieceName}]を凍結しました！次ターン移動不能！"
+        JungleLanguage.KO -> "❄️【빙결 결계】：적의 [${pieceName}] 말이 빙결되어 다음 턴에 이동할 수 없습니다!"
+        JungleLanguage.ES -> "❄️【Congelación】: ¡El [${pieceName}] enemigo ha sido congelado y no puede mover!"
+        JungleLanguage.FR -> "❄️【Gel Glacial】: Le [${pieceName}] adverse est gelé et immobilisé pour le prochain tour !"
+        JungleLanguage.DE -> "❄️【Frosteinfrierung】: Gegnerischer [${pieceName}] eingefroren, kann nächste Runde nicht ziehen!"
+        }
+    }
+
+    fun aiShieldBannerText(pieceName: String): String {
+        return when (currentLanguage) {
+        JungleLanguage.ZH_HANS -> "🤖 敌方 AI 启动【神兽天降】！【${pieceName}】回防大本营前哨！"
+        JungleLanguage.ZH_HANT -> "🤖 敵方 AI 啟動【神獸天降】！【${pieceName}】回防大本營前哨！"
+        JungleLanguage.EN -> "🤖 Enemy AI triggered【Guardian Teleport】! [${pieceName}] recalled to defend den!"
+        JungleLanguage.JA -> "🤖 相手AIが【神獣防衛ワープ】を発動！[${pieceName}]が自陣獣穴へ回防！"
+        JungleLanguage.KO -> "🤖 상대 AI가 【수호신 소환】을 발동했습니다! [${pieceName}] 진영 복귀!"
+        JungleLanguage.ES -> "🤖 ¡La IA enemiga activó【Teletransporte Guardián】! [${pieceName}] defiende la guarida!"
+        JungleLanguage.FR -> "🤖 L'IA ennemie a activé【Téléportation Défensive】! [${pieceName}] défend la tanière !"
+        JungleLanguage.DE -> "🤖 Gegnerische KI aktiviert【Wächter-Teleport】! [${pieceName}] verteidigt Höhle!"
+        }
+    }
+
+    val aiFrenzyBannerText: String
+        get() {
+        return when (currentLanguage) {
+        JungleLanguage.ZH_HANS -> "🤖 敌方 AI 启动【妙手越级】！全员激活逆袭捕食特权！"
+        JungleLanguage.ZH_HANT -> "🤖 敵方 AI 啟動【妙手越級】！全員激活逆襲捕食特權！"
+        JungleLanguage.EN -> "🤖 Enemy AI triggered【Master Leap】! All red pieces can leapfrog capture!"
+        JungleLanguage.JA -> "🤖 相手AIが【妙手跳躍】を発動！全赤駒が格上捕獲可能に！"
+        JungleLanguage.KO -> "🤖 상대 AI가 【묘수 도약】을 발동했습니다! 전원 역습 포식 가능!"
+        JungleLanguage.ES -> "🤖 ¡La IA enemiga activó【Salto Magistral】! ¡Cualquier pieza puede capturar!"
+        JungleLanguage.FR -> "🤖 L'IA ennemie a activé【Saut Magistral】! Les pièces rouges peuvent capturer !"
+        JungleLanguage.DE -> "🤖 Gegnerische KI aktiviert【Meister-Sprung】! Alle roten Figuren können schlagen!"
+        }
+    }
+
+    fun aiFreezeBannerText(pieceName: String): String {
+        return when (currentLanguage) {
+        JungleLanguage.ZH_HANS -> "🤖 敌方 AI 启动【寒冰禁锢】！你的【${pieceName}】被冰封 1 回合无法移动！"
+        JungleLanguage.ZH_HANT -> "🤖 敵方 AI 啟動【寒冰禁錮】！你的【${pieceName}】被冰封 1 回合無法移動！"
+        JungleLanguage.EN -> "🤖 Enemy AI triggered【Frost Freeze】! Your [${pieceName}] is frozen for 1 turn!"
+        JungleLanguage.JA -> "🤖 相手AIが【氷霜結界】を発動！あなたの[${pieceName}]が1ターン氷結！"
+        JungleLanguage.KO -> "🤖 상대 AI가 【빙결 결계】를 발동했습니다! 당신의 [${pieceName}] 말이 1턴 동안 빙결!"
+        JungleLanguage.ES -> "🤖 ¡La IA enemiga activó【Congelación】! ¡Tu [${pieceName}] está congelado!"
+        JungleLanguage.FR -> "🤖 L'IA ennemie a activé【Gel Glacial】! Votre [${pieceName}] est gelé !"
+        JungleLanguage.DE -> "🤖 Gegnerische KI aktiviert【Frosteinfrierung】! Dein [${pieceName}] ist eingefroren!"
         }
     }
     

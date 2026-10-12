@@ -288,4 +288,55 @@ class JungleChessTest {
             assertTrue("Round $round completed successfully with $moveCount moves (winner: ${engine.winner})", moveCount > 0)
         }
     }
+
+    @Test
+    fun testSuperpowersFrenzyAndFreeze() {
+        val engine = JungleGameEngine()
+        val customBoard = mutableMapOf<Position, Piece>()
+        val blueCat = Piece(type = AnimalType.CAT, owner = PlayerColor.BLUE)
+        val redElephant = Piece(type = AnimalType.ELEPHANT, owner = PlayerColor.RED)
+        customBoard[Position(6, 1)] = blueCat
+        customBoard[Position(6, 2)] = redElephant
+        engine.board = customBoard
+        engine.currentTurn = PlayerColor.BLUE
+
+        // Cat normally cannot capture Elephant
+        val normalMoves = engine.calculateValidMoves(Position(6, 1))
+        assertFalse("Cat cannot capture Elephant normally", normalMoves.contains(Position(6, 2)))
+
+        // Activate Frenzy
+        engine.activateFrenzySkill(PlayerColor.BLUE)
+        assertEquals(2, engine.blueFrenzyRemainingTurns)
+        assertEquals(0, engine.blueFrenzySkillCount)
+        val frenzyMoves = engine.calculateValidMoves(Position(6, 1))
+        assertTrue("Cat with Master Leap can leapfrog capture Elephant", frenzyMoves.contains(Position(6, 2)))
+
+        // Test Freeze
+        engine.activateFreezeSkill(PlayerColor.BLUE)
+        assertEquals(0, engine.blueFreezeSkillCount)
+        assertEquals(Position(6, 2), engine.frozenPiecePos)
+        engine.currentTurn = PlayerColor.RED
+        val frozenMoves = engine.calculateValidMoves(Position(6, 2))
+        assertTrue("Frozen piece should have 0 valid moves", frozenMoves.isEmpty())
+    }
+
+    @Test
+    fun testAISkillTriggerDecisions() {
+        val engine = JungleGameEngine()
+        val customBoard = mutableMapOf<Position, Piece>()
+        // Blue threatens Red den at (0, 3): Blue Tiger at (1, 2) (dist = 2)
+        // Red Lion is far away at (4, 4)
+        customBoard[Position(1, 2)] = Piece(type = AnimalType.TIGER, owner = PlayerColor.BLUE)
+        customBoard[Position(4, 4)] = Piece(type = AnimalType.LION, owner = PlayerColor.RED)
+        engine.board = customBoard
+        engine.currentTurn = PlayerColor.RED
+        engine.isVsAI = true
+
+        engine.evaluateAndTriggerAISkills()
+
+        // Red AI should trigger shield recall or freeze
+        val shieldUsed = (engine.redShieldSkillCount == 0)
+        val freezeUsed = (engine.redFreezeSkillCount == 0)
+        assertTrue("AI should proactively trigger defensive superpower", shieldUsed || freezeUsed)
+    }
 }

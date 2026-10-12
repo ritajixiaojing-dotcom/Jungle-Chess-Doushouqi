@@ -142,10 +142,24 @@ class JungleGameEngine: ObservableObject {
     @Published var winAdvantagePercent: Int = 50
     @Published var currentDoctrine: StrategicDoctrine = .lionBlitz
     
-    @Published var frenzyRemainingTurns: Int = 0
-    @Published var shieldSkillCount: Int = 1
-    @Published var frenzySkillCount: Int = 1
+    @Published var blueShieldSkillCount: Int = 1
+    @Published var redShieldSkillCount: Int = 1
+    @Published var blueFrenzySkillCount: Int = 1
+    @Published var redFrenzySkillCount: Int = 1
+    @Published var blueFreezeSkillCount: Int = 1
+    @Published var redFreezeSkillCount: Int = 1
+    
+    @Published var blueFrenzyRemainingTurns: Int = 0
+    @Published var redFrenzyRemainingTurns: Int = 0
+    
+    @Published var frozenPiecePos: Position? = nil
+    @Published var frozenTurns: Int = 0
     @Published var skillBannerText: String? = nil
+    
+    var shieldSkillCount: Int { blueShieldSkillCount }
+    var frenzySkillCount: Int { blueFrenzySkillCount }
+    var freezeSkillCount: Int { blueFreezeSkillCount }
+    var frenzyRemainingTurns: Int { blueFrenzyRemainingTurns }
     
     @Published var inspectPiece: Piece? = nil
     @Published var isVsAI: Bool = true
@@ -230,9 +244,17 @@ class JungleGameEngine: ObservableObject {
         winner = nil
         currentTurn = .blue
         
-        frenzyRemainingTurns = 0
-        shieldSkillCount = 1
-        frenzySkillCount = 1
+        blueShieldSkillCount = 1
+        redShieldSkillCount = 1
+        blueFrenzySkillCount = 1
+        redFrenzySkillCount = 1
+        blueFreezeSkillCount = 1
+        redFreezeSkillCount = 1
+        
+        blueFrenzyRemainingTurns = 0
+        redFrenzyRemainingTurns = 0
+        frozenPiecePos = nil
+        frozenTurns = 0
         skillBannerText = nil
         
         currentDoctrine = StrategicDoctrine.allCases.randomElement() ?? .lionBlitz
@@ -260,34 +282,114 @@ class JungleGameEngine: ObservableObject {
         updateRoundEvaluation()
     }
     
-    func activateFrenzySkill() {
-        guard frenzySkillCount > 0, currentTurn == .blue else { return }
-        frenzySkillCount -= 1
-        frenzyRemainingTurns = 2
-        skillBannerText = JungleLanguageManager.shared.frenzyBannerText
-        playSound(type: .win)
-        updateRoundEvaluation()
+    func activateFrenzySkill(for player: Player = .blue) {
+        if player == .blue {
+            guard blueFrenzySkillCount > 0, currentTurn == .blue else { return }
+            blueFrenzySkillCount -= 1
+            blueFrenzyRemainingTurns = 2
+            skillBannerText = JungleLanguageManager.shared.frenzyBannerText
+            playSound(type: .win)
+            updateRoundEvaluation()
+        } else {
+            guard redFrenzySkillCount > 0, currentTurn == .red else { return }
+            redFrenzySkillCount -= 1
+            redFrenzyRemainingTurns = 2
+            skillBannerText = JungleLanguageManager.shared.aiFrenzyBannerText
+            playSound(type: .win)
+            updateRoundEvaluation()
+        }
     }
     
-    func activateShieldRecallSkill() {
-        guard shieldSkillCount > 0, currentTurn == .blue else { return }
-        shieldSkillCount -= 1
-        
-        var bestPiecePos: Position? = nil
-        var bestPiece: Piece? = nil
-        let targetGate = Position(row: 7, col: 3)
-        
-        for (pos, p) in board where p.owner == .blue {
-            if pos != targetGate && (bestPiece == nil || p.type.rawValue > bestPiece!.type.rawValue) {
-                bestPiecePos = pos
-                bestPiece = p
+    func activateShieldRecallSkill(for player: Player = .blue) {
+        if player == .blue {
+            guard blueShieldSkillCount > 0, currentTurn == .blue else { return }
+            blueShieldSkillCount -= 1
+            
+            var bestPiecePos: Position? = nil
+            var bestPiece: Piece? = nil
+            let targetGate = Position(row: 7, col: 3)
+            
+            for (pos, p) in board where p.owner == .blue {
+                if pos != targetGate && (bestPiece == nil || p.type.rawValue > bestPiece!.type.rawValue) {
+                    bestPiecePos = pos
+                    bestPiece = p
+                }
+            }
+            
+            if let fromPos = bestPiecePos, let piece = bestPiece {
+                board.removeValue(forKey: fromPos)
+                board[targetGate] = piece
+                skillBannerText = JungleLanguageManager.shared.shieldBannerText(pieceName: piece.type.name)
+                playSound(type: .win)
+                updateRoundEvaluation()
+            }
+        } else {
+            guard redShieldSkillCount > 0, currentTurn == .red else { return }
+            redShieldSkillCount -= 1
+            
+            var bestPiecePos: Position? = nil
+            var bestPiece: Piece? = nil
+            let targetGate = Position(row: 1, col: 3)
+            
+            for (pos, p) in board where p.owner == .red {
+                if pos != targetGate && (bestPiece == nil || p.type.rawValue > bestPiece!.type.rawValue) {
+                    bestPiecePos = pos
+                    bestPiece = p
+                }
+            }
+            
+            if let fromPos = bestPiecePos, let piece = bestPiece {
+                board.removeValue(forKey: fromPos)
+                board[targetGate] = piece
+                skillBannerText = JungleLanguageManager.shared.aiShieldBannerText(pieceName: piece.type.name)
+                playSound(type: .win)
+                updateRoundEvaluation()
             }
         }
-        
-        if let fromPos = bestPiecePos, let piece = bestPiece {
-            board.removeValue(forKey: fromPos)
-            board[targetGate] = piece
-            skillBannerText = JungleLanguageManager.shared.shieldBannerText(pieceName: piece.type.name)
+    }
+    
+    func activateFreezeSkill(for player: Player = .blue) {
+        let opponent = player.opponent
+        if player == .blue {
+            guard blueFreezeSkillCount > 0, currentTurn == .blue else { return }
+            var targetPos: Position? = nil
+            var highestScore = -99999
+            
+            for (pos, p) in board where p.owner == opponent {
+                let distToDen = abs(pos.row - 8) + abs(pos.col - 3)
+                let score = p.type.pieceValue - (distToDen * 150)
+                if score > highestScore {
+                    highestScore = score
+                    targetPos = pos
+                }
+            }
+            
+            guard let freezeTarget = targetPos, let targetPiece = board[freezeTarget] else { return }
+            blueFreezeSkillCount -= 1
+            frozenPiecePos = freezeTarget
+            frozenTurns = 1
+            skillBannerText = JungleLanguageManager.shared.freezeBannerText(pieceName: targetPiece.type.name)
+            playSound(type: .win)
+            updateRoundEvaluation()
+        } else {
+            guard redFreezeSkillCount > 0, currentTurn == .red else { return }
+            var targetPos: Position? = nil
+            var highestScore = -99999
+            
+            for (pos, p) in board where p.owner == opponent {
+                let distToDen = abs(pos.row - 0) + abs(pos.col - 3)
+                let score = p.type.pieceValue - (distToDen * 150)
+                if score > highestScore {
+                    highestScore = score
+                    targetPos = pos
+                }
+            }
+            
+            guard let freezeTarget = targetPos, let targetPiece = board[freezeTarget] else { return }
+            redFreezeSkillCount -= 1
+            frozenPiecePos = freezeTarget
+            frozenTurns = 1
+            skillBannerText = JungleLanguageManager.shared.aiFreezeBannerText(pieceName: targetPiece.type.name)
             playSound(type: .win)
             updateRoundEvaluation()
         }
@@ -305,6 +407,10 @@ class JungleGameEngine: ObservableObject {
         }
         
         if let piece = clickedPiece, piece.owner == currentTurn {
+            if pos == frozenPiecePos {
+                playSound(type: .select)
+                return
+            }
             selectedPos = pos
             inspectPiece = piece
             validMoves = calculateValidMoves(from: pos)
@@ -349,11 +455,27 @@ class JungleGameEngine: ObservableObject {
         threatenedPieces = []
         optimalAdvice = nil
         
-        if movingPiece.owner == .blue && frenzyRemainingTurns > 0 {
-            frenzyRemainingTurns -= 1
-            if frenzyRemainingTurns == 0 {
-                skillBannerText = nil
+        if movingPiece.owner == .blue && blueFrenzyRemainingTurns > 0 {
+            blueFrenzyRemainingTurns -= 1
+        }
+        if movingPiece.owner == .red && redFrenzyRemainingTurns > 0 {
+            redFrenzyRemainingTurns -= 1
+        }
+        
+        if let fPos = frozenPiecePos {
+            if board[fPos] == nil || to == fPos {
+                frozenPiecePos = nil
+                frozenTurns = 0
+            } else if let fPiece = board[fPos], fPiece.owner == movingPiece.owner {
+                frozenTurns -= 1
+                if frozenTurns <= 0 {
+                    frozenPiecePos = nil
+                }
             }
+        }
+        
+        if blueFrenzyRemainingTurns == 0 && redFrenzyRemainingTurns == 0 && frozenPiecePos == nil {
+            skillBannerText = nil
         }
         
         if checkWin(afterMoveTo: to, by: movingPiece.owner) {
@@ -1006,8 +1128,57 @@ class JungleGameEngine: ObservableObject {
         }
     }
     
-    // MARK: - 🤖 红方电脑走棋
+    // MARK: - 🤖 红方电脑走棋与技能决策
+    func evaluateAndTriggerAISkills() {
+        guard isVsAI && currentTurn == .red && winner == nil else { return }
+        
+        // 1. 🛡️ 守家绝技：当蓝方逼近兽穴 (距离 <= 2) 且门前防守空虚时，召回最强猛兽
+        if redShieldSkillCount > 0 {
+            let blueThreatsNearDen = board.filter { pos, piece in
+                piece.owner == .blue && (abs(pos.row - 0) + abs(pos.col - 3) <= 2)
+            }
+            let gate = Position(row: 1, col: 3)
+            let gateDefender = board[gate]
+            let needGateHelp = gateDefender == nil || (gateDefender!.owner == .red && gateDefender!.type.rawValue < 6)
+            if !blueThreatsNearDen.isEmpty && needGateHelp {
+                activateShieldRecallSkill(for: .red)
+                return
+            }
+        }
+        
+        // 2. ❄️ 控场冰封：当蓝方逼近红方兽穴，或者蓝方开启了狂暴，红方冰封蓝方最有威胁的核心
+        if redFreezeSkillCount > 0 && frozenPiecePos == nil {
+            let playerNearRedDen = board.first { pos, piece in
+                piece.owner == .blue && (abs(pos.row - 0) + abs(pos.col - 3) <= 2)
+            }
+            if playerNearRedDen != nil {
+                activateFreezeSkill(for: .red)
+                return
+            } else if blueFrenzyRemainingTurns > 0 {
+                activateFreezeSkill(for: .red)
+                return
+            }
+        }
+        
+        // 3. ✨ 逆袭越级：当红方弱兽 (鼠猫狗狼) 与蓝方大兽 (狮虎象) 相邻，开启越级完成斩杀
+        if redFrenzySkillCount > 0 && redFrenzyRemainingTurns == 0 {
+            for (redPos, redPiece) in board where redPiece.owner == .red && redPiece.type.rawValue <= 4 {
+                let neighbors = [Position(row: redPos.row - 1, col: redPos.col),
+                                 Position(row: redPos.row + 1, col: redPos.col),
+                                 Position(row: redPos.row, col: redPos.col - 1),
+                                 Position(row: redPos.row, col: redPos.col + 1)]
+                for nPos in neighbors {
+                    if let bluePiece = board[nPos], bluePiece.owner == .blue, bluePiece.type.rawValue >= 6 {
+                        activateFrenzySkill(for: .red)
+                        return
+                    }
+                }
+            }
+        }
+    }
+    
     func triggerAIMove() {
+        evaluateAndTriggerAISkills()
         let candidates = searchOptimalMoveCandidates(for: .red)
         self.isThinking = false
         
@@ -1038,6 +1209,7 @@ class JungleGameEngine: ObservableObject {
     // MARK: - 辅助模拟函数 (用于 Minimax 棋盘状态推演)
     func calculateValidMovesOnBoard(boardState: [Position: Piece], from: Position) -> [Position] {
         guard let piece = boardState[from] else { return [] }
+        if from == frozenPiecePos { return [] }
         var result: [Position] = []
         let directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         
@@ -1092,6 +1264,13 @@ class JungleGameEngine: ObservableObject {
     private func canOccupyOrCaptureOnBoard(boardState: [Position: Piece], attacker: Piece, from: Position, to: Position) -> Bool {
         guard let defender = boardState[to] else { return true }
         guard defender.owner != attacker.owner else { return false }
+        
+        if attacker.owner == .blue && blueFrenzyRemainingTurns > 0 {
+            return true
+        }
+        if attacker.owner == .red && redFrenzyRemainingTurns > 0 {
+            return true
+        }
         
         let toTile = getTileType(at: to)
         if case .trap(let trapOwner) = toTile, trapOwner == attacker.owner {
@@ -1225,6 +1404,7 @@ class JungleGameEngine: ObservableObject {
     
     func calculateValidMoves(from: Position) -> [Position] {
         guard let piece = board[from] else { return [] }
+        if from == frozenPiecePos { return [] }
         var result: [Position] = []
         let directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         
@@ -1278,7 +1458,10 @@ class JungleGameEngine: ObservableObject {
         guard let defender = board[to] else { return true }
         if defender.owner == attacker.owner { return false }
         
-        if attacker.owner == .blue && frenzyRemainingTurns > 0 {
+        if attacker.owner == .blue && blueFrenzyRemainingTurns > 0 {
+            return true
+        }
+        if attacker.owner == .red && redFrenzyRemainingTurns > 0 {
             return true
         }
         
@@ -1382,10 +1565,19 @@ struct ContentView: View {
                     .minimumScaleFactor(0.65)
                     .layoutPriority(1)
                 
-                Text("🔵 \(lang.playerName(.blue)): \(engine.winAdvantagePercent)% (\(lang.doctrineName(engine.currentDoctrine)))")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.blue)
-                    .lineLimit(1)
+                HStack(spacing: 5) {
+                    Text("🔵 \(lang.playerName(.blue)): \(engine.winAdvantagePercent)%")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.blue)
+                        .lineLimit(1)
+                    
+                    if engine.isVsAI {
+                        Text("• 🔴 \(lang.aiSkillsTitle): 🛡️\(engine.redShieldSkillCount) ✨\(engine.redFrenzySkillCount) ❄️\(engine.redFreezeSkillCount)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.red)
+                            .lineLimit(1)
+                    }
+                }
             }
             
             Spacer()
@@ -1579,13 +1771,13 @@ struct ContentView: View {
     }
     
     private var superpowerBar: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Button(action: { engine.activateShieldRecallSkill() }) {
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Image(systemName: "shield.righthalf.filled")
                     Text(lang.shieldSkillText(engine.shieldSkillCount))
                 }
-                .font(.system(size: 11, weight: .black))
+                .font(.system(size: 10, weight: .black))
                 .foregroundColor(engine.shieldSkillCount > 0 ? .white : .secondary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 7)
@@ -1593,14 +1785,14 @@ struct ContentView: View {
                 .cornerRadius(10)
                 .shadow(color: .indigo.opacity(0.3), radius: 2)
             }
-            .disabled(engine.shieldSkillCount == 0)
+            .disabled(engine.shieldSkillCount == 0 || engine.currentTurn != .blue)
             
             Button(action: { engine.activateFrenzySkill() }) {
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Image(systemName: "sparkles")
                     Text(lang.frenzySkillText(engine.frenzySkillCount))
                 }
-                .font(.system(size: 11, weight: .black))
+                .font(.system(size: 10, weight: .black))
                 .foregroundColor(engine.frenzySkillCount > 0 ? .white : .secondary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 7)
@@ -1608,7 +1800,22 @@ struct ContentView: View {
                 .cornerRadius(10)
                 .shadow(color: .purple.opacity(0.3), radius: 2)
             }
-            .disabled(engine.frenzySkillCount == 0)
+            .disabled(engine.frenzySkillCount == 0 || engine.currentTurn != .blue)
+            
+            Button(action: { engine.activateFreezeSkill() }) {
+                HStack(spacing: 3) {
+                    Image(systemName: "snowflake")
+                    Text(lang.freezeSkillText(engine.freezeSkillCount))
+                }
+                .font(.system(size: 10, weight: .black))
+                .foregroundColor(engine.freezeSkillCount > 0 ? .white : .secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 7)
+                .background(engine.freezeSkillCount > 0 ? Color.cyan.opacity(0.9) : Color.gray.opacity(0.3))
+                .cornerRadius(10)
+                .shadow(color: .cyan.opacity(0.3), radius: 2)
+            }
+            .disabled(engine.freezeSkillCount == 0 || engine.currentTurn != .blue)
         }
         .padding(.horizontal, 14)
     }
@@ -1741,7 +1948,8 @@ struct BoardView: View {
                                        isOptimalSourcePiece: isOptimalSourcePiece,
                                        isEmergencyPiece: isOptimalSourcePiece && (engine.optimalAdvice?.isEmergency == true),
                                        isOpponentTarget: isOpponentTarget,
-                                       isPulsing: isPulsing)
+                                       isPulsing: isPulsing,
+                                       isFrozen: (pos == engine.frozenPiecePos))
                             .frame(width: cellSize * 0.88, height: cellSize * 0.88)
                             .offset(x: CGFloat(pos.col) * cellSize + cellSize * 0.06,
                                     y: CGFloat(pos.row) * cellSize + cellSize * 0.06)
@@ -1902,19 +2110,20 @@ struct PieceBadgeView: View {
     let isEmergencyPiece: Bool
     var isOpponentTarget: Bool = false
     let isPulsing: Bool
+    var isFrozen: Bool = false
     
     private var shouldPulse: Bool {
-        return isOptimalSourcePiece || isOpponentTarget
+        return (isOptimalSourcePiece || isOpponentTarget) && !isFrozen
     }
     
     var body: some View {
         ZStack {
             // 1. 闪烁光晕外圈 (只针对：蓝方推荐走棋 或 对方刚走过的棋子)
-            if isOptimalSourcePiece {
+            if isOptimalSourcePiece && !isFrozen {
                 Circle()
                     .stroke(Color.green.opacity(isPulsing ? 0.85 : 0.25), lineWidth: 3.5)
                     .scaleEffect(isPulsing ? 1.18 : 1.04)
-            } else if isOpponentTarget {
+            } else if isOpponentTarget && !isFrozen {
                 Circle()
                     .stroke(Color(red: 1.0, green: 0.1, blue: 0.25).opacity(isPulsing ? 0.85 : 0.25), lineWidth: 3.5)
                     .scaleEffect(isPulsing ? 1.18 : 1.04)
@@ -1922,9 +2131,10 @@ struct PieceBadgeView: View {
             
             // 2. 棋子圆盘底色
             Circle()
-                .fill(isEmergencyPiece ? Color(red: 1.0, green: 0.85, blue: 0.85) :
+                .fill(isFrozen ? Color(red: 0.88, green: 0.96, blue: 1.0) :
+                      (isEmergencyPiece ? Color(red: 1.0, green: 0.85, blue: 0.85) :
                       (isOpponentTarget ? Color(red: 1.0, green: 0.93, blue: 0.93) :
-                      (isOptimalSourcePiece ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color.white)))
+                      (isOptimalSourcePiece ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color.white))))
                 .shadow(color: isOpponentTarget ? Color.red.opacity(0.4) : (isOptimalSourcePiece ? Color.green.opacity(0.35) : Color.black.opacity(0.2)),
                         radius: isSelected ? 5 : (shouldPulse ? 4 : 2),
                         x: 0,
@@ -1932,10 +2142,11 @@ struct PieceBadgeView: View {
             
             // 3. 棋子边缘描边
             Circle()
-                .stroke(isEmergencyPiece ? Color.red :
+                .stroke(isFrozen ? Color.cyan :
+                        (isEmergencyPiece ? Color.red :
                         (isOpponentTarget ? Color(red: 1.0, green: 0.1, blue: 0.25) :
-                        (isOptimalSourcePiece ? Color.green : piece.owner.color)),
-                        lineWidth: isEmergencyPiece ? 4 : (isOpponentTarget ? 3.5 : (isOptimalSourcePiece ? 3.5 : 3)))
+                        (isOptimalSourcePiece ? Color.green : piece.owner.color))),
+                        lineWidth: isFrozen ? 3.5 : (isEmergencyPiece ? 4 : (isOpponentTarget ? 3.5 : (isOptimalSourcePiece ? 3.5 : 3))))
             
             // 4. 动物图标与名称
             VStack(spacing: -2) {
@@ -1948,7 +2159,7 @@ struct PieceBadgeView: View {
             }
             
             // 5. 角标提示 (紧急/敌步/推荐)
-            if isEmergencyPiece {
+            if isEmergencyPiece && !isFrozen {
                 VStack {
                     HStack {
                         Spacer()
@@ -1964,7 +2175,7 @@ struct PieceBadgeView: View {
                     Spacer()
                 }
             }
-            else if isOpponentTarget {
+            else if isOpponentTarget && !isFrozen {
                 VStack {
                     HStack {
                         Spacer()
@@ -1979,6 +2190,21 @@ struct PieceBadgeView: View {
                             .offset(x: 4, y: -4)
                     }
                     Spacer()
+                }
+            }
+            
+            // 6. ❄️ 冰封覆盖特效
+            if isFrozen {
+                Circle()
+                    .fill(Color.cyan.opacity(0.35))
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Text("❄️")
+                            .font(.system(size: 13))
+                            .offset(x: 3, y: 3)
+                    }
                 }
             }
             else if isOptimalSourcePiece {
@@ -2079,6 +2305,7 @@ struct RuleGuideView: View {
                         Text("• 🦁 / 🐯: \(lang.animalEatRule(.lion))")
                         Text("• \(lang.shieldSkillText(1))")
                         Text("• \(lang.frenzySkillText(1))")
+                        Text("• \(lang.freezeSkillText(1))")
                     }
                     Divider()
                     VStack(spacing: 4) {

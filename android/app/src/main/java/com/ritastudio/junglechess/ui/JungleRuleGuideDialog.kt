@@ -155,6 +155,11 @@ fun JungleRuleGuideDialog(
                         fontSize = 11.sp,
                         color = Color.DarkGray
                     )
+                    Text(
+                        text = "• ${lang.freezeSkillText(1)}",
+                        fontSize = 11.sp,
+                        color = Color.DarkGray
+                    )
 
                     HorizontalDivider()
 

@@ -25,9 +25,16 @@ class JungleGameEngine(
     var winAdvantagePercent by mutableStateOf(50)
     var currentDoctrine by mutableStateOf(StrategicDoctrine.LION_BLITZ)
 
-    var frenzyRemainingTurns by mutableStateOf(0)
-    var shieldSkillCount by mutableStateOf(1)
-    var frenzySkillCount by mutableStateOf(1)
+    var blueShieldSkillCount by mutableStateOf(1)
+    var redShieldSkillCount by mutableStateOf(1)
+    var blueFrenzySkillCount by mutableStateOf(1)
+    var redFrenzySkillCount by mutableStateOf(1)
+    var blueFreezeSkillCount by mutableStateOf(1)
+    var redFreezeSkillCount by mutableStateOf(1)
+    var blueFrenzyRemainingTurns by mutableStateOf(0)
+    var redFrenzyRemainingTurns by mutableStateOf(0)
+    var frozenPiecePos by mutableStateOf<Position?>(null)
+    var frozenTurns by mutableStateOf(0)
     var skillBannerText by mutableStateOf<String?>(null)
 
     var inspectPiece by mutableStateOf<Piece?>(null)
@@ -73,9 +80,16 @@ class JungleGameEngine(
         winner = null
         currentTurn = PlayerColor.BLUE
 
-        frenzyRemainingTurns = 0
-        shieldSkillCount = 1
-        frenzySkillCount = 1
+        blueShieldSkillCount = 1
+        redShieldSkillCount = 1
+        blueFrenzySkillCount = 1
+        redFrenzySkillCount = 1
+        blueFreezeSkillCount = 1
+        redFreezeSkillCount = 1
+        blueFrenzyRemainingTurns = 0
+        redFrenzyRemainingTurns = 0
+        frozenPiecePos = null
+        frozenTurns = 0
         skillBannerText = null
 
         currentDoctrine = StrategicDoctrine.entries.random()
@@ -104,41 +118,136 @@ class JungleGameEngine(
         updateRoundEvaluation()
     }
 
-    fun activateFrenzySkill() {
-        if (frenzySkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
-        frenzySkillCount -= 1
-        frenzyRemainingTurns = 2
-        skillBannerText = JungleLanguageManager.shared.frenzyBannerText
-        JungleSoundManager.getOrNull()?.playJump()
-        updateRoundEvaluation()
-    }
-
-    fun activateShieldRecallSkill() {
-        if (shieldSkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
-        shieldSkillCount -= 1
-
-        var bestPiecePos: Position? = null
-        var bestPiece: Piece? = null
-        val targetGate = Position(7, 3)
-
-        for ((pos, p) in board) {
-            if (p.owner == PlayerColor.BLUE && pos != targetGate) {
-                if (bestPiece == null || p.type.rank > bestPiece.type.rank) {
-                    bestPiecePos = pos
-                    bestPiece = p
-                }
-            }
-        }
-
-        if (bestPiecePos != null && bestPiece != null) {
-            val newBoard = board.toMutableMap()
-            newBoard.remove(bestPiecePos)
-            newBoard[targetGate] = bestPiece
-            board = newBoard
-            val name = JungleLanguageManager.shared.animalName(bestPiece.type)
-            skillBannerText = JungleLanguageManager.shared.shieldBannerText(pieceName = name)
+    fun activateFrenzySkill(player: PlayerColor = PlayerColor.BLUE) {
+        if (player == PlayerColor.BLUE) {
+            if (blueFrenzySkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
+            blueFrenzySkillCount -= 1
+            blueFrenzyRemainingTurns = 2
+            skillBannerText = JungleLanguageManager.shared.frenzyBannerText
             JungleSoundManager.getOrNull()?.playJump()
             updateRoundEvaluation()
+        } else {
+            if (redFrenzySkillCount <= 0 || currentTurn != PlayerColor.RED) return
+            redFrenzySkillCount -= 1
+            redFrenzyRemainingTurns = 2
+            skillBannerText = JungleLanguageManager.shared.aiFrenzyBannerText
+            JungleSoundManager.getOrNull()?.playJump()
+            updateRoundEvaluation()
+        }
+    }
+
+    fun activateShieldRecallSkill(player: PlayerColor = PlayerColor.BLUE) {
+        if (player == PlayerColor.BLUE) {
+            if (blueShieldSkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
+            blueShieldSkillCount -= 1
+
+            var bestPiecePos: Position? = null
+            var bestPiece: Piece? = null
+            val targetGate = Position(7, 3)
+
+            for ((pos, p) in board) {
+                if (p.owner == PlayerColor.BLUE && pos != targetGate) {
+                    if (bestPiece == null || p.type.rank > bestPiece.type.rank) {
+                        bestPiecePos = pos
+                        bestPiece = p
+                    }
+                }
+            }
+
+            if (bestPiecePos != null && bestPiece != null) {
+                val newBoard = board.toMutableMap()
+                newBoard.remove(bestPiecePos)
+                newBoard[targetGate] = bestPiece
+                board = newBoard
+                val name = JungleLanguageManager.shared.animalName(bestPiece.type)
+                skillBannerText = JungleLanguageManager.shared.shieldBannerText(pieceName = name)
+                JungleSoundManager.getOrNull()?.playWin()
+                updateRoundEvaluation()
+            }
+        } else {
+            if (redShieldSkillCount <= 0 || currentTurn != PlayerColor.RED) return
+            redShieldSkillCount -= 1
+
+            var bestPiecePos: Position? = null
+            var bestPiece: Piece? = null
+            val targetGate = Position(1, 3)
+
+            for ((pos, p) in board) {
+                if (p.owner == PlayerColor.RED && pos != targetGate) {
+                    if (bestPiece == null || p.type.rank > bestPiece.type.rank) {
+                        bestPiecePos = pos
+                        bestPiece = p
+                    }
+                }
+            }
+
+            if (bestPiecePos != null && bestPiece != null) {
+                val newBoard = board.toMutableMap()
+                newBoard.remove(bestPiecePos)
+                newBoard[targetGate] = bestPiece
+                board = newBoard
+                val name = JungleLanguageManager.shared.animalName(bestPiece.type)
+                skillBannerText = JungleLanguageManager.shared.aiShieldBannerText(pieceName = name)
+                JungleSoundManager.getOrNull()?.playWin()
+                updateRoundEvaluation()
+            }
+        }
+    }
+
+    fun activateFreezeSkill(player: PlayerColor = PlayerColor.BLUE) {
+        val opponent = player.opponent
+        if (player == PlayerColor.BLUE) {
+            if (blueFreezeSkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
+            var targetPos: Position? = null
+            var highestScore = -99999
+
+            for ((pos, p) in board) {
+                if (p.owner == opponent) {
+                    val distToDen = abs(pos.row - 8) + abs(pos.col - 3)
+                    val score = p.type.pieceValue - (distToDen * 150)
+                    if (score > highestScore) {
+                        highestScore = score
+                        targetPos = pos
+                    }
+                }
+            }
+
+            if (targetPos != null) {
+                val targetPiece = board[targetPos] ?: return
+                blueFreezeSkillCount -= 1
+                frozenPiecePos = targetPos
+                frozenTurns = 1
+                val name = JungleLanguageManager.shared.animalName(targetPiece.type)
+                skillBannerText = JungleLanguageManager.shared.freezeBannerText(pieceName = name)
+                JungleSoundManager.getOrNull()?.playWin()
+                updateRoundEvaluation()
+            }
+        } else {
+            if (redFreezeSkillCount <= 0 || currentTurn != PlayerColor.RED) return
+            var targetPos: Position? = null
+            var highestScore = -99999
+
+            for ((pos, p) in board) {
+                if (p.owner == opponent) {
+                    val distToDen = abs(pos.row - 0) + abs(pos.col - 3)
+                    val score = p.type.pieceValue - (distToDen * 150)
+                    if (score > highestScore) {
+                        highestScore = score
+                        targetPos = pos
+                    }
+                }
+            }
+
+            if (targetPos != null) {
+                val targetPiece = board[targetPos] ?: return
+                redFreezeSkillCount -= 1
+                frozenPiecePos = targetPos
+                frozenTurns = 1
+                val name = JungleLanguageManager.shared.animalName(targetPiece.type)
+                skillBannerText = JungleLanguageManager.shared.aiFreezeBannerText(pieceName = name)
+                JungleSoundManager.getOrNull()?.playWin()
+                updateRoundEvaluation()
+            }
         }
     }
 
@@ -155,6 +264,10 @@ class JungleGameEngine(
         }
 
         if (clickedPiece != null && clickedPiece.owner == currentTurn) {
+            if (pos == frozenPiecePos) {
+                JungleSoundManager.getOrNull()?.playSelect()
+                return
+            }
             selectedPos = pos
             inspectPiece = clickedPiece
             validMoves = calculateValidMoves(pos)
@@ -206,11 +319,31 @@ class JungleGameEngine(
             JungleSoundManager.getOrNull()?.playMove()
         }
 
-        if (movingPiece.owner == PlayerColor.BLUE && frenzyRemainingTurns > 0) {
-            frenzyRemainingTurns -= 1
-            if (frenzyRemainingTurns == 0) {
-                skillBannerText = null
+        if (movingPiece.owner == PlayerColor.BLUE && blueFrenzyRemainingTurns > 0) {
+            blueFrenzyRemainingTurns -= 1
+        }
+        if (movingPiece.owner == PlayerColor.RED && redFrenzyRemainingTurns > 0) {
+            redFrenzyRemainingTurns -= 1
+        }
+
+        val fPos = frozenPiecePos
+        if (fPos != null) {
+            if (board[fPos] == null || to == fPos) {
+                frozenPiecePos = null
+                frozenTurns = 0
+            } else {
+                val fPiece = board[fPos]
+                if (fPiece != null && fPiece.owner == movingPiece.owner) {
+                    frozenTurns -= 1
+                    if (frozenTurns <= 0) {
+                        frozenPiecePos = null
+                    }
+                }
             }
+        }
+
+        if (blueFrenzyRemainingTurns == 0 && redFrenzyRemainingTurns == 0 && frozenPiecePos == null) {
+            skillBannerText = null
         }
 
         if (checkWin(afterMoveTo = to, by = movingPiece.owner)) {
@@ -880,8 +1013,62 @@ class JungleGameEngine(
         this.optimalAdvice = candidates.firstOrNull()?.advice
     }
 
-    // MARK: - 🤖 红方电脑走棋
+    // MARK: - 🤖 红方电脑走棋与技能决策
+    fun evaluateAndTriggerAISkills() {
+        if (!isVsAI || currentTurn != PlayerColor.RED || winner != null) return
+
+        // 1. 🛡️ 守家绝技：当蓝方逼近兽穴 (距离 <= 2) 且门前防守空虚时，召回最强猛兽
+        if (redShieldSkillCount > 0) {
+            val blueThreatsNearDen = board.filter { (pos, piece) ->
+                piece.owner == PlayerColor.BLUE && (abs(pos.row - 0) + abs(pos.col - 3) <= 2)
+            }
+            val gate = Position(1, 3)
+            val gateDefender = board[gate]
+            val needGateHelp = gateDefender == null || (gateDefender.owner == PlayerColor.RED && gateDefender.type.rank < 6)
+            if (blueThreatsNearDen.isNotEmpty() && needGateHelp) {
+                activateShieldRecallSkill(PlayerColor.RED)
+                return
+            }
+        }
+
+        // 2. ❄️ 控场冰封：当蓝方逼近红方兽穴，或者蓝方开启了狂暴，红方冰封蓝方最有威胁的核心
+        if (redFreezeSkillCount > 0 && frozenPiecePos == null) {
+            val playerNearRedDen = board.entries.firstOrNull { (pos, piece) ->
+                piece.owner == PlayerColor.BLUE && (abs(pos.row - 0) + abs(pos.col - 3) <= 2)
+            }
+            if (playerNearRedDen != null) {
+                activateFreezeSkill(PlayerColor.RED)
+                return
+            } else if (blueFrenzyRemainingTurns > 0) {
+                activateFreezeSkill(PlayerColor.RED)
+                return
+            }
+        }
+
+        // 3. ✨ 逆袭越级：当红方弱兽 (鼠猫狗狼) 与蓝方大兽 (狮虎象) 相邻，开启越级完成斩杀
+        if (redFrenzySkillCount > 0 && redFrenzyRemainingTurns == 0) {
+            for ((redPos, redPiece) in board) {
+                if (redPiece.owner == PlayerColor.RED && redPiece.type.rank <= 4) {
+                    val neighbors = listOf(
+                        Position(redPos.row - 1, redPos.col),
+                        Position(redPos.row + 1, redPos.col),
+                        Position(redPos.row, redPos.col - 1),
+                        Position(redPos.row, redPos.col + 1)
+                    )
+                    for (nPos in neighbors) {
+                        val bluePiece = board[nPos]
+                        if (bluePiece != null && bluePiece.owner == PlayerColor.BLUE && bluePiece.type.rank >= 6) {
+                            activateFrenzySkill(PlayerColor.RED)
+                            return
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fun triggerAIMove() {
+        evaluateAndTriggerAISkills()
         val candidates = searchOptimalMoveCandidates(PlayerColor.RED)
         this.isThinking = false
 
@@ -907,6 +1094,7 @@ class JungleGameEngine(
     }
 
     private fun calculateValidMovesOnBoard(boardState: Map<Position, Piece>, from: Position): List<Position> {
+        if (from == frozenPiecePos) return emptyList()
         val piece = boardState[from] ?: return emptyList()
         val result = mutableListOf<Position>()
         val directions = listOf(-1 to 0, 1 to 0, 0 to -1, 0 to 1)
@@ -959,6 +1147,13 @@ class JungleGameEngine(
     private fun canOccupyOrCaptureOnBoard(boardState: Map<Position, Piece>, attacker: Piece, from: Position, to: Position): Boolean {
         val defender = boardState[to] ?: return true
         if (defender.owner == attacker.owner) return false
+
+        if (attacker.owner == PlayerColor.BLUE && blueFrenzyRemainingTurns > 0) {
+            return true
+        }
+        if (attacker.owner == PlayerColor.RED && redFrenzyRemainingTurns > 0) {
+            return true
+        }
 
         val fromTile = getTileType(from)
         val toTile = getTileType(to)
@@ -1097,6 +1292,7 @@ class JungleGameEngine(
     }
 
     fun calculateValidMoves(from: Position): List<Position> {
+        if (from == frozenPiecePos) return emptyList()
         val piece = board[from] ?: return emptyList()
         val result = mutableListOf<Position>()
         val directions = listOf(-1 to 0, 1 to 0, 0 to -1, 0 to 1)
@@ -1150,7 +1346,10 @@ class JungleGameEngine(
         val defender = board[to] ?: return true
         if (defender.owner == attacker.owner) return false
 
-        if (attacker.owner == PlayerColor.BLUE && frenzyRemainingTurns > 0) {
+        if (attacker.owner == PlayerColor.BLUE && blueFrenzyRemainingTurns > 0) {
+            return true
+        }
+        if (attacker.owner == PlayerColor.RED && redFrenzyRemainingTurns > 0) {
             return true
         }
 
