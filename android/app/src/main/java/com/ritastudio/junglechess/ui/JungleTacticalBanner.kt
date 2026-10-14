@@ -30,7 +30,7 @@ fun JungleTacticalBanner(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(82.dp)
+            .height(90.dp)
             .padding(horizontal = 10.dp, vertical = 2.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -40,7 +40,7 @@ fun JungleTacticalBanner(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Top row: Badge, Headline, Action Buttons
@@ -105,9 +105,10 @@ fun JungleTacticalBanner(
                 Text(
                     text = advice.detailReason,
                     fontSize = 10.5.sp,
-                    color = Color(0xFF555555),
-                    lineHeight = 12.sp,
-                    maxLines = 1
+                    color = Color(0xFF444444),
+                    lineHeight = 13.5.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 // 3-Step Forecast Row
@@ -201,7 +202,7 @@ fun JungleRuleCheatBar(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(30.dp)
+            .height(36.dp)
             .padding(horizontal = 10.dp, vertical = 1.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
@@ -228,7 +229,8 @@ fun JungleRuleCheatBar(
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.DarkGray,
-                    maxLines = 1,
+                    maxLines = 2,
+                    lineHeight = 13.sp,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )

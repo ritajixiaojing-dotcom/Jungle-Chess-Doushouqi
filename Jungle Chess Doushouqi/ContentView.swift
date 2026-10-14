@@ -1717,8 +1717,8 @@ struct ContentView: View {
                 Text(advice.detailReason)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
                 
                 HStack(spacing: 4) {
                     Text(lang.depth3DeductionTitle)
@@ -1728,7 +1728,7 @@ struct ContentView: View {
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.5))
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .minimumScaleFactor(0.75)
                 }
             } else {
                 HStack(spacing: 6) {
@@ -1754,7 +1754,7 @@ struct ContentView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 5)
-        .frame(height: 72)
+        .frame(height: 84)
         .background(engine.optimalAdvice?.isEmergency == true ? Color.red.opacity(0.15) :
                     (engine.optimalAdvice?.isTrade == true ? Color.purple.opacity(0.15) : Color.white.opacity(0.95)))
         .cornerRadius(10)
@@ -1796,7 +1796,7 @@ struct ContentView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 3)
-        .frame(height: 32)
+        .frame(height: 36)
         .background(Color.white.opacity(0.85))
         .cornerRadius(8)
         .padding(.horizontal, 14)
@@ -2063,8 +2063,10 @@ struct TileView: View {
             // 👑 2. 金色最优推荐或行动标牌
             else if (isValidTarget || isGlobalOptimalTarget), let badge = actionBadgeText {
                 Text(badge)
-                    .font(.system(size: 8, weight: .black))
+                    .font(.system(size: 7.5, weight: .black))
                     .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .padding(.horizontal, 3)
                     .padding(.vertical, 2)
                     .background((badge.contains("净赚") || badge.contains("+")) ? Color.purple : (isGlobalOptimalTarget ? Color(red: 0.1, green: 0.6, blue: 0.2) : Color(red: 0.15, green: 0.55, blue: 0.2)))
@@ -2184,9 +2186,9 @@ struct PieceBadgeView: View {
             VStack(spacing: -2) {
                 Text(piece.type.emoji).font(.system(size: 18))
                 Text(lang.animalName(piece.type))
-                    .font(.system(size: 10, weight: .black))
+                    .font(.system(size: 11, weight: .black))
                     .foregroundColor(isOpponentTarget ? Color(red: 0.9, green: 0.1, blue: 0.2) : (isOptimalSourcePiece ? Color(red: 0.05, green: 0.55, blue: 0.15) : piece.owner.color))
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.8)
                     .lineLimit(1)
             }
             

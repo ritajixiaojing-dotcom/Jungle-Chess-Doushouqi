@@ -182,6 +182,93 @@ class JungleLanguageManager: ObservableObject {
         switch type {
         case .rat:
             switch currentLanguage {
+            case .zhHans, .zhHant: return "鼠"
+            case .en: return "Rat"
+            case .ja: return "ネズミ"
+            case .ko: return "쥐"
+            case .es: return "Rata"
+            case .fr: return "Rat"
+            case .de: return "Ratte"
+            }
+        case .cat:
+            switch currentLanguage {
+            case .zhHans: return "猫"
+            case .zhHant: return "貓"
+            case .en: return "Cat"
+            case .ja: return "ネコ"
+            case .ko: return "고양이"
+            case .es: return "Gato"
+            case .fr: return "Chat"
+            case .de: return "Katze"
+            }
+        case .dog:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "狗"
+            case .en: return "Dog"
+            case .ja: return "イヌ"
+            case .ko: return "개"
+            case .es: return "Perro"
+            case .fr: return "Chien"
+            case .de: return "Hund"
+            }
+        case .wolf:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "狼"
+            case .en: return "Wolf"
+            case .ja: return "オオカミ"
+            case .ko: return "늑대"
+            case .es: return "Lobo"
+            case .fr: return "Loup"
+            case .de: return "Wolf"
+            }
+        case .leopard:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "豹"
+            case .en: return "Leopard"
+            case .ja: return "ヒョウ"
+            case .ko: return "표범"
+            case .es: return "Leopardo"
+            case .fr: return "Léopard"
+            case .de: return "Leopard"
+            }
+        case .tiger:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "虎"
+            case .en: return "Tiger"
+            case .ja: return "トラ"
+            case .ko: return "호랑이"
+            case .es: return "Tigre"
+            case .fr: return "Tigre"
+            case .de: return "Tiger"
+            }
+        case .lion:
+            switch currentLanguage {
+            case .zhHans: return "狮"
+            case .zhHant: return "獅"
+            case .en: return "Lion"
+            case .ja: return "ライオン"
+            case .ko: return "사자"
+            case .es: return "León"
+            case .fr: return "Lion"
+            case .de: return "Löwe"
+            }
+        case .elephant:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "象"
+            case .en: return "Elephant"
+            case .ja: return "象"
+            case .ko: return "코끼리"
+            case .es: return "Elefante"
+            case .fr: return "Éléphant"
+            case .de: return "Elefant"
+            }
+        }
+    }
+    
+    func animalFullName(_ type: AnimalType) -> String {
+        switch type {
+        case .rat:
+            switch currentLanguage {
             case .zhHans, .zhHant: return "老鼠"
             case .en: return "Rat"
             case .ja: return "ネズミ"

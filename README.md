@@ -2,8 +2,8 @@
 
 [![iOS Platform](https://img.shields.io/badge/Platform-iOS%2016%2B%20%7C%20iPadOS%20%7C%20macOS-blue?logo=apple)](https://apps.apple.com)
 [![Android Platform](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--36)-green?logo=android)](https://play.google.com)
-[![iOS Status](https://img.shields.io/badge/App%20Store-Live%20v1.6.1%20%7C%20v1.7.1%20Ready-success?logo=apple)]()
-[![Android Status](https://img.shields.io/badge/Google%20Play-Closed%20Testing%20(v1.7.1)-orange?logo=google-play)]()
+[![iOS Status](https://img.shields.io/badge/App%20Store-Live%20v1.6.1%20%7C%20v1.7.2%20Ready-success?logo=apple)]()
+[![Android Status](https://img.shields.io/badge/Google%20Play-Closed%20Testing%20(v1.7.2)-orange?logo=google-play)]()
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 > 一款基于 **双原生架构 (iOS SwiftUI + Android Jetpack Compose)** 深度打造的现代化经典单机益智斗兽棋游戏。内置统一的 4-Ply / 6-Ply Alpha-Beta 剪枝博弈 AI 引擎、实时深度战术推演预判、三大神兽战略绝技（神兽天降、妙手越级、寒冰禁锢）、动态动物台词规则全显与纯净零广告体验。
@@ -14,8 +14,8 @@
 
 | 平台 | 技术栈 | 当前版本 | 状态 / 渠道 | 说明 |
 | :--- | :--- | :--- | :--- | :--- |
-| 🍏 **iOS / iPadOS / macOS** | SwiftUI / Swift 6 | **v1.7.1 (Build 3)** | 🚀 **App Store 提审版本** | 支持 iPhone、iPad 及 Apple Silicon Mac |
-| 🤖 **Android** | Jetpack Compose / Kotlin | **v1.7.1 (Build 6)** | 🧪 **Google Play 封闭测试 (Closed Testing)** | 覆盖全球 178 个国家/地区，火热测试中 |
+| 🍏 **iOS / iPadOS / macOS** | SwiftUI / Swift 6 | **v1.7.2 (Build 4)** | 🚀 **App Store 提审版本** | 支持 iPhone、iPad 及 Apple Silicon Mac |
+| 🤖 **Android** | Jetpack Compose / Kotlin | **v1.7.2 (Build 7)** | 🧪 **Google Play 封闭测试 (Closed Testing)** | 覆盖全球 178 个国家/地区，火热测试中 |
 
 ### 🤖 Android 封闭测试 (Google Play Closed Testing) 参与方式
 Android 版本目前已正式发布至 Google Play 封闭测试（Closed Testing - Alpha Track）阶段，采用 Google Groups 自动化分发机制：

@@ -80,7 +80,94 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
     }
     
     fun animalName(type: AnimalType): String {
-        return when (type ) {
+        return when (type) {
+        AnimalType.RAT ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "鼠"
+            JungleLanguage.EN -> "Rat"
+            JungleLanguage.JA -> "ネズミ"
+            JungleLanguage.KO -> "쥐"
+            JungleLanguage.ES -> "Rata"
+            JungleLanguage.FR -> "Rat"
+            JungleLanguage.DE -> "Ratte"
+            }
+        AnimalType.CAT ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "猫"
+            JungleLanguage.ZH_HANT -> "貓"
+            JungleLanguage.EN -> "Cat"
+            JungleLanguage.JA -> "ネコ"
+            JungleLanguage.KO -> "고양이"
+            JungleLanguage.ES -> "Gato"
+            JungleLanguage.FR -> "Chat"
+            JungleLanguage.DE -> "Katze"
+            }
+        AnimalType.DOG ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "狗"
+            JungleLanguage.EN -> "Dog"
+            JungleLanguage.JA -> "イヌ"
+            JungleLanguage.KO -> "개"
+            JungleLanguage.ES -> "Perro"
+            JungleLanguage.FR -> "Chien"
+            JungleLanguage.DE -> "Hund"
+            }
+        AnimalType.WOLF ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "狼"
+            JungleLanguage.EN -> "Wolf"
+            JungleLanguage.JA -> "オオカミ"
+            JungleLanguage.KO -> "늑대"
+            JungleLanguage.ES -> "Lobo"
+            JungleLanguage.FR -> "Loup"
+            JungleLanguage.DE -> "Wolf"
+            }
+        AnimalType.LEOPARD ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "豹"
+            JungleLanguage.EN -> "Leopard"
+            JungleLanguage.JA -> "ヒョウ"
+            JungleLanguage.KO -> "표범"
+            JungleLanguage.ES -> "Leopardo"
+            JungleLanguage.FR -> "Léopard"
+            JungleLanguage.DE -> "Leopard"
+            }
+        AnimalType.TIGER ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "虎"
+            JungleLanguage.EN -> "Tiger"
+            JungleLanguage.JA -> "トラ"
+            JungleLanguage.KO -> "호랑이"
+            JungleLanguage.ES -> "Tigre"
+            JungleLanguage.FR -> "Tigre"
+            JungleLanguage.DE -> "Tiger"
+            }
+        AnimalType.LION ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "狮"
+            JungleLanguage.ZH_HANT -> "獅"
+            JungleLanguage.EN -> "Lion"
+            JungleLanguage.JA -> "ライオン"
+            JungleLanguage.KO -> "사자"
+            JungleLanguage.ES -> "León"
+            JungleLanguage.FR -> "Lion"
+            JungleLanguage.DE -> "Löwe"
+            }
+        AnimalType.ELEPHANT ->
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "象"
+            JungleLanguage.EN -> "Elephant"
+            JungleLanguage.JA -> "象"
+            JungleLanguage.KO -> "코끼리"
+            JungleLanguage.ES -> "Elefante"
+            JungleLanguage.FR -> "Éléphant"
+            JungleLanguage.DE -> "Elefant"
+            }
+        }
+    }
+
+    fun animalFullName(type: AnimalType): String {
+        return when (type) {
         AnimalType.RAT ->
             when (currentLanguage) {
             JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "老鼠"

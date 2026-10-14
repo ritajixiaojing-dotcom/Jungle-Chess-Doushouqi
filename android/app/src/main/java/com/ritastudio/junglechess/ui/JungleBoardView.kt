@@ -92,7 +92,7 @@ fun JungleBoardView(
                             val actionBadge = if (engine.selectedPos != null) {
                                 engine.getActionBadge(pos, engine.selectedPos!!)
                             } else if (isRecommendedTarget) {
-                                advice?.badgeText ?: lang.recommendedTargetBadge
+                                advice.badgeText
                             } else null
 
                             Box(
@@ -348,10 +348,10 @@ fun TileCellView(
                     val animalTitle = lang.animalName(piece.type)
                     Text(
                         text = animalTitle,
-                        fontSize = if (animalTitle.length >= 3) 7.sp else 8.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isRecommendedSource) Color(0xFF00C853) else if (isOpponentTarget) Color(0xFFFF1744) else borderColor,
-                        lineHeight = 8.5.sp,
+                        lineHeight = 10.sp,
                         maxLines = 1
                     )
                 }
