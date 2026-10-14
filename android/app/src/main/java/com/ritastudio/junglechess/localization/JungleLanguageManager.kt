@@ -82,80 +82,81 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
     fun animalName(type: AnimalType): String {
         return when (type ) {
         AnimalType.RAT ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "鼠"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "老鼠"
             JungleLanguage.EN -> "Rat"
-            JungleLanguage.JA -> "鼠"
+            JungleLanguage.JA -> "ネズミ"
             JungleLanguage.KO -> "쥐"
             JungleLanguage.ES -> "Rata"
             JungleLanguage.FR -> "Rat"
             JungleLanguage.DE -> "Ratte"
             }
         AnimalType.CAT ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS -> "猫"
-            JungleLanguage.ZH_HANT -> "貓"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "花猫"
+            JungleLanguage.ZH_HANT -> "花貓"
             JungleLanguage.EN -> "Cat"
-            JungleLanguage.JA -> "猫"
+            JungleLanguage.JA -> "ネコ"
             JungleLanguage.KO -> "고양이"
             JungleLanguage.ES -> "Gato"
             JungleLanguage.FR -> "Chat"
             JungleLanguage.DE -> "Katze"
             }
         AnimalType.DOG ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "狗"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "猎狗"
             JungleLanguage.EN -> "Dog"
-            JungleLanguage.JA -> "犬"
+            JungleLanguage.JA -> "イヌ"
             JungleLanguage.KO -> "개"
             JungleLanguage.ES -> "Perro"
             JungleLanguage.FR -> "Chien"
             JungleLanguage.DE -> "Hund"
             }
         AnimalType.WOLF ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "狼"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "野狼"
             JungleLanguage.EN -> "Wolf"
-            JungleLanguage.JA -> "狼"
+            JungleLanguage.JA -> "オオカミ"
             JungleLanguage.KO -> "늑대"
             JungleLanguage.ES -> "Lobo"
             JungleLanguage.FR -> "Loup"
             JungleLanguage.DE -> "Wolf"
             }
         AnimalType.LEOPARD ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "豹"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "金钱豹"
+            JungleLanguage.ZH_HANT -> "金錢豹"
             JungleLanguage.EN -> "Leopard"
-            JungleLanguage.JA -> "豹"
+            JungleLanguage.JA -> "ヒョウ"
             JungleLanguage.KO -> "표범"
             JungleLanguage.ES -> "Leopardo"
             JungleLanguage.FR -> "Léopard"
             JungleLanguage.DE -> "Leopard"
             }
         AnimalType.TIGER ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "虎"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "老虎"
             JungleLanguage.EN -> "Tiger"
-            JungleLanguage.JA -> "虎"
+            JungleLanguage.JA -> "トラ"
             JungleLanguage.KO -> "호랑이"
             JungleLanguage.ES -> "Tigre"
             JungleLanguage.FR -> "Tigre"
             JungleLanguage.DE -> "Tiger"
             }
         AnimalType.LION ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS -> "狮"
-            JungleLanguage.ZH_HANT -> "獅"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "狮子"
+            JungleLanguage.ZH_HANT -> "獅子"
             JungleLanguage.EN -> "Lion"
-            JungleLanguage.JA -> "獅"
+            JungleLanguage.JA -> "ライオン"
             JungleLanguage.KO -> "사자"
             JungleLanguage.ES -> "León"
             JungleLanguage.FR -> "Lion"
             JungleLanguage.DE -> "Löwe"
             }
         AnimalType.ELEPHANT ->
-            when (currentLanguage ) {
-            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "象"
+            when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "大象"
             JungleLanguage.EN -> "Elephant"
             JungleLanguage.JA -> "象"
             JungleLanguage.KO -> "코끼리"
@@ -163,6 +164,19 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
             JungleLanguage.FR -> "Éléphant"
             JungleLanguage.DE -> "Elefant"
             }
+        }
+    }
+
+    fun animalSingleCharName(type: AnimalType): String {
+        return when (type) {
+            AnimalType.RAT -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "鼠" else "Rat"
+            AnimalType.CAT -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "猫" else "Cat"
+            AnimalType.DOG -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "狗" else "Dog"
+            AnimalType.WOLF -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "狼" else "Wolf"
+            AnimalType.LEOPARD -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "豹" else "Leo"
+            AnimalType.TIGER -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "虎" else "Tig"
+            AnimalType.LION -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "狮" else "Lion"
+            AnimalType.ELEPHANT -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "象" else "Ele"
         }
     }
     

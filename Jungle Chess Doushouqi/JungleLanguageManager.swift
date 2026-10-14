@@ -182,9 +182,9 @@ class JungleLanguageManager: ObservableObject {
         switch type {
         case .rat:
             switch currentLanguage {
-            case .zhHans, .zhHant: return "鼠"
+            case .zhHans, .zhHant: return "老鼠"
             case .en: return "Rat"
-            case .ja: return "鼠"
+            case .ja: return "ネズミ"
             case .ko: return "쥐"
             case .es: return "Rata"
             case .fr: return "Rat"
@@ -192,10 +192,10 @@ class JungleLanguageManager: ObservableObject {
             }
         case .cat:
             switch currentLanguage {
-            case .zhHans: return "猫"
-            case .zhHant: return "貓"
+            case .zhHans: return "花猫"
+            case .zhHant: return "花貓"
             case .en: return "Cat"
-            case .ja: return "猫"
+            case .ja: return "ネコ"
             case .ko: return "고양이"
             case .es: return "Gato"
             case .fr: return "Chat"
@@ -203,9 +203,9 @@ class JungleLanguageManager: ObservableObject {
             }
         case .dog:
             switch currentLanguage {
-            case .zhHans, .zhHant: return "狗"
+            case .zhHans, .zhHant: return "猎狗"
             case .en: return "Dog"
-            case .ja: return "犬"
+            case .ja: return "イヌ"
             case .ko: return "개"
             case .es: return "Perro"
             case .fr: return "Chien"
@@ -213,9 +213,9 @@ class JungleLanguageManager: ObservableObject {
             }
         case .wolf:
             switch currentLanguage {
-            case .zhHans, .zhHant: return "狼"
+            case .zhHans, .zhHant: return "野狼"
             case .en: return "Wolf"
-            case .ja: return "狼"
+            case .ja: return "オオカミ"
             case .ko: return "늑대"
             case .es: return "Lobo"
             case .fr: return "Loup"
@@ -223,9 +223,10 @@ class JungleLanguageManager: ObservableObject {
             }
         case .leopard:
             switch currentLanguage {
-            case .zhHans, .zhHant: return "豹"
+            case .zhHans: return "金钱豹"
+            case .zhHant: return "金錢豹"
             case .en: return "Leopard"
-            case .ja: return "豹"
+            case .ja: return "ヒョウ"
             case .ko: return "표범"
             case .es: return "Leopardo"
             case .fr: return "Léopard"
@@ -233,9 +234,9 @@ class JungleLanguageManager: ObservableObject {
             }
         case .tiger:
             switch currentLanguage {
-            case .zhHans, .zhHant: return "虎"
+            case .zhHans, .zhHant: return "老虎"
             case .en: return "Tiger"
-            case .ja: return "虎"
+            case .ja: return "トラ"
             case .ko: return "호랑이"
             case .es: return "Tigre"
             case .fr: return "Tigre"
@@ -243,10 +244,10 @@ class JungleLanguageManager: ObservableObject {
             }
         case .lion:
             switch currentLanguage {
-            case .zhHans: return "狮"
-            case .zhHant: return "獅"
+            case .zhHans: return "狮子"
+            case .zhHant: return "獅子"
             case .en: return "Lion"
-            case .ja: return "獅"
+            case .ja: return "ライオン"
             case .ko: return "사자"
             case .es: return "León"
             case .fr: return "Lion"
@@ -254,7 +255,7 @@ class JungleLanguageManager: ObservableObject {
             }
         case .elephant:
             switch currentLanguage {
-            case .zhHans, .zhHant: return "象"
+            case .zhHans, .zhHant: return "大象"
             case .en: return "Elephant"
             case .ja: return "象"
             case .ko: return "코끼리"
@@ -262,6 +263,19 @@ class JungleLanguageManager: ObservableObject {
             case .fr: return "Éléphant"
             case .de: return "Elefant"
             }
+        }
+    }
+    
+    func animalSingleCharName(_ type: AnimalType) -> String {
+        switch type {
+        case .rat: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "鼠" : "Rat"
+        case .cat: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "猫" : "Cat"
+        case .dog: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "狗" : "Dog"
+        case .wolf: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "狼" : "Wolf"
+        case .leopard: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "豹" : "Leo"
+        case .tiger: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "虎" : "Tig"
+        case .lion: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "狮" : "Lion"
+        case .elephant: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "象" : "Ele"
         }
     }
     

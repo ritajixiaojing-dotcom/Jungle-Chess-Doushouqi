@@ -1667,19 +1667,24 @@ struct ContentView: View {
         .padding(.horizontal, 14)
     }
     
-    @ViewBuilder
     private var skillBannerView: some View {
-        if let msg = engine.skillBannerText {
-            Text(msg)
-                .font(.system(size: 11, weight: .black))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
-                .background(LinearGradient(colors: [Color.purple, Color.indigo], startPoint: .leading, endPoint: .trailing))
-                .cornerRadius(6)
-                .padding(.horizontal, 14)
-                .transition(.scale)
+        Group {
+            if let msg = engine.skillBannerText {
+                Text(msg)
+                    .font(.system(size: 11, weight: .black))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 3)
+                    .background(LinearGradient(colors: [Color.purple, Color.indigo], startPoint: .leading, endPoint: .trailing))
+                    .cornerRadius(6)
+                    .padding(.horizontal, 14)
+                    .transition(.opacity)
+            } else {
+                Color.clear
+                    .frame(height: 20)
+            }
         }
+        .frame(height: 20)
     }
     
     private var optimalMoveGuidanceCard: some View {
@@ -1692,6 +1697,7 @@ struct ContentView: View {
                     Text(advice.headline)
                         .font(.system(size: 13, weight: .black))
                         .foregroundColor(advice.isEmergency ? .red : (advice.isWin ? .orange : (advice.isTrade ? Color.purple : Color(red: 0.1, green: 0.55, blue: 0.15))))
+                        .lineLimit(1)
                     
                     Spacer()
                     
@@ -1709,10 +1715,10 @@ struct ContentView: View {
                 }
                 
                 Text(advice.detailReason)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 
                 HStack(spacing: 4) {
                     Text(lang.depth3DeductionTitle)
@@ -1722,16 +1728,33 @@ struct ContentView: View {
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.5))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
-                .padding(.top, 2)
             } else {
-                Text(lang.deducingBestMove)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    Text("🤖")
+                        .font(.system(size: 15))
+                    Text(lang.deducingBestMove)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                Text("落子后在此实时展示 3 步大师级战术推演")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary.opacity(0.8))
+                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text("💡")
+                        .font(.system(size: 10))
+                    Text("运筹帷幄 · 决胜千里")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.secondary.opacity(0.7))
+                }
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
+        .padding(.vertical, 5)
+        .frame(height: 72)
         .background(engine.optimalAdvice?.isEmergency == true ? Color.red.opacity(0.15) :
                     (engine.optimalAdvice?.isTrade == true ? Color.purple.opacity(0.15) : Color.white.opacity(0.95)))
         .cornerRadius(10)
@@ -1750,23 +1773,32 @@ struct ContentView: View {
                 Text("\(p.type.emoji)【\(lang.animalName(p.type))】:")
                     .font(.system(size: 12, weight: .black))
                     .foregroundColor(p.owner.color)
+                    .layoutPriority(2)
                 
-                Text("\(lang.animalEatRule(p.type))")
+                Text(lang.animalEatRule(p.type))
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .layoutPriority(1)
             } else {
-                Text(lang.rulePromptHint)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text("💡")
+                        .font(.system(size: 12))
+                    Text(lang.rulePromptHint)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
             }
-            Spacer()
+            Spacer(minLength: 0)
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 4)
-        .background(Color.white.opacity(0.8))
-        .cornerRadius(6)
+        .padding(.vertical, 3)
+        .frame(height: 32)
+        .background(Color.white.opacity(0.85))
+        .cornerRadius(8)
         .padding(.horizontal, 14)
     }
     

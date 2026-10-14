@@ -14,8 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
 import com.ritastudio.junglechess.engine.JungleGameEngine
 import com.ritastudio.junglechess.localization.JungleLanguageManager
+import com.ritastudio.junglechess.model.PlayerColor
 
 @Composable
 fun JungleTacticalBanner(
@@ -25,20 +27,21 @@ fun JungleTacticalBanner(
 ) {
     val advice = engine.optimalAdvice
 
-    if (advice != null) {
-        Card(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 2.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-        ) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(82.dp)
+            .padding(horizontal = 10.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        if (advice != null) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Top row: Badge, Headline, Action Buttons
                 Row(
@@ -66,7 +69,7 @@ fun JungleTacticalBanner(
                         ) {
                             Text(
                                 text = advice.badgeText,
-                                fontSize = 10.sp,
+                                fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -74,23 +77,24 @@ fun JungleTacticalBanner(
 
                         Text(
                             text = advice.headline,
-                            fontSize = 12.sp,
+                            fontSize = 11.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF212121)
+                            color = Color(0xFF212121),
+                            maxLines = 1
                         )
                     }
 
                     // Smart Move Button
                     Button(
                         onClick = { engine.executeBestAdvice() },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                         shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.height(28.dp)
+                        modifier = Modifier.height(26.dp)
                     ) {
                         Text(
                             text = lang.moveForMeBtn.replace("\n", " "),
-                            fontSize = 10.sp,
+                            fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -100,29 +104,143 @@ fun JungleTacticalBanner(
                 // Detail Reason
                 Text(
                     text = advice.detailReason,
-                    fontSize = 11.sp,
+                    fontSize = 10.5.sp,
                     color = Color(0xFF555555),
-                    lineHeight = 13.sp
+                    lineHeight = 12.sp,
+                    maxLines = 1
                 )
 
                 // 3-Step Forecast Row
-                if (advice.forecast3Steps.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(Color(0xFFF1F8E9))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = if (advice.forecast3Steps.isNotEmpty()) "${lang.depth3DeductionTitle} ${advice.forecast3Steps}" else "${lang.depth3DeductionTitle} 洞悉先机 步步为营",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF1B5E20),
+                        lineHeight = 11.sp,
+                        maxLines = 1
+                    )
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "🤖 ${lang.deducingBestMove}",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2E7D32)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFFF1F8E9))
-                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0xFFE8F5E9))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = "${lang.depth3DeductionTitle} ${advice.forecast3Steps}",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF1B5E20),
-                            lineHeight = 12.sp
+                            text = "AI 实时演算",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2E7D32)
                         )
                     }
                 }
+
+                Text(
+                    text = "落子后将在此实时展示 3 步大师级战术推演",
+                    fontSize = 10.5.sp,
+                    color = Color.DarkGray,
+                    lineHeight = 12.sp,
+                    maxLines = 1
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(Color(0xFFF1F8E9))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "💡 运筹帷幄 · 智勇双全 · 决胜千里",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF1B5E20),
+                        lineHeight = 11.sp,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun JungleRuleCheatBar(
+    engine: JungleGameEngine,
+    lang: JungleLanguageManager = JungleLanguageManager.shared,
+    modifier: Modifier = Modifier
+) {
+    val piece = engine.inspectPiece
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(30.dp)
+            .padding(horizontal = 10.dp, vertical = 1.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            if (piece != null) {
+                val ownerColor = if (piece.owner == PlayerColor.BLUE) BluePlayerColor else RedPlayerColor
+                Text(
+                    text = "${piece.type.emoji}【${lang.animalName(piece.type)}】:",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    color = ownerColor
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = lang.animalEatRule(piece.type),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                Text(
+                    text = "💡 ${lang.rulePromptHint}",
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }

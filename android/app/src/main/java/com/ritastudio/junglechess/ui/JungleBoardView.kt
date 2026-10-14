@@ -342,15 +342,16 @@ fun TileCellView(
                 ) {
                     Text(
                         text = piece.type.emoji,
-                        fontSize = 15.sp,
-                        lineHeight = 15.sp
+                        fontSize = 14.sp,
+                        lineHeight = 14.sp
                     )
+                    val animalTitle = lang.animalName(piece.type)
                     Text(
-                        text = lang.animalName(piece.type),
-                        fontSize = 8.5.sp,
+                        text = animalTitle,
+                        fontSize = if (animalTitle.length >= 3) 7.sp else 8.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isRecommendedSource) Color(0xFF00C853) else if (isOpponentTarget) Color(0xFFFF1744) else borderColor,
-                        lineHeight = 9.sp,
+                        lineHeight = 8.5.sp,
                         maxLines = 1
                     )
                 }
