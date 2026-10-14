@@ -32,11 +32,8 @@ fun JungleScreen(
             // Header: Title, Language, Advantage, Difficulty
             JungleHeaderBar(engine = engine, lang = lang)
 
-            // Tactical Advice Banner
+            // Tactical Advice & Selected Piece Guidance (Fixed Height Banner)
             JungleTacticalBanner(engine = engine, lang = lang)
-
-            // Animal rule / speech cheat bar
-            JungleRuleCheatBar(engine = engine, lang = lang)
 
             // Board (9x7 Grid)
             Box(

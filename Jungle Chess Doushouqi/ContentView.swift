@@ -1529,13 +1529,15 @@ struct ContentView: View {
                            startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             
-            VStack(spacing: 5) {
+            VStack(spacing: 6) {
                 headerView
                 difficultySelectorBar
                 skillBannerView
-                optimalMoveGuidanceCard
-                ruleHelperCheatBar
                 
+                // 棋盘上方的长方形提示框（完全固定尺寸与位置，彻底消除页面抖动与跳跃）
+                fixedPromptCardView
+                
+                // 棋盘主体（完全固定尺寸，居中渲染，彻底消除每走一步缩小的问题）
                 BoardView(engine: engine)
                     .padding(.horizontal, 6)
                 
@@ -1687,9 +1689,45 @@ struct ContentView: View {
         .frame(height: 20)
     }
     
-    private var optimalMoveGuidanceCard: some View {
+    private var fixedPromptCardView: some View {
         VStack(alignment: .leading, spacing: 3) {
-            if let advice = engine.optimalAdvice {
+            if let piece = engine.inspectPiece {
+                // 1. 选中棋子模式：展示专属吃子克制规则与台词，高度严格恒定
+                HStack(spacing: 6) {
+                    Text("\(piece.type.emoji)")
+                        .font(.system(size: 15))
+                    Text("【\(lang.animalFullName(piece.type))】")
+                        .font(.system(size: 13, weight: .black))
+                        .foregroundColor(piece.owner.color)
+                    
+                    Spacer()
+                    
+                    Text(lang.playerName(piece.owner))
+                        .font(.system(size: 10, weight: .black))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(piece.owner.color)
+                        .cornerRadius(4)
+                }
+                
+                Text(lang.animalEatRule(piece.type))
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                
+                HStack(spacing: 4) {
+                    Text("💡")
+                        .font(.system(size: 10))
+                    Text("点击高亮绿圈走子，或点击其他棋子查看技能")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+            } else if let advice = engine.optimalAdvice {
+                // 2. 战术指引模式：展示最优策略与3步推演，高度严格恒定
                 HStack(spacing: 6) {
                     Text(advice.isEmergency ? "🚨" : (advice.isWin ? "🏆" : (advice.isTrade ? "⚡️" : "👑")))
                         .font(.system(size: 15))
@@ -1698,6 +1736,7 @@ struct ContentView: View {
                         .font(.system(size: 13, weight: .black))
                         .foregroundColor(advice.isEmergency ? .red : (advice.isWin ? .orange : (advice.isTrade ? Color.purple : Color(red: 0.1, green: 0.55, blue: 0.15))))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                     
                     Spacer()
                     
@@ -1717,8 +1756,8 @@ struct ContentView: View {
                 Text(advice.detailReason)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 
                 HStack(spacing: 4) {
                     Text(lang.depth3DeductionTitle)
@@ -1731,10 +1770,11 @@ struct ContentView: View {
                         .minimumScaleFactor(0.75)
                 }
             } else {
+                // 3. AI思考/等待中：占位文案，确保高度尺寸完全一致
                 HStack(spacing: 6) {
-                    Text("🤖")
+                    Text(engine.isThinking ? "🤖" : "💡")
                         .font(.system(size: 15))
-                    Text(lang.deducingBestMove)
+                    Text(engine.isThinking ? "智谋大师正在缜密思考对策..." : lang.deducingBestMove)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.secondary)
                     Spacer()
@@ -1744,7 +1784,7 @@ struct ContentView: View {
                     .foregroundColor(.secondary.opacity(0.8))
                     .lineLimit(1)
                 HStack(spacing: 4) {
-                    Text("💡")
+                    Text("⚡️")
                         .font(.system(size: 10))
                     Text("运筹帷幄 · 决胜千里")
                         .font(.system(size: 10, weight: .medium))
@@ -1753,53 +1793,25 @@ struct ContentView: View {
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 5)
-        .frame(height: 84)
-        .background(engine.optimalAdvice?.isEmergency == true ? Color.red.opacity(0.15) :
-                    (engine.optimalAdvice?.isTrade == true ? Color.purple.opacity(0.15) : Color.white.opacity(0.95)))
+        .padding(.vertical, 6)
+        .frame(height: 74)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            engine.optimalAdvice?.isEmergency == true ? Color.red.opacity(0.12) :
+            (engine.optimalAdvice?.isTrade == true ? Color.purple.opacity(0.12) : Color.white.opacity(0.95))
+        )
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(engine.optimalAdvice?.isEmergency == true ? Color.red :
-                        (engine.optimalAdvice?.isTrade == true ? Color.purple : Color.green.opacity(0.7)), lineWidth: 1.5)
+                .stroke(
+                    engine.optimalAdvice?.isEmergency == true ? Color.red :
+                    (engine.optimalAdvice?.isTrade == true ? Color.purple : Color.green.opacity(0.6)),
+                    lineWidth: 1.5
+                )
         )
         .shadow(color: .black.opacity(0.04), radius: 2)
         .padding(.horizontal, 14)
-    }
-    
-    private var ruleHelperCheatBar: some View {
-        HStack(spacing: 6) {
-            if let p = engine.inspectPiece {
-                Text("\(p.type.emoji)【\(lang.animalName(p.type))】:")
-                    .font(.system(size: 12, weight: .black))
-                    .foregroundColor(p.owner.color)
-                    .layoutPriority(2)
-                
-                Text(lang.animalEatRule(p.type))
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.75)
-                    .layoutPriority(1)
-            } else {
-                HStack(spacing: 4) {
-                    Text("💡")
-                        .font(.system(size: 12))
-                    Text(lang.rulePromptHint)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 3)
-        .frame(height: 36)
-        .background(Color.white.opacity(0.85))
-        .cornerRadius(8)
-        .padding(.horizontal, 14)
+        .clipped()
     }
     
     private var superpowerBar: some View {
@@ -1920,9 +1932,11 @@ struct BoardView: View {
     
     var body: some View {
         GeometryReader { geo in
-            let totalWidth = geo.size.width
-            let cellSize = totalWidth / 7.0
-            let totalHeight = cellSize * 9.0
+            let availW = geo.size.width
+            let availH = geo.size.height
+            let cellSize = min(availW / 7.0, availH / 9.0)
+            let boardW = cellSize * 7.0
+            let boardH = cellSize * 9.0
             
             ZStack(alignment: .topLeading) {
                 // 1. 底层棋盘网格
@@ -1992,14 +2006,14 @@ struct BoardView: View {
                     }
                 }
             }
-            .frame(width: totalWidth, height: totalHeight)
+            .frame(width: boardW, height: boardH)
+            .position(x: availW / 2.0, y: availH / 2.0)
             .onAppear {
                 withAnimation(Animation.easeInOut(duration: 0.75).repeatForever(autoreverses: true)) {
                     isPulsing = true
                 }
             }
         }
-        .aspectRatio(7.0 / 9.0, contentMode: .fit)
     }
 }
 
@@ -2146,53 +2160,55 @@ struct PieceBadgeView: View {
     let isPulsing: Bool
     var isFrozen: Bool = false
     
-    private var shouldPulse: Bool {
-        return (isOptimalSourcePiece || isOpponentTarget) && !isFrozen
-    }
-    
     var body: some View {
         ZStack {
-            // 1. 闪烁光晕外圈 (只针对：蓝方推荐走棋 或 对方刚走过的棋子)
+            // 1. 闪烁光晕外圈 (只改变透明度呼吸，不改变大小，彻底消除尺寸缩放)
             if isOptimalSourcePiece && !isFrozen {
                 Circle()
-                    .stroke(Color.green.opacity(isPulsing ? 0.85 : 0.25), lineWidth: 3.5)
-                    .scaleEffect(isPulsing ? 1.18 : 1.04)
+                    .stroke(Color.green.opacity(isPulsing ? 0.95 : 0.35), lineWidth: 3.5)
             } else if isOpponentTarget && !isFrozen {
                 Circle()
-                    .stroke(Color(red: 1.0, green: 0.1, blue: 0.25).opacity(isPulsing ? 0.85 : 0.25), lineWidth: 3.5)
-                    .scaleEffect(isPulsing ? 1.18 : 1.04)
+                    .stroke(Color(red: 1.0, green: 0.1, blue: 0.25).opacity(isPulsing ? 0.95 : 0.35), lineWidth: 3.5)
             }
             
-            // 2. 棋子圆盘底色
+            // 2. 选中金圈高亮（静态清晰外圈，不缩放，防抖防跳）
+            if isSelected {
+                Circle()
+                    .stroke(Color.yellow, lineWidth: 3.5)
+                    .shadow(color: .orange.opacity(0.8), radius: 3)
+            }
+            
+            // 3. 棋子圆盘底色
             Circle()
                 .fill(isFrozen ? Color(red: 0.88, green: 0.96, blue: 1.0) :
                       (isEmergencyPiece ? Color(red: 1.0, green: 0.85, blue: 0.85) :
                       (isOpponentTarget ? Color(red: 1.0, green: 0.93, blue: 0.93) :
                       (isOptimalSourcePiece ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color.white))))
                 .shadow(color: isOpponentTarget ? Color.red.opacity(0.4) : (isOptimalSourcePiece ? Color.green.opacity(0.35) : Color.black.opacity(0.2)),
-                        radius: isSelected ? 5 : (shouldPulse ? 4 : 2),
+                        radius: isSelected ? 4 : 2,
                         x: 0,
-                        y: isSelected ? 3 : 1.5)
+                        y: isSelected ? 2 : 1)
             
-            // 3. 棋子边缘描边
+            // 4. 棋子边缘描边
             Circle()
                 .stroke(isFrozen ? Color.cyan :
+                        (isSelected ? Color.orange :
                         (isEmergencyPiece ? Color.red :
                         (isOpponentTarget ? Color(red: 1.0, green: 0.1, blue: 0.25) :
-                        (isOptimalSourcePiece ? Color.green : piece.owner.color))),
-                        lineWidth: isFrozen ? 3.5 : (isEmergencyPiece ? 4 : (isOpponentTarget ? 3.5 : (isOptimalSourcePiece ? 3.5 : 3))))
+                        (isOptimalSourcePiece ? Color.green : piece.owner.color)))),
+                        lineWidth: isFrozen ? 3.5 : (isSelected ? 3.5 : (isEmergencyPiece ? 3.5 : 3)))
             
-            // 4. 动物图标与名称
-            VStack(spacing: -2) {
+            // 5. 动物图标与名称（单汉字居中，清晰饱满）
+            VStack(spacing: -1) {
                 Text(piece.type.emoji).font(.system(size: 18))
-                Text(lang.animalName(piece.type))
-                    .font(.system(size: 11, weight: .black))
+                Text(lang.animalSingleCharName(piece.type))
+                    .font(.system(size: 12, weight: .black))
                     .foregroundColor(isOpponentTarget ? Color(red: 0.9, green: 0.1, blue: 0.2) : (isOptimalSourcePiece ? Color(red: 0.05, green: 0.55, blue: 0.15) : piece.owner.color))
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.75)
                     .lineLimit(1)
             }
             
-            // 5. 角标提示 (紧急/敌步/推荐)
+            // 6. 角标提示 (紧急/敌步/推荐)
             if isEmergencyPiece && !isFrozen {
                 VStack {
                     HStack {
@@ -2227,7 +2243,7 @@ struct PieceBadgeView: View {
                 }
             }
             
-            // 6. ❄️ 冰封覆盖特效
+            // 7. ❄️ 冰封覆盖特效
             if isFrozen {
                 Circle()
                     .fill(Color.cyan.opacity(0.35))
@@ -2258,7 +2274,7 @@ struct PieceBadgeView: View {
                 }
             }
         }
-        .scaleEffect(isSelected ? 1.16 : (shouldPulse ? (isPulsing ? 1.09 : 1.0) : 1.0))
+        // 完全固定尺寸，绝不使用 scaleEffect，彻底解决下棋每走一步缩小的Bug
     }
 }
 

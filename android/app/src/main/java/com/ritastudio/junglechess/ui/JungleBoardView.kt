@@ -300,18 +300,10 @@ fun TileCellView(
                 else -> 1.dp
             }
 
-            val tokenScale = when {
-                isOpponentTarget -> opponentGlowScale
-                isRecommendedSource -> pulseScale
-                isSelected -> 1.10f
-                else -> 1.0f
-            }
-
             if (isOpponentTarget) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(0.98f)
-                        .scale(opponentGlowScale)
                         .clip(CircleShape)
                         .background(Color(0x22FF1744))
                         .border(
@@ -325,7 +317,6 @@ fun TileCellView(
             Box(
                 modifier = Modifier
                     .fillMaxSize(0.92f)
-                    .scale(tokenScale)
                     .shadow(elevation = tokenElevation, shape = CircleShape)
                     .clip(CircleShape)
                     .background(tokenBg)
@@ -345,13 +336,13 @@ fun TileCellView(
                         fontSize = 14.sp,
                         lineHeight = 14.sp
                     )
-                    val animalTitle = lang.animalName(piece.type)
+                    val animalTitle = lang.animalSingleCharName(piece.type)
                     Text(
                         text = animalTitle,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
                         color = if (isRecommendedSource) Color(0xFF00C853) else if (isOpponentTarget) Color(0xFFFF1744) else borderColor,
-                        lineHeight = 10.sp,
+                        lineHeight = 11.sp,
                         maxLines = 1
                     )
                 }
