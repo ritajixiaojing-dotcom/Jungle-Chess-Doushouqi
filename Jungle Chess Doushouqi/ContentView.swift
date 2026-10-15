@@ -1524,31 +1524,53 @@ struct ContentView: View {
     @State private var showRules = CommandLine.arguments.contains("-showRules")
     
     var body: some View {
-        ZStack {
-            LinearGradient(colors: [Color(red: 0.94, green: 0.98, blue: 0.93), Color(red: 0.88, green: 0.94, blue: 0.86)],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+        GeometryReader { rootGeo in
+            let screenW = rootGeo.size.width
+            let screenH = rootGeo.size.height
+            // Available space for board:
+            // Screen height minus all fixed bars (header: 38, difficulty: 30, banner: 20, prompt: 72, superpower: 36, bottom: 44, spacings & paddings: ~36) = ~276pt reserved
+            let maxBoardW = min(screenW - 20, 360.0)
+            let maxBoardH = max(280.0, screenH - 280.0)
+            let cellSize = max(36.0, floor(min(maxBoardW / 7.0, maxBoardH / 9.0)))
+            let boardW = cellSize * 7.0
+            let boardH = cellSize * 9.0
             
-            VStack(spacing: 6) {
-                headerView
-                difficultySelectorBar
-                skillBannerView
+            ZStack {
+                LinearGradient(colors: [Color(red: 0.94, green: 0.98, blue: 0.93), Color(red: 0.88, green: 0.94, blue: 0.86)],
+                               startPoint: .top, endPoint: .bottom)
+                    .ignoresSafeArea()
                 
-                // 棋盘上方的长方形提示框（完全固定尺寸与位置，彻底消除页面抖动与跳跃）
-                fixedPromptCardView
+                VStack(spacing: 4) {
+                    headerView
+                        .frame(height: 38)
+                    difficultySelectorBar
+                        .frame(height: 30)
+                    skillBannerView
+                        .frame(height: 20)
+                    
+                    // 棋盘上方的长方形走棋攻略提示框（完全固定尺寸 72pt，彻底消除页面抖动与跳跃）
+                    fixedPromptCardView
+                        .frame(height: 72)
+                    
+                    Spacer(minLength: 2)
+                    
+                    // 棋盘主体（根据屏幕尺寸一次性固定绝对像素尺寸，居中渲染，绝不因走子或状态变化而缩放）
+                    BoardView(engine: engine, cellSize: cellSize)
+                        .frame(width: boardW, height: boardH)
+                    
+                    Spacer(minLength: 2)
+                    
+                    superpowerBar
+                        .frame(height: 36)
+                    bottomControls
+                        .frame(height: 44)
+                }
+                .padding(.vertical, 4)
                 
-                // 棋盘主体（完全固定尺寸，居中渲染，彻底消除每走一步缩小的问题）
-                BoardView(engine: engine)
-                    .padding(.horizontal, 6)
-                
-                superpowerBar
-                bottomControls
-            }
-            .padding(.vertical, 4)
-            
-            if let winner = engine.winner {
-                VictoryOverlay(winner: winner) {
-                    engine.resetGame()
+                if let winner = engine.winner {
+                    VictoryOverlay(winner: winner) {
+                        engine.resetGame()
+                    }
                 }
             }
         }
@@ -1690,9 +1712,9 @@ struct ContentView: View {
     }
     
     private var fixedPromptCardView: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            if let piece = engine.inspectPiece {
-                // 1. 选中棋子模式：展示专属吃子克制规则与台词，高度严格恒定
+        VStack(alignment: .leading, spacing: 2) {
+            if let selected = engine.selectedPos, let piece = engine.board[selected] {
+                // 1. 玩家主动选中棋子状态：展示选中棋子吃子规则与指引
                 HStack(spacing: 6) {
                     Text("\(piece.type.emoji)")
                         .font(.system(size: 15))
@@ -1710,12 +1732,14 @@ struct ContentView: View {
                         .background(piece.owner.color)
                         .cornerRadius(4)
                 }
+                .frame(height: 20)
                 
                 Text(lang.animalEatRule(piece.type))
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.75)
+                    .frame(height: 15)
                 
                 HStack(spacing: 4) {
                     Text("💡")
@@ -1724,10 +1748,11 @@ struct ContentView: View {
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .minimumScaleFactor(0.75)
                 }
+                .frame(height: 15)
             } else if let advice = engine.optimalAdvice {
-                // 2. 战术指引模式：展示最优策略与3步推演，高度严格恒定
+                // 2. 走棋攻略模式：展示3步推演与大师策略
                 HStack(spacing: 6) {
                     Text(advice.isEmergency ? "🚨" : (advice.isWin ? "🏆" : (advice.isTrade ? "⚡️" : "👑")))
                         .font(.system(size: 15))
@@ -1736,7 +1761,7 @@ struct ContentView: View {
                         .font(.system(size: 13, weight: .black))
                         .foregroundColor(advice.isEmergency ? .red : (advice.isWin ? .orange : (advice.isTrade ? Color.purple : Color(red: 0.1, green: 0.55, blue: 0.15))))
                         .lineLimit(1)
-                        .minimumScaleFactor(0.85)
+                        .minimumScaleFactor(0.8)
                     
                     Spacer()
                     
@@ -1752,12 +1777,14 @@ struct ContentView: View {
                             .cornerRadius(4)
                     }
                 }
+                .frame(height: 20)
                 
                 Text(advice.detailReason)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.75)
+                    .frame(height: 15)
                 
                 HStack(spacing: 4) {
                     Text(lang.depth3DeductionTitle)
@@ -1769,6 +1796,7 @@ struct ContentView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
                 }
+                .frame(height: 15)
             } else {
                 // 3. AI思考/等待中：占位文案，确保高度尺寸完全一致
                 HStack(spacing: 6) {
@@ -1777,24 +1805,31 @@ struct ContentView: View {
                     Text(engine.isThinking ? "智谋大师正在缜密思考对策..." : lang.deducingBestMove)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
                     Spacer()
                 }
+                .frame(height: 20)
+                
                 Text("落子后在此实时展示 3 步大师级战术推演")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary.opacity(0.8))
                     .lineLimit(1)
+                    .frame(height: 15)
+                
                 HStack(spacing: 4) {
                     Text("⚡️")
                         .font(.system(size: 10))
                     Text("运筹帷幄 · 决胜千里")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.secondary.opacity(0.7))
+                        .lineLimit(1)
                 }
+                .frame(height: 15)
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .frame(height: 74)
+        .padding(.vertical, 8)
+        .frame(height: 72)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             engine.optimalAdvice?.isEmergency == true ? Color.red.opacity(0.12) :
@@ -1928,90 +1963,86 @@ struct ContentView: View {
 
 struct BoardView: View {
     @ObservedObject var engine: JungleGameEngine
+    let cellSize: CGFloat
     @State private var isPulsing: Bool = false
     
     var body: some View {
-        GeometryReader { geo in
-            let availW = geo.size.width
-            let availH = geo.size.height
-            let cellSize = min(availW / 7.0, availH / 9.0)
-            let boardW = cellSize * 7.0
-            let boardH = cellSize * 9.0
-            
-            ZStack(alignment: .topLeading) {
-                // 1. 底层棋盘网格
-                VStack(spacing: 0) {
-                    ForEach(0..<9, id: \.self) { r in
-                        HStack(spacing: 0) {
-                            ForEach(0..<7, id: \.self) { c in
-                                let pos = Position(row: r, col: c)
-                                let tileType = engine.getTileType(at: pos)
-                                
-                                let actionBadge: String? = {
-                                    if let selected = engine.selectedPos {
-                                        return engine.getActionBadge(for: pos, from: selected)
-                                    } else if engine.optimalAdvice?.to == pos {
-                                        return engine.optimalAdvice?.badgeText
-                                    }
-                                    return nil
-                                }()
-                                
-                                let lastOpMove = engine.lastOpponentMove
-                                let isOpponentSource = (lastOpMove?.from == pos) && (lastOpMove?.movedPiece.owner != engine.currentTurn) && (engine.board[pos] == nil)
-                                
-                                TileView(tileType: tileType,
-                                         isValidTarget: engine.validMoves.contains(pos),
-                                         isDangerous: engine.dangerousMoves.contains(pos),
-                                         actionBadgeText: actionBadge,
-                                         isGlobalOptimalTarget: engine.optimalAdvice?.to == pos,
-                                         isEmergencyTarget: engine.optimalAdvice?.isEmergency == true && engine.optimalAdvice?.to == pos,
-                                         isSelected: engine.selectedPos == pos,
-                                         isOpponentSource: isOpponentSource)
-                                    .frame(width: cellSize, height: cellSize)
-                                    .onTapGesture {
-                                        engine.handleTileTap(at: pos)
-                                    }
-                            }
+        let boardW = cellSize * 7.0
+        let boardH = cellSize * 9.0
+        
+        ZStack(alignment: .topLeading) {
+            // 1. 底层棋盘网格
+            VStack(spacing: 0) {
+                ForEach(0..<9, id: \.self) { r in
+                    HStack(spacing: 0) {
+                        ForEach(0..<7, id: \.self) { c in
+                            let pos = Position(row: r, col: c)
+                            let tileType = engine.getTileType(at: pos)
+                            
+                            let actionBadge: String? = {
+                                if let selected = engine.selectedPos {
+                                    return engine.getActionBadge(for: pos, from: selected)
+                                } else if engine.optimalAdvice?.to == pos {
+                                    return engine.optimalAdvice?.badgeText
+                                }
+                                return nil
+                            }()
+                            
+                            let lastOpMove = engine.lastOpponentMove
+                            let isOpponentSource = (lastOpMove?.from == pos) && (lastOpMove?.movedPiece.owner != engine.currentTurn) && (engine.board[pos] == nil)
+                            
+                            TileView(tileType: tileType,
+                                     isValidTarget: engine.validMoves.contains(pos),
+                                     isDangerous: engine.dangerousMoves.contains(pos),
+                                     actionBadgeText: actionBadge,
+                                     isGlobalOptimalTarget: engine.optimalAdvice?.to == pos,
+                                     isEmergencyTarget: engine.optimalAdvice?.isEmergency == true && engine.optimalAdvice?.to == pos,
+                                     isSelected: engine.selectedPos == pos,
+                                     isOpponentSource: isOpponentSource)
+                                .frame(width: cellSize, height: cellSize)
+                                .onTapGesture {
+                                    engine.handleTileTap(at: pos)
+                                }
                         }
-                    }
-                }
-                .background(Color(red: 0.92, green: 0.88, blue: 0.78))
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color(red: 0.45, green: 0.32, blue: 0.18), lineWidth: 3)
-                )
-                
-                // 2. 棋子层
-                ForEach(Array(engine.board.keys), id: \.self) { pos in
-                    if let piece = engine.board[pos] {
-                        let isPlayerPiece = (piece.owner == .blue || !engine.isVsAI)
-                        let isOptimalSourcePiece = isPlayerPiece && (engine.currentTurn == piece.owner) && (engine.optimalAdvice?.from == pos)
-                        let isOpponentTarget = (engine.lastOpponentMove?.to == pos) && (piece.owner != engine.currentTurn)
-                        
-                        PieceBadgeView(piece: piece,
-                                       isSelected: engine.selectedPos == pos,
-                                       isOptimalSourcePiece: isOptimalSourcePiece,
-                                       isEmergencyPiece: isOptimalSourcePiece && (engine.optimalAdvice?.isEmergency == true),
-                                       isOpponentTarget: isOpponentTarget,
-                                       isPulsing: isPulsing,
-                                       isFrozen: (pos == engine.frozenPiecePos))
-                            .frame(width: cellSize * 0.88, height: cellSize * 0.88)
-                            .offset(x: CGFloat(pos.col) * cellSize + cellSize * 0.06,
-                                    y: CGFloat(pos.row) * cellSize + cellSize * 0.06)
-                            .animation(.spring(response: 0.35, dampingFraction: 0.75), value: pos)
-                            .onTapGesture {
-                                engine.handleTileTap(at: pos)
-                            }
                     }
                 }
             }
             .frame(width: boardW, height: boardH)
-            .position(x: availW / 2.0, y: availH / 2.0)
-            .onAppear {
-                withAnimation(Animation.easeInOut(duration: 0.75).repeatForever(autoreverses: true)) {
-                    isPulsing = true
+            .background(Color(red: 0.92, green: 0.88, blue: 0.78))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(red: 0.45, green: 0.32, blue: 0.18), lineWidth: 3)
+            )
+            
+            // 2. 棋子层
+            ForEach(Array(engine.board.keys), id: \.self) { pos in
+                if let piece = engine.board[pos] {
+                    let isPlayerPiece = (piece.owner == .blue || !engine.isVsAI)
+                    let isOptimalSourcePiece = isPlayerPiece && (engine.currentTurn == piece.owner) && (engine.optimalAdvice?.from == pos)
+                    let isOpponentTarget = (engine.lastOpponentMove?.to == pos) && (piece.owner != engine.currentTurn)
+                    
+                    PieceBadgeView(piece: piece,
+                                   isSelected: engine.selectedPos == pos,
+                                   isOptimalSourcePiece: isOptimalSourcePiece,
+                                   isEmergencyPiece: isOptimalSourcePiece && (engine.optimalAdvice?.isEmergency == true),
+                                   isOpponentTarget: isOpponentTarget,
+                                   isPulsing: isPulsing,
+                                   isFrozen: (pos == engine.frozenPiecePos))
+                        .frame(width: cellSize * 0.88, height: cellSize * 0.88)
+                        .offset(x: CGFloat(pos.col) * cellSize + cellSize * 0.06,
+                                y: CGFloat(pos.row) * cellSize + cellSize * 0.06)
+                        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: pos)
+                        .onTapGesture {
+                            engine.handleTileTap(at: pos)
+                        }
                 }
+            }
+        }
+        .frame(width: boardW, height: boardH)
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 0.75).repeatForever(autoreverses: true)) {
+                isPulsing = true
             }
         }
     }

@@ -25,16 +25,23 @@ fun JungleTacticalBanner(
     lang: JungleLanguageManager = JungleLanguageManager.shared,
     modifier: Modifier = Modifier
 ) {
+    val selected = engine.selectedPos
+    val piece = if (selected != null) engine.board[selected] else null
     val advice = engine.optimalAdvice
-    val piece = engine.inspectPiece
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(74.dp)
+            .height(72.dp)
             .padding(horizontal = 10.dp, vertical = 2.dp),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(
+            containerColor = when {
+                advice?.isEmergency == true -> Color(0xFFFFEBEE)
+                advice?.isTrade == true -> Color(0xFFF3E5F5)
+                else -> Color.White
+            }
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -44,12 +51,14 @@ fun JungleTacticalBanner(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             if (piece != null) {
-                // 1. 选中棋子模式：专属吃子规则与说明，高度恒定
+                // 1. 选中棋子模式：专属吃子规则与说明，固定3行高度（20, 15, 15）
                 val ownerColor = if (piece.owner == PlayerColor.BLUE) BluePlayerColor else RedPlayerColor
                 val ownerLabel = if (piece.owner == PlayerColor.BLUE) lang.playerName(PlayerColor.BLUE) else lang.playerName(PlayerColor.RED)
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -65,7 +74,8 @@ fun JungleTacticalBanner(
                             text = "【${lang.animalFullName(piece.type)}】",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black,
-                            color = ownerColor
+                            color = ownerColor,
+                            maxLines = 1
                         )
                     }
 
@@ -84,34 +94,46 @@ fun JungleTacticalBanner(
                     }
                 }
 
-                Text(
-                    text = lang.animalEatRule(piece.type),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = lang.animalEatRule(piece.type),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF333333),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
+                        .height(15.dp)
+                        .clip(RoundedCornerShape(3.dp))
                         .background(Color(0xFFF1F8E9))
-                        .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                        .padding(horizontal = 6.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
                         text = "💡 点击高亮绿圈走子，或点击其他棋子查看技能",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF1B5E20),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             } else if (advice != null) {
-                // 2. 战术指引模式：3步推演与走法建议
+                // 2. 战术指引模式：3步推演与走法建议，固定3行高度（20, 15, 15）
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -154,10 +176,10 @@ fun JungleTacticalBanner(
                     // Smart Move Button
                     Button(
                         onClick = { engine.executeBestAdvice() },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                         shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.height(24.dp)
+                        modifier = Modifier.height(20.dp)
                     ) {
                         Text(
                             text = lang.moveForMeBtn.replace("\n", " "),
@@ -168,40 +190,54 @@ fun JungleTacticalBanner(
                     }
                 }
 
-                Text(
-                    text = advice.detailReason,
-                    fontSize = 10.sp,
-                    color = Color(0xFF444444),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = advice.detailReason,
+                        fontSize = 10.sp,
+                        color = Color(0xFF444444),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
+                        .height(15.dp)
+                        .clip(RoundedCornerShape(3.dp))
                         .background(Color(0xFFF1F8E9))
-                        .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                        .padding(horizontal = 6.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
                         text = if (advice.forecast3Steps.isNotEmpty()) "${lang.depth3DeductionTitle} ${advice.forecast3Steps}" else "${lang.depth3DeductionTitle} 洞悉先机 步步为营",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF1B5E20),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             } else {
-                // 3. AI思考/等待中状态：占位恒定高度
+                // 3. AI思考/等待中状态：占位恒定高度（20, 15, 15）
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = if (engine.isThinking) "🤖 智谋大师正在缜密思考对策..." else "🤖 ${lang.deducingBestMove}",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2E7D32)
+                        color = Color(0xFF2E7D32),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Box(
@@ -219,26 +255,37 @@ fun JungleTacticalBanner(
                     }
                 }
 
-                Text(
-                    text = "落子后将在此实时展示 3 步大师级战术推演",
-                    fontSize = 10.sp,
-                    color = Color.DarkGray,
-                    maxLines = 1
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "落子后将在此实时展示 3 步大师级战术推演",
+                        fontSize = 10.sp,
+                        color = Color.DarkGray,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
+                        .height(15.dp)
+                        .clip(RoundedCornerShape(3.dp))
                         .background(Color(0xFFF1F8E9))
-                        .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                        .padding(horizontal = 6.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
                         text = "💡 运筹帷幄 · 智勇双全 · 决胜千里",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF1B5E20),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

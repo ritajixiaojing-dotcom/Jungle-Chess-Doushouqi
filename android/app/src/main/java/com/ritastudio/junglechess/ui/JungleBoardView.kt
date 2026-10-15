@@ -33,33 +33,12 @@ fun JungleBoardView(
     lang: JungleLanguageManager = JungleLanguageManager.shared,
     modifier: Modifier = Modifier
 ) {
-    BoxWithConstraints(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 10.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center
+    Card(
+        modifier = modifier.fillMaxSize(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = BoardWoodBackground),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        val availableWidth = maxWidth
-        val availableHeight = maxHeight
-        val targetRatio = 7f / 9.2f
-
-        val boardWidth: androidx.compose.ui.unit.Dp
-        val boardHeight: androidx.compose.ui.unit.Dp
-
-        if (availableWidth / availableHeight > targetRatio) {
-            boardHeight = availableHeight
-            boardWidth = availableHeight * targetRatio
-        } else {
-            boardWidth = availableWidth
-            boardHeight = availableWidth / targetRatio
-        }
-
-        Card(
-            modifier = Modifier.size(width = boardWidth, height = boardHeight),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = BoardWoodBackground),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -124,7 +103,6 @@ fun JungleBoardView(
                 }
             }
         }
-    }
 }
 
 @Composable

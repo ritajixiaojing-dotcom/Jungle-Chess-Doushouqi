@@ -147,9 +147,11 @@ fun JungleHeaderBar(
             }
         }
 
-        // Sub-row: Advantage & Doctrine & AI Skills
+        // Sub-row: Advantage & Doctrine & AI Skills (Fixed height 20dp)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -164,7 +166,9 @@ fun JungleHeaderBar(
                 text = "$playerLabel: ${engine.winAdvantagePercent}% ($doctrineText)",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = BluePlayerColor
+                color = BluePlayerColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             if (engine.isThinking) {
@@ -172,21 +176,27 @@ fun JungleHeaderBar(
                     text = "🤖 ${lang.deducingBestMove}",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = RedPlayerColor
+                    color = RedPlayerColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             } else if (engine.isVsAI) {
                 Text(
                     text = "🔴 ${lang.aiSkillsTitle}: 🛡️${engine.redShieldSkillCount} ✨${engine.redFrenzySkillCount} ❄️${engine.redFreezeSkillCount}",
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = RedPlayerColor
+                    color = RedPlayerColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
 
-        // Difficulty Selector Bar
+        // Difficulty Selector Bar (Fixed height 30dp)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(30.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             AIDifficulty.entries.forEach { diff ->

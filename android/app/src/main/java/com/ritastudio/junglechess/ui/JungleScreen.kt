@@ -21,36 +21,56 @@ fun JungleScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header: Title, Language, Advantage, Difficulty
-            JungleHeaderBar(engine = engine, lang = lang)
+            val screenW = maxWidth
+            val screenH = maxHeight
 
-            // Tactical Advice & Selected Piece Guidance (Fixed Height Banner)
-            JungleTacticalBanner(engine = engine, lang = lang)
+            // Strictly compute board size once from device screen bounds, never affected by sibling state changes
+            val maxBoardW = (screenW - 20.dp).coerceAtMost(360.dp)
+            val maxBoardH = (screenH - 270.dp).coerceAtLeast(280.dp)
+            val cellSize = minOf(maxBoardW / 7f, maxBoardH / 9.2f).coerceAtLeast(36.dp)
+            val boardW = cellSize * 7f
+            val boardH = cellSize * 9.2f
 
-            // Board (9x7 Grid)
-            Box(
+            Column(
                 modifier = Modifier
-                    .weight(1f, fill = true)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                JungleBoardView(engine = engine, lang = lang)
-            }
+                // Header: Title, Language, Advantage, Difficulty (fixed rows)
+                JungleHeaderBar(engine = engine, lang = lang)
 
-            // Bottom Controls & Superpower Abilities
-            JungleSuperpowerBar(
-                engine = engine,
-                onShowRules = { showRules = true },
-                lang = lang
-            )
+                // Tactical Advice & Selected Piece Guidance (Fixed Height Banner 72dp)
+                JungleTacticalBanner(
+                    engine = engine,
+                    lang = lang,
+                    modifier = Modifier.height(72.dp)
+                )
+
+                Spacer(modifier = Modifier.weight(1f, fill = true))
+
+                // Board (9x7 Grid) - Constant immutable size
+                Box(
+                    modifier = Modifier.size(width = boardW, height = boardH),
+                    contentAlignment = Alignment.Center
+                ) {
+                    JungleBoardView(engine = engine, lang = lang)
+                }
+
+                Spacer(modifier = Modifier.weight(1f, fill = true))
+
+                // Bottom Controls & Superpower Abilities
+                JungleSuperpowerBar(
+                    engine = engine,
+                    onShowRules = { showRules = true },
+                    lang = lang
+                )
+            }
         }
 
         // Rule Guide Modal Dialog
