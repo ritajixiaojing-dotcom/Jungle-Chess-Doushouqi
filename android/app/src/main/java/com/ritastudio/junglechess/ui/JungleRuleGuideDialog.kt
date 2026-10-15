@@ -172,7 +172,7 @@ fun JungleRuleGuideDialog(
                         verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
                         Text(
-                            text = "快乐斗兽棋 · Jungle Chess",
+                            text = lang.appTitle,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.DarkGray

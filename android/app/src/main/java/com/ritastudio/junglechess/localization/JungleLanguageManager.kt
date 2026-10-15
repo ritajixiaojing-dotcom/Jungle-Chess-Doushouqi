@@ -254,16 +254,93 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
         }
     }
 
-    fun animalSingleCharName(type: AnimalType): String {
+    fun animalPieceName(type: AnimalType): String {
         return when (type) {
-            AnimalType.RAT -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "鼠" else "Rat"
-            AnimalType.CAT -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "猫" else "Cat"
-            AnimalType.DOG -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "狗" else "Dog"
-            AnimalType.WOLF -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "狼" else "Wolf"
-            AnimalType.LEOPARD -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "豹" else "Leo"
-            AnimalType.TIGER -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "虎" else "Tig"
-            AnimalType.LION -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "狮" else "Lion"
-            AnimalType.ELEPHANT -> if (currentLanguage == JungleLanguage.ZH_HANS || currentLanguage == JungleLanguage.ZH_HANT) "象" else "Ele"
+            AnimalType.RAT -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "鼠"
+                JungleLanguage.EN -> "Rat"
+                JungleLanguage.JA -> "鼠"
+                JungleLanguage.KO -> "쥐"
+                JungleLanguage.ES -> "Rata"
+                JungleLanguage.FR -> "Rat"
+                JungleLanguage.DE -> "Ratte"
+            }
+            AnimalType.CAT -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "猫"
+                JungleLanguage.EN -> "Cat"
+                JungleLanguage.JA -> "猫"
+                JungleLanguage.KO -> "고양이"
+                JungleLanguage.ES -> "Gato"
+                JungleLanguage.FR -> "Chat"
+                JungleLanguage.DE -> "Katze"
+            }
+            AnimalType.DOG -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "狗"
+                JungleLanguage.EN -> "Dog"
+                JungleLanguage.JA -> "犬"
+                JungleLanguage.KO -> "개"
+                JungleLanguage.ES -> "Perro"
+                JungleLanguage.FR -> "Chien"
+                JungleLanguage.DE -> "Hund"
+            }
+            AnimalType.WOLF -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "狼"
+                JungleLanguage.EN -> "Wolf"
+                JungleLanguage.JA -> "狼"
+                JungleLanguage.KO -> "늑대"
+                JungleLanguage.ES -> "Lobo"
+                JungleLanguage.FR -> "Loup"
+                JungleLanguage.DE -> "Wolf"
+            }
+            AnimalType.LEOPARD -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "豹"
+                JungleLanguage.EN -> "Leopard"
+                JungleLanguage.JA -> "豹"
+                JungleLanguage.KO -> "표범"
+                JungleLanguage.ES -> "Leopardo"
+                JungleLanguage.FR -> "Léopard"
+                JungleLanguage.DE -> "Leopard"
+            }
+            AnimalType.TIGER -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "虎"
+                JungleLanguage.EN -> "Tiger"
+                JungleLanguage.JA -> "虎"
+                JungleLanguage.KO -> "호랑이"
+                JungleLanguage.ES -> "Tigre"
+                JungleLanguage.FR -> "Tigre"
+                JungleLanguage.DE -> "Tiger"
+            }
+            AnimalType.LION -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS -> "狮"
+                JungleLanguage.ZH_HANT -> "獅"
+                JungleLanguage.EN -> "Lion"
+                JungleLanguage.JA -> "獅"
+                JungleLanguage.KO -> "사자"
+                JungleLanguage.ES -> "León"
+                JungleLanguage.FR -> "Lion"
+                JungleLanguage.DE -> "Löwe"
+            }
+            AnimalType.ELEPHANT -> when (currentLanguage) {
+                JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "象"
+                JungleLanguage.EN -> "Elephant"
+                JungleLanguage.JA -> "象"
+                JungleLanguage.KO -> "코끼리"
+                JungleLanguage.ES -> "Elefante"
+                JungleLanguage.FR -> "Éléphant"
+                JungleLanguage.DE -> "Elefant"
+            }
+        }
+    }
+
+    fun animalSingleCharName(type: AnimalType): String {
+        return animalPieceName(type)
+    }
+
+    fun formatAnimalTitle(type: AnimalType, isFull: Boolean = false): String {
+        val name = if (isFull) animalFullName(type) else animalName(type)
+        return when (currentLanguage) {
+            JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "【$name】"
+            else -> "[$name]"
         }
     }
     
@@ -2012,5 +2089,91 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
         JungleLanguage.DE -> "🎯 Höhle nah"
         }
     }
+
+    // MARK: - 走步攻略与战术卡片 UI 纯正本地化
+
+    val selectedPieceInstruction: String
+        get() = when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "💡 点击高亮绿圈走子，或点击其他棋子查看特异技能\n运筹帷幄 · 智勇双全 · 决胜千里"
+            JungleLanguage.ZH_HANT -> "💡 點擊高亮綠圈走子，或點擊其他棋子查看特異技能\n運籌帷幄 · 智勇雙全 · 決勝千里"
+            JungleLanguage.EN -> "💡 Tap green circles to move, or other pieces to view skills\nStrategic Vision · Tactical Mastery · Victorious Play"
+            JungleLanguage.DE -> "💡 Grüne Kreise antippen zum Ziehen, oder Tiere für Regeln wählen\nWeitsicht · Taktische Meisterschaft · Überlegener Sieg"
+            JungleLanguage.FR -> "💡 Touchez les cercles verts pour bouger, ou un fauve pour ses règles\nVision Stratégique · Maîtrise Tactique · Vers la Victoire"
+            JungleLanguage.ES -> "💡 Toca círculos verdes para mover, u otras piezas para ver reglas\nVisión Estratégica · Dominio Táctico · Hacia la Victoria"
+            JungleLanguage.JA -> "💡 緑の丸をタップして移動、他の駒をタップしてルールを確認\n深謀遠慮 · 智勇兼備 · 必勝の手筋"
+            JungleLanguage.KO -> "💡 녹색 원을 탭하여 이동하거나 다른 말을 탭하여 규칙을 확인하세요\n심모원려 · 지용겸비 · 필승의 한 수"
+        }
+
+    val tacticalMotto: String
+        get() = when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "运筹帷幄 · 决胜千里"
+            JungleLanguage.ZH_HANT -> "運籌帷幄 · 決勝千里"
+            JungleLanguage.EN -> "Strategic Vision · Tactical Victory"
+            JungleLanguage.DE -> "Taktische Weitsicht · Sicherer Sieg"
+            JungleLanguage.FR -> "Vision Stratégique · Victoire Tactique"
+            JungleLanguage.ES -> "Visión Estratégica · Victoria Táctica"
+            JungleLanguage.JA -> "深謀遠慮 · 必勝の手筋"
+            JungleLanguage.KO -> "심모원려 · 결승천리"
+        }
+
+    val depth3DefaultMotto: String
+        get() = when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "洞悉先机 · 步步为营"
+            JungleLanguage.ZH_HANT -> "洞悉先機 · 步步為營"
+            JungleLanguage.EN -> "Foresee Moves · Advance Strategically"
+            JungleLanguage.DE -> "Taktische Weitsicht · Schritt für Schritt"
+            JungleLanguage.FR -> "Anticiper chaque coup · Pas à pas"
+            JungleLanguage.ES -> "Anticipar jugadas · Paso a paso"
+            JungleLanguage.JA -> "先見の明 · 着実に歩を進める"
+            JungleLanguage.KO -> "선견지명 · 한 걸음씩 착실히"
+        }
+
+    val aiThinkingText: String
+        get() = when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "智谋大师正在缜密思考对策..."
+            JungleLanguage.ZH_HANT -> "智謀大師正在縝密思考對策..."
+            JungleLanguage.EN -> "Grandmaster is calculating tactics..."
+            JungleLanguage.DE -> "Großmeister überlegt nächsten Zug..."
+            JungleLanguage.FR -> "Le Grand Maître calcule la riposte..."
+            JungleLanguage.ES -> "Gran maestro calculando tácticas..."
+            JungleLanguage.JA -> "AIが最善手を綿密に推演中..."
+            JungleLanguage.KO -> "AI가 최선의 수를 정밀 계산 중..."
+        }
+
+    val aiRealtimeBadge: String
+        get() = when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "AI 实时演算"
+            JungleLanguage.ZH_HANT -> "AI 即時演算"
+            JungleLanguage.EN -> "AI Realtime"
+            JungleLanguage.DE -> "AI Echtzeit"
+            JungleLanguage.FR -> "IA Direct"
+            JungleLanguage.ES -> "IA Directo"
+            JungleLanguage.JA -> "AI リアルタイム"
+            JungleLanguage.KO -> "AI 실시간 연산"
+        }
+
+    val waitingMoveHint: String
+        get() = when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "落子后将在此实时展示 3 步大师级战术推演全流程"
+            JungleLanguage.ZH_HANT -> "落子後將在此即時展示 3 步大師級戰術推演全流程"
+            JungleLanguage.EN -> "Make a move to see 3-step master tactical deduction"
+            JungleLanguage.DE -> "Nach dem Zug wird hier die 3-Schritte-Taktik angezeigt"
+            JungleLanguage.FR -> "Jouez un coup pour voir la déduction en 3 étapes"
+            JungleLanguage.ES -> "Mueve una pieza para ver la deducción en 3 pasos"
+            JungleLanguage.JA -> "着手後に3手の戦術推演プロセスをここに表示します"
+            JungleLanguage.KO -> "착수 후 3단계 전술 추론 과정이 실시간 표시됩니다"
+        }
+
+    val tacticalDeepSearchHint: String
+        get() = when (currentLanguage) {
+            JungleLanguage.ZH_HANS -> "💡 运筹帷幄 · 智勇双全 · 决胜千里\n每一步均经过多分支深度博弈推演评估"
+            JungleLanguage.ZH_HANT -> "💡 運籌帷幄 · 智勇雙全 · 決勝千里\n每一步均經過多分支深度博弈推演評估"
+            JungleLanguage.EN -> "💡 Strategic Vision · Tactical Mastery\nEvery move is evaluated via deep minimax game tree"
+            JungleLanguage.DE -> "💡 Taktische Weitsicht · Höchste Meisterschaft\nJeder Zug wird durch tiefe Spielbaumanalyse berechnet"
+            JungleLanguage.FR -> "💡 Vision Stratégique · Maîtrise Tactique\nChaque coup est évalué par déduction approfondie"
+            JungleLanguage.ES -> "💡 Visión Estratégica · Gran Maestría\nCada jugada es evaluada con análisis profundo"
+            JungleLanguage.JA -> "💡 深謀遠慮 · 智勇兼備 · 必勝の手筋\n全手順を多分岐の深層ゲーム木で評価"
+            JungleLanguage.KO -> "💡 심모원려 · 지용겸비 · 필승의 한 수\n모든 수는 심층 탐색을 통해 최적화됩니다"
+        }
 
 }

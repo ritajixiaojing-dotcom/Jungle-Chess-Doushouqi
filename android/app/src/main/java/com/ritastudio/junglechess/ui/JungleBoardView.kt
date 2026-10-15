@@ -314,13 +314,24 @@ fun TileCellView(
                         fontSize = 14.sp,
                         lineHeight = 14.sp
                     )
-                    val animalTitle = lang.animalSingleCharName(piece.type)
+                    val animalTitle = lang.animalPieceName(piece.type)
+                    val pieceFontSize = when {
+                        animalTitle.length >= 7 -> 7.5.sp
+                        animalTitle.length >= 5 -> 8.5.sp
+                        animalTitle.length >= 3 -> 9.5.sp
+                        else -> 11.sp
+                    }
+                    val pieceLineHeight = when {
+                        animalTitle.length >= 7 -> 8.sp
+                        animalTitle.length >= 5 -> 9.sp
+                        else -> 11.sp
+                    }
                     Text(
                         text = animalTitle,
-                        fontSize = 11.sp,
+                        fontSize = pieceFontSize,
                         fontWeight = FontWeight.Black,
                         color = if (isRecommendedSource) Color(0xFF00C853) else if (isOpponentTarget) Color(0xFFFF1744) else borderColor,
-                        lineHeight = 11.sp,
+                        lineHeight = pieceLineHeight,
                         maxLines = 1
                     )
                 }

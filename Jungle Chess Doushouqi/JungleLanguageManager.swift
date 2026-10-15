@@ -353,16 +353,101 @@ class JungleLanguageManager: ObservableObject {
         }
     }
     
-    func animalSingleCharName(_ type: AnimalType) -> String {
+    func animalPieceName(_ type: AnimalType) -> String {
         switch type {
-        case .rat: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "鼠" : "Rat"
-        case .cat: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "猫" : "Cat"
-        case .dog: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "狗" : "Dog"
-        case .wolf: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "狼" : "Wolf"
-        case .leopard: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "豹" : "Leo"
-        case .tiger: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "虎" : "Tig"
-        case .lion: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "狮" : "Lion"
-        case .elephant: return (currentLanguage == .zhHant || currentLanguage == .zhHans) ? "象" : "Ele"
+        case .rat:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "鼠"
+            case .en: return "Rat"
+            case .ja: return "鼠"
+            case .ko: return "쥐"
+            case .es: return "Rata"
+            case .fr: return "Rat"
+            case .de: return "Ratte"
+            }
+        case .cat:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "猫"
+            case .en: return "Cat"
+            case .ja: return "猫"
+            case .ko: return "고양이"
+            case .es: return "Gato"
+            case .fr: return "Chat"
+            case .de: return "Katze"
+            }
+        case .dog:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "狗"
+            case .en: return "Dog"
+            case .ja: return "犬"
+            case .ko: return "개"
+            case .es: return "Perro"
+            case .fr: return "Chien"
+            case .de: return "Hund"
+            }
+        case .wolf:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "狼"
+            case .en: return "Wolf"
+            case .ja: return "狼"
+            case .ko: return "늑대"
+            case .es: return "Lobo"
+            case .fr: return "Loup"
+            case .de: return "Wolf"
+            }
+        case .leopard:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "豹"
+            case .en: return "Leopard"
+            case .ja: return "豹"
+            case .ko: return "표범"
+            case .es: return "Leopardo"
+            case .fr: return "Léopard"
+            case .de: return "Leopard"
+            }
+        case .tiger:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "虎"
+            case .en: return "Tiger"
+            case .ja: return "虎"
+            case .ko: return "호랑이"
+            case .es: return "Tigre"
+            case .fr: return "Tigre"
+            case .de: return "Tiger"
+            }
+        case .lion:
+            switch currentLanguage {
+            case .zhHans: return "狮"
+            case .zhHant: return "獅"
+            case .en: return "Lion"
+            case .ja: return "獅"
+            case .ko: return "사자"
+            case .es: return "León"
+            case .fr: return "Lion"
+            case .de: return "Löwe"
+            }
+        case .elephant:
+            switch currentLanguage {
+            case .zhHans, .zhHant: return "象"
+            case .en: return "Elephant"
+            case .ja: return "象"
+            case .ko: return "코끼리"
+            case .es: return "Elefante"
+            case .fr: return "Éléphant"
+            case .de: return "Elefant"
+            }
+        }
+    }
+
+    func animalSingleCharName(_ type: AnimalType) -> String {
+        return animalPieceName(type)
+    }
+
+    func formatAnimalTitle(_ type: AnimalType, isFull: Bool = false) -> String {
+        let name = isFull ? animalFullName(type) : animalName(type)
+        switch currentLanguage {
+        case .zhHans, .zhHant: return "【\(name)】"
+        default: return "[\(name)]"
         }
     }
     
@@ -1997,6 +2082,99 @@ class JungleLanguageManager: ObservableObject {
         case .es: return "🎯 Hacia Guarida"
         case .fr: return "🎯 Vers Repaire"
         case .de: return "🎯 Höhle nah"
+        }
+    }
+
+    // MARK: - 走步攻略与战术卡片 UI 纯正本地化
+
+    var selectedPieceInstruction: String {
+        switch currentLanguage {
+        case .zhHans: return "💡 点击高亮绿圈走子，或点击其他棋子查看特异技能\n运筹帷幄 · 智勇双全 · 决胜千里"
+        case .zhHant: return "💡 點擊高亮綠圈走子，或點擊其他棋子查看特異技能\n運籌帷幄 · 智勇雙全 · 決勝千里"
+        case .en: return "💡 Tap green circles to move, or other pieces to view skills\nStrategic Vision · Tactical Mastery · Victorious Play"
+        case .de: return "💡 Grüne Kreise antippen zum Ziehen, oder Tiere für Regeln wählen\nWeitsicht · Taktische Meisterschaft · Überlegener Sieg"
+        case .fr: return "💡 Touchez les cercles verts pour bouger, ou un fauve pour ses règles\nVision Stratégique · Maîtrise Tactique · Vers la Victoire"
+        case .es: return "💡 Toca círculos verdes para mover, u otras piezas para ver reglas\nVisión Estratégica · Dominio Táctico · Hacia la Victoria"
+        case .ja: return "💡 緑の丸をタップして移動、他の駒をタップしてルールを確認\n深謀遠慮 · 智勇兼備 · 必勝の手筋"
+        case .ko: return "💡 녹색 원을 탭하여 이동하거나 다른 말을 탭하여 규칙을 확인하세요\n심모원려 · 지용겸비 · 필승의 한 수"
+        }
+    }
+
+    var tacticalMotto: String {
+        switch currentLanguage {
+        case .zhHans: return "运筹帷幄 · 决胜千里"
+        case .zhHant: return "運籌帷幄 · 決勝千里"
+        case .en: return "Strategic Vision · Tactical Victory"
+        case .de: return "Taktische Weitsicht · Sicherer Sieg"
+        case .fr: return "Vision Stratégique · Victoire Tactique"
+        case .es: return "Visión Estratégica · Victoria Táctica"
+        case .ja: return "深謀遠慮 · 必勝の手筋"
+        case .ko: return "심모원려 · 결승천리"
+        }
+    }
+
+    var depth3DefaultMotto: String {
+        switch currentLanguage {
+        case .zhHans: return "洞悉先机 · 步步为营"
+        case .zhHant: return "洞悉先機 · 步步為營"
+        case .en: return "Foresee Moves · Advance Strategically"
+        case .de: return "Taktische Weitsicht · Schritt für Schritt"
+        case .fr: return "Anticiper chaque coup · Pas à pas"
+        case .es: return "Anticipar jugadas · Paso a paso"
+        case .ja: return "先見の明 · 着実に歩を進める"
+        case .ko: return "선견지명 · 한 걸음씩 착실히"
+        }
+    }
+
+    var aiThinkingText: String {
+        switch currentLanguage {
+        case .zhHans: return "智谋大师正在缜密思考对策..."
+        case .zhHant: return "智謀大師正在縝密思考對策..."
+        case .en: return "Grandmaster is calculating tactics..."
+        case .de: return "Großmeister überlegt nächsten Zug..."
+        case .fr: return "Le Grand Maître calcule la riposte..."
+        case .es: return "Gran maestro calculando tácticas..."
+        case .ja: return "AIが最善手を綿密に推演中..."
+        case .ko: return "AI가 최선의 수를 정밀 계산 중..."
+        }
+    }
+
+    var aiRealtimeBadge: String {
+        switch currentLanguage {
+        case .zhHans: return "AI 实时演算"
+        case .zhHant: return "AI 即時演算"
+        case .en: return "AI Realtime"
+        case .de: return "AI Echtzeit"
+        case .fr: return "IA Direct"
+        case .es: return "IA Directo"
+        case .ja: return "AI リアルタイム"
+        case .ko: return "AI 실시간 연산"
+        }
+    }
+
+    var waitingMoveHint: String {
+        switch currentLanguage {
+        case .zhHans: return "落子后将在此实时展示 3 步大师级战术推演全流程"
+        case .zhHant: return "落子後將在此即時展示 3 步大師級戰術推演全流程"
+        case .en: return "Make a move to see 3-step master tactical deduction"
+        case .de: return "Nach dem Zug wird hier die 3-Schritte-Taktik angezeigt"
+        case .fr: return "Jouez un coup pour voir la déduction en 3 étapes"
+        case .es: return "Mueve una pieza para ver la deducción en 3 pasos"
+        case .ja: return "着手後に3手の戦術推演プロセスをここに表示します"
+        case .ko: return "착수 후 3단계 전술 추론 과정이 실시간 표시됩니다"
+        }
+    }
+
+    var tacticalDeepSearchHint: String {
+        switch currentLanguage {
+        case .zhHans: return "💡 运筹帷幄 · 智勇双全 · 决胜千里\n每一步均经过多分支深度博弈推演评估"
+        case .zhHant: return "💡 運籌帷幄 · 智勇雙全 · 決勝千里\n每一步均經過多分支深度博弈推演評估"
+        case .en: return "💡 Strategic Vision · Tactical Mastery\nEvery move is evaluated via deep minimax game tree"
+        case .de: return "💡 Taktische Weitsicht · Höchste Meisterschaft\nJeder Zug wird durch tiefe Spielbaumanalyse berechnet"
+        case .fr: return "💡 Vision Stratégique · Maîtrise Tactique\nChaque coup est évalué par déduction approfondie"
+        case .es: return "💡 Visión Estratégica · Gran Maestría\nCada jugada es evaluada con análisis profundo"
+        case .ja: return "💡 深謀遠慮 · 智勇兼備 · 必勝の手筋\n全手順を多分岐の深層ゲーム木で評価"
+        case .ko: return "💡 심모원려 · 지용겸비 · 필승의 한 수\n모든 수는 심층 탐색을 통해 최적화됩니다"
         }
     }
 }

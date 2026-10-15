@@ -5,8 +5,8 @@ import AudioToolbox
 // MARK: - 1. 基础数据模型
 
 enum Player: String, Codable {
-    case red = "红方"
-    case blue = "蓝方"
+    case red = "red"
+    case blue = "blue"
     
     var color: Color {
         self == .red ? Color(red: 0.92, green: 0.25, blue: 0.2) : Color(red: 0.18, green: 0.52, blue: 0.95)
@@ -18,26 +18,22 @@ enum Player: String, Codable {
 }
 
 enum AIDifficulty: String, CaseIterable, Identifiable {
-    case easy = "🌱 轻松入门"
-    case normal = "🌿 棋艺进阶"
-    case hard = "👑 智谋大师"
+    case easy = "easy"
+    case normal = "normal"
+    case hard = "hard"
     
     var id: String { rawValue }
     
     var shortName: String {
-        switch self {
-        case .easy: return "🌱 入门"
-        case .normal: return "🌿 进阶"
-        case .hard: return "👑 大师"
-        }
+        return JungleLanguageManager.shared.difficultyName(self)
     }
 }
 
 enum StrategicDoctrine: String, CaseIterable {
-    case lionBlitz = "🦁 狮王飞河突击"
-    case elephantTank = "🐘 象王稳步推进"
-    case ratStealth = "🐭 灵鼠潜河入穴"
-    case packHunt = "🐺 狼豹多路包抄"
+    case lionBlitz = "lionBlitz"
+    case elephantTank = "elephantTank"
+    case ratStealth = "ratStealth"
+    case packHunt = "packHunt"
 }
 
 enum AnimalType: Int, CaseIterable, Identifiable {
@@ -1529,11 +1525,11 @@ struct ContentView: View {
             let screenH = rootGeo.size.height
             // Available space for board:
             // Screen height minus all fixed bars (header: 38, difficulty: 30, banner: 20, prompt: 72, superpower: 36, bottom: 44, spacings & paddings: ~36) = ~276pt reserved
-            let maxBoardW = min(screenW - 20, 360.0)
-            let maxBoardH = max(280.0, screenH - 280.0)
-            let cellSize = max(36.0, floor(min(maxBoardW / 7.0, maxBoardH / 9.0)))
+            let maxBoardW = screenW - 14.0
+            let maxBoardH = max(300.0, screenH - 295.0)
+            let cellSize = max(36.0, floor(min(maxBoardW / 7.0, maxBoardH / 9.2)))
             let boardW = cellSize * 7.0
-            let boardH = cellSize * 9.0
+            let boardH = cellSize * 9.2
             
             ZStack {
                 LinearGradient(colors: [Color(red: 0.94, green: 0.98, blue: 0.93), Color(red: 0.88, green: 0.94, blue: 0.86)],
@@ -1548,9 +1544,9 @@ struct ContentView: View {
                     skillBannerView
                         .frame(height: 20)
                     
-                    // 棋盘上方的长方形走棋攻略提示框（完全固定尺寸 72pt，彻底消除页面抖动与跳跃）
+                    // 棋盘上方的长方形走棋攻略提示框（完全固定尺寸 90pt，充裕展示不吞字，彻底消除页面抖动与跳跃）
                     fixedPromptCardView
-                        .frame(height: 72)
+                        .frame(height: 90)
                     
                     Spacer(minLength: 2)
                     
@@ -1718,7 +1714,7 @@ struct ContentView: View {
                 HStack(spacing: 6) {
                     Text("\(piece.type.emoji)")
                         .font(.system(size: 15))
-                    Text("【\(lang.animalFullName(piece.type))】")
+                    Text(lang.formatAnimalTitle(piece.type, isFull: true))
                         .font(.system(size: 13, weight: .black))
                         .foregroundColor(piece.owner.color)
                     
@@ -1732,25 +1728,25 @@ struct ContentView: View {
                         .background(piece.owner.color)
                         .cornerRadius(4)
                 }
-                .frame(height: 20)
+                .frame(height: 22)
                 
                 Text(lang.animalEatRule(piece.type))
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
-                    .frame(height: 15)
+                    .frame(height: 18)
                 
                 HStack(spacing: 4) {
                     Text("💡")
-                        .font(.system(size: 10))
-                    Text("点击高亮绿圈走子，或点击其他棋子查看技能")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
+                        .font(.system(size: 11))
+                    Text(lang.selectedPieceInstruction)
+                        .font(.system(size: 9.5, weight: .medium))
+                        .foregroundColor(Color(red: 0.1, green: 0.45, blue: 0.15))
+                        .lineLimit(2)
                         .minimumScaleFactor(0.75)
                 }
-                .frame(height: 15)
+                .frame(height: 36)
             } else if let advice = engine.optimalAdvice {
                 // 2. 走棋攻略模式：展示3步推演与大师策略
                 HStack(spacing: 6) {
@@ -1777,59 +1773,67 @@ struct ContentView: View {
                             .cornerRadius(4)
                     }
                 }
-                .frame(height: 20)
+                .frame(height: 22)
                 
                 Text(advice.detailReason)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
-                    .frame(height: 15)
+                    .frame(height: 18)
                 
-                HStack(spacing: 4) {
+                HStack(alignment: .top, spacing: 4) {
                     Text(lang.depth3DeductionTitle)
                         .font(.system(size: 10, weight: .black))
                         .foregroundColor(.purple)
-                    Text(advice.forecast3Steps)
+                    Text(advice.forecast3Steps.isEmpty ? lang.depth3DefaultMotto : advice.forecast3Steps)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.5))
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.75)
                 }
-                .frame(height: 15)
+                .frame(height: 36)
             } else {
                 // 3. AI思考/等待中：占位文案，确保高度尺寸完全一致
                 HStack(spacing: 6) {
                     Text(engine.isThinking ? "🤖" : "💡")
                         .font(.system(size: 15))
-                    Text(engine.isThinking ? "智谋大师正在缜密思考对策..." : lang.deducingBestMove)
+                    Text(engine.isThinking ? lang.aiThinkingText : lang.deducingBestMove)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                     Spacer()
+                    Text(lang.aiRealtimeBadge)
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(Color(red: 0.1, green: 0.5, blue: 0.2))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.green.opacity(0.12))
+                        .cornerRadius(4)
                 }
-                .frame(height: 20)
+                .frame(height: 22)
                 
-                Text("落子后在此实时展示 3 步大师级战术推演")
-                    .font(.system(size: 11, weight: .medium))
+                Text(lang.waitingMoveHint)
+                    .font(.system(size: 10.5, weight: .medium))
                     .foregroundColor(.secondary.opacity(0.8))
                     .lineLimit(1)
-                    .frame(height: 15)
+                    .frame(height: 18)
                 
                 HStack(spacing: 4) {
-                    Text("⚡️")
-                        .font(.system(size: 10))
-                    Text("运筹帷幄 · 决胜千里")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.secondary.opacity(0.7))
-                        .lineLimit(1)
+                    Text("💡")
+                        .font(.system(size: 11))
+                    Text(lang.tacticalDeepSearchHint)
+                        .font(.system(size: 9.5, weight: .medium))
+                        .foregroundColor(Color(red: 0.1, green: 0.45, blue: 0.15))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.75)
                 }
-                .frame(height: 15)
+                .frame(height: 36)
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .frame(height: 72)
+        .padding(.vertical, 6)
+        .frame(height: 90)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             engine.optimalAdvice?.isEmergency == true ? Color.red.opacity(0.12) :
@@ -2114,12 +2118,12 @@ struct TileView: View {
                     .minimumScaleFactor(0.7)
                     .padding(.horizontal, 3)
                     .padding(.vertical, 2)
-                    .background((badge.contains("净赚") || badge.contains("+")) ? Color.purple : (isGlobalOptimalTarget ? Color(red: 0.1, green: 0.6, blue: 0.2) : Color(red: 0.15, green: 0.55, blue: 0.2)))
+                    .background((badge.contains("+") || badge.contains("🟣")) ? Color.purple : (isGlobalOptimalTarget ? Color(red: 0.1, green: 0.6, blue: 0.2) : Color(red: 0.15, green: 0.55, blue: 0.2)))
                     .cornerRadius(4)
                     .shadow(radius: 2)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke((badge.contains("净赚") || badge.contains("+")) ? Color.pink : Color.green, lineWidth: 2)
+                            .stroke((badge.contains("+") || badge.contains("🟣")) ? Color.pink : Color.green, lineWidth: 2)
                     )
             }
             // 🔴 3. 红色危险格子
@@ -2229,13 +2233,14 @@ struct PieceBadgeView: View {
                         (isOptimalSourcePiece ? Color.green : piece.owner.color)))),
                         lineWidth: isFrozen ? 3.5 : (isSelected ? 3.5 : (isEmergencyPiece ? 3.5 : 3)))
             
-            // 5. 动物图标与名称（单汉字居中，清晰饱满）
+            // 5. 动物图标与名称（相对应语言居中，清晰饱满）
             VStack(spacing: -1) {
                 Text(piece.type.emoji).font(.system(size: 18))
-                Text(lang.animalSingleCharName(piece.type))
-                    .font(.system(size: 12, weight: .black))
+                Text(lang.animalPieceName(piece.type))
+                    .font(.system(size: 10.5, weight: .black))
                     .foregroundColor(isOpponentTarget ? Color(red: 0.9, green: 0.1, blue: 0.2) : (isOptimalSourcePiece ? Color(red: 0.05, green: 0.55, blue: 0.15) : piece.owner.color))
-                    .minimumScaleFactor(0.75)
+                    .frame(maxWidth: 36)
+                    .minimumScaleFactor(0.55)
                     .lineLimit(1)
             }
             

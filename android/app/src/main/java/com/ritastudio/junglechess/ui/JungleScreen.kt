@@ -29,10 +29,10 @@ fun JungleScreen(
             val screenW = maxWidth
             val screenH = maxHeight
 
-            // Strictly compute board size once from device screen bounds, never affected by sibling state changes
-            val maxBoardW = (screenW - 20.dp).coerceAtMost(360.dp)
-            val maxBoardH = (screenH - 270.dp).coerceAtLeast(280.dp)
-            val cellSize = minOf(maxBoardW / 7f, maxBoardH / 9.2f).coerceAtLeast(36.dp)
+            // Strictly compute board size once from device screen bounds, maximizing width and height to fill screen
+            val maxBoardW = (screenW - 12.dp)
+            val maxBoardH = (screenH - 290.dp).coerceAtLeast(300.dp)
+            val cellSize = minOf(maxBoardW / 7f, maxBoardH / 9.2f)
             val boardW = cellSize * 7f
             val boardH = cellSize * 9.2f
 
@@ -45,11 +45,11 @@ fun JungleScreen(
                 // Header: Title, Language, Advantage, Difficulty (fixed rows)
                 JungleHeaderBar(engine = engine, lang = lang)
 
-                // Tactical Advice & Selected Piece Guidance (Fixed Height Banner 72dp)
+                // Tactical Advice & Selected Piece Guidance (Fixed Height Banner 90dp, generous display)
                 JungleTacticalBanner(
                     engine = engine,
                     lang = lang,
-                    modifier = Modifier.height(72.dp)
+                    modifier = Modifier.height(90.dp)
                 )
 
                 Spacer(modifier = Modifier.weight(1f, fill = true))
