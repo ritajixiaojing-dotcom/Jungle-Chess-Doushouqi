@@ -434,7 +434,11 @@ class JungleGameEngine: ObservableObject {
         
         let record = MoveRecord(from: from, to: to, movedPiece: movingPiece, capturedPiece: capturedPiece)
         history.append(record)
-        lastOpponentMove = record
+        if movingPiece.owner == .red || !isVsAI {
+            lastOpponentMove = record
+        } else {
+            lastOpponentMove = nil
+        }
         
         board.removeValue(forKey: from)
         board[to] = movingPiece
@@ -2024,7 +2028,7 @@ struct BoardView: View {
                 if let piece = engine.board[pos] {
                     let isPlayerPiece = (piece.owner == .blue || !engine.isVsAI)
                     let isOptimalSourcePiece = isPlayerPiece && (engine.currentTurn == piece.owner) && (engine.optimalAdvice?.from == pos)
-                    let isOpponentTarget = (engine.lastOpponentMove?.to == pos) && (piece.owner != engine.currentTurn)
+                    let isOpponentTarget = (engine.lastOpponentMove?.to == pos) && (piece.owner == engine.lastOpponentMove?.movedPiece.owner) && (piece.owner != engine.currentTurn)
                     
                     PieceBadgeView(piece: piece,
                                    isSelected: engine.selectedPos == pos,
@@ -2203,7 +2207,7 @@ struct PieceBadgeView: View {
                     .stroke(Color.green.opacity(isPulsing ? 0.95 : 0.35), lineWidth: 3.5)
             } else if isOpponentTarget && !isFrozen {
                 Circle()
-                    .stroke(Color(red: 1.0, green: 0.1, blue: 0.25).opacity(isPulsing ? 0.95 : 0.35), lineWidth: 3.5)
+                    .stroke((piece.owner == .red ? Color(red: 1.0, green: 0.1, blue: 0.25) : piece.owner.color).opacity(isPulsing ? 0.95 : 0.35), lineWidth: 3.5)
             }
             
             // 2. 选中金圈高亮（静态清晰外圈，不缩放，防抖防跳）
@@ -2217,9 +2221,9 @@ struct PieceBadgeView: View {
             Circle()
                 .fill(isFrozen ? Color(red: 0.88, green: 0.96, blue: 1.0) :
                       (isEmergencyPiece ? Color(red: 1.0, green: 0.85, blue: 0.85) :
-                      (isOpponentTarget ? Color(red: 1.0, green: 0.93, blue: 0.93) :
+                      (isOpponentTarget ? (piece.owner == .red ? Color(red: 1.0, green: 0.93, blue: 0.93) : Color(red: 0.93, green: 0.95, blue: 1.0)) :
                       (isOptimalSourcePiece ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color.white))))
-                .shadow(color: isOpponentTarget ? Color.red.opacity(0.4) : (isOptimalSourcePiece ? Color.green.opacity(0.35) : Color.black.opacity(0.2)),
+                .shadow(color: isOpponentTarget ? (piece.owner == .red ? Color.red.opacity(0.4) : Color.blue.opacity(0.4)) : (isOptimalSourcePiece ? Color.green.opacity(0.35) : Color.black.opacity(0.2)),
                         radius: isSelected ? 4 : 2,
                         x: 0,
                         y: isSelected ? 2 : 1)
@@ -2229,7 +2233,7 @@ struct PieceBadgeView: View {
                 .stroke(isFrozen ? Color.cyan :
                         (isSelected ? Color.orange :
                         (isEmergencyPiece ? Color.red :
-                        (isOpponentTarget ? Color(red: 1.0, green: 0.1, blue: 0.25) :
+                        (isOpponentTarget ? (piece.owner == .red ? Color(red: 1.0, green: 0.1, blue: 0.25) : piece.owner.color) :
                         (isOptimalSourcePiece ? Color.green : piece.owner.color)))),
                         lineWidth: isFrozen ? 3.5 : (isSelected ? 3.5 : (isEmergencyPiece ? 3.5 : 3)))
             
@@ -2238,7 +2242,7 @@ struct PieceBadgeView: View {
                 Text(piece.type.emoji).font(.system(size: 18))
                 Text(lang.animalPieceName(piece.type))
                     .font(.system(size: 10.5, weight: .black))
-                    .foregroundColor(isOpponentTarget ? Color(red: 0.9, green: 0.1, blue: 0.2) : (isOptimalSourcePiece ? Color(red: 0.05, green: 0.55, blue: 0.15) : piece.owner.color))
+                    .foregroundColor(isOpponentTarget ? (piece.owner == .red ? Color(red: 0.9, green: 0.1, blue: 0.2) : piece.owner.color) : (isOptimalSourcePiece ? Color(red: 0.05, green: 0.55, blue: 0.15) : piece.owner.color))
                     .frame(maxWidth: 36)
                     .minimumScaleFactor(0.55)
                     .lineLimit(1)
@@ -2270,7 +2274,7 @@ struct PieceBadgeView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 3)
                             .padding(.vertical, 1.5)
-                            .background(Color(red: 1.0, green: 0.1, blue: 0.25))
+                            .background(piece.owner == .red ? Color(red: 1.0, green: 0.1, blue: 0.25) : piece.owner.color)
                             .cornerRadius(4)
                             .shadow(radius: 2)
                             .offset(x: 4, y: -4)

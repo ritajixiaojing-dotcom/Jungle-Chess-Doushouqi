@@ -65,7 +65,7 @@ fun JungleBoardView(
                             val isRecommendedTarget = isPlayerTurn && (advice?.to == pos)
 
                             val lastOpMove = engine.lastOpponentMove
-                            val isOpponentTarget = (lastOpMove?.to == pos) && (piece != null && piece.owner != engine.currentTurn)
+                            val isOpponentTarget = (lastOpMove?.to == pos) && (piece != null && piece.owner == lastOpMove.movedPiece.owner && piece.owner != engine.currentTurn)
                             val isOpponentSource = (lastOpMove?.from == pos) && (lastOpMove.movedPiece.owner != engine.currentTurn)
 
                             val actionBadge = if (engine.selectedPos != null) {
@@ -258,7 +258,7 @@ fun TileCellView(
             }
 
             val tokenBorderColor = when {
-                isOpponentTarget -> Color(0xFFFF1744)
+                isOpponentTarget -> if (isRed) Color(0xFFFF1744) else BluePlayerColor
                 isRecommendedSource -> Color(0xFF00C853)
                 isSelected -> Color(0xFFFF9800)
                 else -> borderColor
@@ -278,7 +278,7 @@ fun TileCellView(
                 else -> 1.dp
             }
 
-            if (isOpponentTarget) {
+            if (isOpponentTarget && isRed) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(0.98f)
@@ -330,7 +330,7 @@ fun TileCellView(
                         text = animalTitle,
                         fontSize = pieceFontSize,
                         fontWeight = FontWeight.Black,
-                        color = if (isRecommendedSource) Color(0xFF00C853) else if (isOpponentTarget) Color(0xFFFF1744) else borderColor,
+                        color = if (isRecommendedSource) Color(0xFF00C853) else if (isOpponentTarget) (if (isRed) Color(0xFFFF1744) else BluePlayerColor) else borderColor,
                         lineHeight = pieceLineHeight,
                         maxLines = 1
                     )
@@ -364,7 +364,7 @@ fun TileCellView(
                             .offset(x = 2.dp, y = (-2).dp)
                             .shadow(2.dp, RoundedCornerShape(4.dp))
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFFF1744))
+                            .background(if (isRed) Color(0xFFFF1744) else BluePlayerColor)
                             .padding(horizontal = 2.5.dp, vertical = 0.5.dp)
                     ) {
                         Text(

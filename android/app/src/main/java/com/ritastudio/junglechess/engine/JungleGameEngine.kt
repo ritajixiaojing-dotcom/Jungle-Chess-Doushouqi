@@ -295,7 +295,11 @@ class JungleGameEngine(
 
         val record = MoveRecord(from = from, to = to, movedPiece = movingPiece, capturedPiece = capturedPiece)
         history.add(record)
-        lastOpponentMove = record
+        if (movingPiece.owner == PlayerColor.RED || !isVsAI) {
+            lastOpponentMove = record
+        } else {
+            lastOpponentMove = null
+        }
 
         val newBoard = board.toMutableMap()
         newBoard.remove(from)
