@@ -43,6 +43,8 @@ class JungleGameEngine(
     var isThinking by mutableStateOf(false)
     val history = mutableStateListOf<MoveRecord>()
     var lastOpponentMove by mutableStateOf<MoveRecord?>(null)
+    private var gameEpoch = 0
+    private var aiJob: Job? = null
 
     init {
         resetGame()
@@ -70,6 +72,9 @@ class JungleGameEngine(
     }
 
     fun resetGame() {
+        gameEpoch++
+        aiJob?.cancel()
+        isThinking = false
         val newBoard = mutableMapOf<Position, Piece>()
         history.clear()
         lastOpponentMove = null
@@ -119,6 +124,7 @@ class JungleGameEngine(
     }
 
     fun activateFrenzySkill(player: PlayerColor = PlayerColor.BLUE) {
+        if (winner != null || isThinking) return
         if (player == PlayerColor.BLUE) {
             if (blueFrenzySkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
             blueFrenzySkillCount -= 1
@@ -137,9 +143,9 @@ class JungleGameEngine(
     }
 
     fun activateShieldRecallSkill(player: PlayerColor = PlayerColor.BLUE) {
+        if (winner != null || isThinking) return
         if (player == PlayerColor.BLUE) {
             if (blueShieldSkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
-            blueShieldSkillCount -= 1
 
             var bestPiecePos: Position? = null
             var bestPiece: Piece? = null
@@ -155,9 +161,43 @@ class JungleGameEngine(
             }
 
             if (bestPiecePos != null && bestPiece != null) {
+                val existing = board[targetGate]
+                val record = MoveRecord(
+                    from = bestPiecePos, to = targetGate, movedPiece = bestPiece,
+                    capturedPiece = if (existing?.owner == PlayerColor.BLUE) null else existing,
+                    blueShieldCount = blueShieldSkillCount,
+                    redShieldCount = redShieldSkillCount,
+                    blueFrenzyCount = blueFrenzySkillCount,
+                    redFrenzyCount = redFrenzySkillCount,
+                    blueFreezeCount = blueFreezeSkillCount,
+                    redFreezeCount = redFreezeSkillCount,
+                    blueFrenzyTurns = blueFrenzyRemainingTurns,
+                    redFrenzyTurns = redFrenzyRemainingTurns,
+                    frozenPos = frozenPiecePos,
+                    frozenTurnsCount = frozenTurns,
+                    bannerText = skillBannerText
+                )
+                history.add(record)
+                blueShieldSkillCount -= 1
+
                 val newBoard = board.toMutableMap()
-                newBoard.remove(bestPiecePos)
-                newBoard[targetGate] = bestPiece
+                if (existing != null && existing.owner == PlayerColor.BLUE) {
+                    // 卫队换防：若门前已有己方棋子，两者对调位置，确保己方单位绝不被破坏
+                    newBoard[bestPiecePos] = existing
+                    newBoard[targetGate] = bestPiece
+                    if (bestPiecePos == frozenPiecePos) frozenPiecePos = targetGate
+                    else if (targetGate == frozenPiecePos) frozenPiecePos = bestPiecePos
+                } else {
+                    newBoard.remove(bestPiecePos)
+                    newBoard[targetGate] = bestPiece
+                    if (bestPiecePos == frozenPiecePos) frozenPiecePos = targetGate
+                    board = newBoard
+                    if (existing != null && checkWin(afterMoveTo = targetGate, by = PlayerColor.BLUE)) {
+                        winner = PlayerColor.BLUE
+                        JungleSoundManager.getOrNull()?.playWin()
+                        return
+                    }
+                }
                 board = newBoard
                 val name = JungleLanguageManager.shared.animalName(bestPiece.type)
                 skillBannerText = JungleLanguageManager.shared.shieldBannerText(pieceName = name)
@@ -166,7 +206,6 @@ class JungleGameEngine(
             }
         } else {
             if (redShieldSkillCount <= 0 || currentTurn != PlayerColor.RED) return
-            redShieldSkillCount -= 1
 
             var bestPiecePos: Position? = null
             var bestPiece: Piece? = null
@@ -182,9 +221,43 @@ class JungleGameEngine(
             }
 
             if (bestPiecePos != null && bestPiece != null) {
+                val existing = board[targetGate]
+                val record = MoveRecord(
+                    from = bestPiecePos, to = targetGate, movedPiece = bestPiece,
+                    capturedPiece = if (existing?.owner == PlayerColor.RED) null else existing,
+                    blueShieldCount = blueShieldSkillCount,
+                    redShieldCount = redShieldSkillCount,
+                    blueFrenzyCount = blueFrenzySkillCount,
+                    redFrenzyCount = redFrenzySkillCount,
+                    blueFreezeCount = blueFreezeSkillCount,
+                    redFreezeCount = redFreezeSkillCount,
+                    blueFrenzyTurns = blueFrenzyRemainingTurns,
+                    redFrenzyTurns = redFrenzyRemainingTurns,
+                    frozenPos = frozenPiecePos,
+                    frozenTurnsCount = frozenTurns,
+                    bannerText = skillBannerText
+                )
+                history.add(record)
+                redShieldSkillCount -= 1
+
                 val newBoard = board.toMutableMap()
-                newBoard.remove(bestPiecePos)
-                newBoard[targetGate] = bestPiece
+                if (existing != null && existing.owner == PlayerColor.RED) {
+                    // 卫队换防：若门前已有己方棋子，两者对调位置
+                    newBoard[bestPiecePos] = existing
+                    newBoard[targetGate] = bestPiece
+                    if (bestPiecePos == frozenPiecePos) frozenPiecePos = targetGate
+                    else if (targetGate == frozenPiecePos) frozenPiecePos = bestPiecePos
+                } else {
+                    newBoard.remove(bestPiecePos)
+                    newBoard[targetGate] = bestPiece
+                    if (bestPiecePos == frozenPiecePos) frozenPiecePos = targetGate
+                    board = newBoard
+                    if (existing != null && checkWin(afterMoveTo = targetGate, by = PlayerColor.RED)) {
+                        winner = PlayerColor.RED
+                        JungleSoundManager.getOrNull()?.playWin()
+                        return
+                    }
+                }
                 board = newBoard
                 val name = JungleLanguageManager.shared.animalName(bestPiece.type)
                 skillBannerText = JungleLanguageManager.shared.aiShieldBannerText(pieceName = name)
@@ -195,6 +268,7 @@ class JungleGameEngine(
     }
 
     fun activateFreezeSkill(player: PlayerColor = PlayerColor.BLUE) {
+        if (winner != null || isThinking) return
         val opponent = player.opponent
         if (player == PlayerColor.BLUE) {
             if (blueFreezeSkillCount <= 0 || currentTurn != PlayerColor.BLUE) return
@@ -293,7 +367,20 @@ class JungleGameEngine(
         val movingPiece = board[from] ?: return
         val capturedPiece = board[to]
 
-        val record = MoveRecord(from = from, to = to, movedPiece = movingPiece, capturedPiece = capturedPiece)
+        val record = MoveRecord(
+            from = from, to = to, movedPiece = movingPiece, capturedPiece = capturedPiece,
+            blueShieldCount = blueShieldSkillCount,
+            redShieldCount = redShieldSkillCount,
+            blueFrenzyCount = blueFrenzySkillCount,
+            redFrenzyCount = redFrenzySkillCount,
+            blueFreezeCount = blueFreezeSkillCount,
+            redFreezeCount = redFreezeSkillCount,
+            blueFrenzyTurns = blueFrenzyRemainingTurns,
+            redFrenzyTurns = redFrenzyRemainingTurns,
+            frozenPos = frozenPiecePos,
+            frozenTurnsCount = frozenTurns,
+            bannerText = skillBannerText
+        )
         history.add(record)
         if (movingPiece.owner == PlayerColor.RED || !isVsAI) {
             lastOpponentMove = record
@@ -357,19 +444,40 @@ class JungleGameEngine(
         }
 
         currentTurn = currentTurn.opponent
+        if (!hasLegalMoves(currentTurn)) {
+            winner = currentTurn.opponent
+            JungleSoundManager.getOrNull()?.playWin()
+            return
+        }
         updateRoundEvaluation()
 
         if (isVsAI && currentTurn == PlayerColor.RED) {
             isThinking = true
-            scope.launch {
+            val epoch = gameEpoch
+            aiJob?.cancel()
+            aiJob = scope.launch {
                 delay(350)
-                triggerAIMove()
+                if (gameEpoch == epoch && isVsAI && currentTurn == PlayerColor.RED && winner == null && isThinking) {
+                    triggerAIMove()
+                }
             }
         }
     }
 
+    fun hasLegalMoves(player: PlayerColor): Boolean {
+        for ((pos, piece) in board) {
+            if (piece.owner == player) {
+                if (calculateValidMoves(pos).isNotEmpty()) return true
+            }
+        }
+        return false
+    }
+
     fun undo() {
         if (history.isEmpty() || winner != null) return
+        gameEpoch++
+        aiJob?.cancel()
+        isThinking = false
         val stepsToUndo = if (isVsAI && history.size >= 2) 2 else 1
         JungleSoundManager.getOrNull()?.playUndo()
 
@@ -384,6 +492,18 @@ class JungleGameEngine(
                 newBoard.remove(last.to)
             }
             currentTurn = last.movedPiece.owner
+
+            blueShieldSkillCount = last.blueShieldCount
+            redShieldSkillCount = last.redShieldCount
+            blueFrenzySkillCount = last.blueFrenzyCount
+            redFrenzySkillCount = last.redFrenzyCount
+            blueFreezeSkillCount = last.blueFreezeCount
+            redFreezeSkillCount = last.redFreezeCount
+            blueFrenzyRemainingTurns = last.blueFrenzyTurns
+            redFrenzyRemainingTurns = last.redFrenzyTurns
+            frozenPiecePos = last.frozenPos
+            frozenTurns = last.frozenTurnsCount
+            skillBannerText = last.bannerText
         }
         board = newBoard
 
@@ -396,6 +516,7 @@ class JungleGameEngine(
     }
 
     fun executeBestAdvice() {
+        if (winner != null || isThinking) return
         if (currentTurn != PlayerColor.BLUE && isVsAI) return
         val advice = optimalAdvice
         if (advice != null) {
@@ -410,6 +531,7 @@ class JungleGameEngine(
     }
 
     fun autoSelectRecommendedPiece() {
+        if (winner != null || isThinking) return
         if (currentTurn != PlayerColor.BLUE && isVsAI) return
         val advice = optimalAdvice
         if (advice != null) {
@@ -1072,6 +1194,7 @@ class JungleGameEngine(
     }
 
     fun triggerAIMove() {
+        if (winner != null || currentTurn != PlayerColor.RED) return
         evaluateAndTriggerAISkills()
         val candidates = searchOptimalMoveCandidates(PlayerColor.RED)
         this.isThinking = false
@@ -1079,6 +1202,7 @@ class JungleGameEngine(
         val first = candidates.firstOrNull()
         if (first == null) {
             this.winner = PlayerColor.BLUE
+            JungleSoundManager.getOrNull()?.playWin()
             return
         }
 
@@ -1152,6 +1276,13 @@ class JungleGameEngine(
         val defender = boardState[to] ?: return true
         if (defender.owner == attacker.owner) return false
 
+        val fromTile = getTileType(from)
+        val toTile = getTileType(to)
+
+        // 铁律：水陆相隔无法出入水捕食（即使激活狂暴/越级也绝不违背河流天然屏障）
+        if (fromTile is TileType.River && toTile !is TileType.River) return false
+        if (fromTile !is TileType.River && toTile is TileType.River) return false
+
         if (attacker.owner == PlayerColor.BLUE && blueFrenzyRemainingTurns > 0) {
             return true
         }
@@ -1159,21 +1290,15 @@ class JungleGameEngine(
             return true
         }
 
-        val fromTile = getTileType(from)
-        val toTile = getTileType(to)
-
         if (toTile is TileType.Trap && toTile.owner == attacker.owner) {
             return true
         }
         if (attacker.type == AnimalType.RAT && defender.type == AnimalType.ELEPHANT) {
-            if (fromTile is TileType.River && toTile !is TileType.River) return false
             return true
         }
         if (attacker.type == AnimalType.ELEPHANT && defender.type == AnimalType.RAT) {
             return false
         }
-        if (fromTile is TileType.River && toTile !is TileType.River) return false
-        if (fromTile !is TileType.River && toTile is TileType.River) return false
 
         return attacker.type.rank >= defender.type.rank
     }
@@ -1350,6 +1475,13 @@ class JungleGameEngine(
         val defender = board[to] ?: return true
         if (defender.owner == attacker.owner) return false
 
+        val fromTile = getTileType(from)
+        val toTile = getTileType(to)
+
+        // 铁律：水陆相隔无法出入水捕食（即使激活狂暴/越级也绝不违背河流天然屏障）
+        if (fromTile is TileType.River && toTile !is TileType.River) return false
+        if (fromTile !is TileType.River && toTile is TileType.River) return false
+
         if (attacker.owner == PlayerColor.BLUE && blueFrenzyRemainingTurns > 0) {
             return true
         }
@@ -1357,21 +1489,15 @@ class JungleGameEngine(
             return true
         }
 
-        val fromTile = getTileType(from)
-        val toTile = getTileType(to)
-
         if (toTile is TileType.Trap && toTile.owner == attacker.owner) {
             return true
         }
         if (attacker.type == AnimalType.RAT && defender.type == AnimalType.ELEPHANT) {
-            if (fromTile is TileType.River && toTile !is TileType.River) return false
             return true
         }
         if (attacker.type == AnimalType.ELEPHANT && defender.type == AnimalType.RAT) {
             return false
         }
-        if (fromTile is TileType.River && toTile !is TileType.River) return false
-        if (fromTile !is TileType.River && toTile is TileType.River) return false
 
         return attacker.type.rank >= defender.type.rank
     }

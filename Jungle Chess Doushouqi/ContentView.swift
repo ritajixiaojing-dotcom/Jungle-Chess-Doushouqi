@@ -106,6 +106,17 @@ struct MoveRecord: Equatable {
     let to: Position
     let movedPiece: Piece
     let capturedPiece: Piece?
+    var blueShieldCount: Int = 1
+    var redShieldCount: Int = 1
+    var blueFrenzyCount: Int = 1
+    var redFrenzyCount: Int = 1
+    var blueFreezeCount: Int = 1
+    var redFreezeCount: Int = 1
+    var blueFrenzyTurns: Int = 0
+    var redFrenzyTurns: Int = 0
+    var frozenPos: Position? = nil
+    var frozenTurnsCount: Int = 0
+    var bannerText: String? = nil
 }
 
 // 战术最优解模型
@@ -163,6 +174,7 @@ class JungleGameEngine: ObservableObject {
     @Published var isThinking: Bool = false
     @Published var history: [MoveRecord] = []
     @Published var lastOpponentMove: MoveRecord? = nil
+    private var gameEpoch: Int = 0
     
     init() {
         resetGame()
@@ -230,6 +242,8 @@ class JungleGameEngine: ObservableObject {
     }
     
     func resetGame() {
+        gameEpoch += 1
+        isThinking = false
         board.removeAll()
         history.removeAll()
         lastOpponentMove = nil
@@ -279,6 +293,7 @@ class JungleGameEngine: ObservableObject {
     }
     
     func activateFrenzySkill(for player: Player = .blue) {
+        guard winner == nil && !isThinking else { return }
         if player == .blue {
             guard blueFrenzySkillCount > 0, currentTurn == .blue else { return }
             blueFrenzySkillCount -= 1
@@ -297,46 +312,111 @@ class JungleGameEngine: ObservableObject {
     }
     
     func activateShieldRecallSkill(for player: Player = .blue) {
+        guard winner == nil && !isThinking else { return }
         if player == .blue {
             guard blueShieldSkillCount > 0, currentTurn == .blue else { return }
-            blueShieldSkillCount -= 1
             
             var bestPiecePos: Position? = nil
             var bestPiece: Piece? = nil
             let targetGate = Position(row: 7, col: 3)
             
             for (pos, p) in board where p.owner == .blue {
-                if pos != targetGate && (bestPiece == nil || p.type.rawValue > bestPiece!.type.rawValue) {
+                if pos != targetGate && (bestPiece == nil || p.type.rawValue > (bestPiece?.type.rawValue ?? 0)) {
                     bestPiecePos = pos
                     bestPiece = p
                 }
             }
             
             if let fromPos = bestPiecePos, let piece = bestPiece {
-                board.removeValue(forKey: fromPos)
-                board[targetGate] = piece
+                let existing = board[targetGate]
+                let record = MoveRecord(
+                    from: fromPos, to: targetGate, movedPiece: piece,
+                    capturedPiece: (existing?.owner == .blue) ? nil : existing,
+                    blueShieldCount: blueShieldSkillCount,
+                    redShieldCount: redShieldSkillCount,
+                    blueFrenzyCount: blueFrenzySkillCount,
+                    redFrenzyCount: redFrenzySkillCount,
+                    blueFreezeCount: blueFreezeSkillCount,
+                    redFreezeCount: redFreezeSkillCount,
+                    blueFrenzyTurns: blueFrenzyRemainingTurns,
+                    redFrenzyTurns: redFrenzyRemainingTurns,
+                    frozenPos: frozenPiecePos,
+                    frozenTurnsCount: frozenTurns,
+                    bannerText: skillBannerText
+                )
+                history.append(record)
+                blueShieldSkillCount -= 1
+                
+                if let existing = existing, existing.owner == .blue {
+                    // 卫队换防：若门前已有己方棋子，两者对调位置，确保己方单位绝不被破坏
+                    board[fromPos] = existing
+                    board[targetGate] = piece
+                    if fromPos == frozenPiecePos { frozenPiecePos = targetGate }
+                    else if targetGate == frozenPiecePos { frozenPiecePos = fromPos }
+                } else {
+                    board.removeValue(forKey: fromPos)
+                    board[targetGate] = piece
+                    if fromPos == frozenPiecePos { frozenPiecePos = targetGate }
+                    if existing != nil && checkWin(afterMoveTo: targetGate, by: .blue) {
+                        winner = .blue
+                        playSound(type: .win)
+                        return
+                    }
+                }
                 skillBannerText = JungleLanguageManager.shared.shieldBannerText(pieceName: piece.type.name)
                 playSound(type: .win)
                 updateRoundEvaluation()
             }
         } else {
             guard redShieldSkillCount > 0, currentTurn == .red else { return }
-            redShieldSkillCount -= 1
             
             var bestPiecePos: Position? = nil
             var bestPiece: Piece? = nil
             let targetGate = Position(row: 1, col: 3)
             
             for (pos, p) in board where p.owner == .red {
-                if pos != targetGate && (bestPiece == nil || p.type.rawValue > bestPiece!.type.rawValue) {
+                if pos != targetGate && (bestPiece == nil || p.type.rawValue > (bestPiece?.type.rawValue ?? 0)) {
                     bestPiecePos = pos
                     bestPiece = p
                 }
             }
             
             if let fromPos = bestPiecePos, let piece = bestPiece {
-                board.removeValue(forKey: fromPos)
-                board[targetGate] = piece
+                let existing = board[targetGate]
+                let record = MoveRecord(
+                    from: fromPos, to: targetGate, movedPiece: piece,
+                    capturedPiece: (existing?.owner == .red) ? nil : existing,
+                    blueShieldCount: blueShieldSkillCount,
+                    redShieldCount: redShieldSkillCount,
+                    blueFrenzyCount: blueFrenzySkillCount,
+                    redFrenzyCount: redFrenzySkillCount,
+                    blueFreezeCount: blueFreezeSkillCount,
+                    redFreezeCount: redFreezeSkillCount,
+                    blueFrenzyTurns: blueFrenzyRemainingTurns,
+                    redFrenzyTurns: redFrenzyRemainingTurns,
+                    frozenPos: frozenPiecePos,
+                    frozenTurnsCount: frozenTurns,
+                    bannerText: skillBannerText
+                )
+                history.append(record)
+                redShieldSkillCount -= 1
+                
+                if let existing = existing, existing.owner == .red {
+                    // 卫队换防：若门前已有己方棋子，两者对调位置
+                    board[fromPos] = existing
+                    board[targetGate] = piece
+                    if fromPos == frozenPiecePos { frozenPiecePos = targetGate }
+                    else if targetGate == frozenPiecePos { frozenPiecePos = fromPos }
+                } else {
+                    board.removeValue(forKey: fromPos)
+                    board[targetGate] = piece
+                    if fromPos == frozenPiecePos { frozenPiecePos = targetGate }
+                    if existing != nil && checkWin(afterMoveTo: targetGate, by: .red) {
+                        winner = .red
+                        playSound(type: .win)
+                        return
+                    }
+                }
                 skillBannerText = JungleLanguageManager.shared.aiShieldBannerText(pieceName: piece.type.name)
                 playSound(type: .win)
                 updateRoundEvaluation()
@@ -345,6 +425,7 @@ class JungleGameEngine: ObservableObject {
     }
     
     func activateFreezeSkill(for player: Player = .blue) {
+        guard winner == nil && !isThinking else { return }
         let opponent = player.opponent
         if player == .blue {
             guard blueFreezeSkillCount > 0, currentTurn == .blue else { return }
@@ -432,7 +513,20 @@ class JungleGameEngine: ObservableObject {
         guard let movingPiece = board[from] else { return }
         let capturedPiece = board[to]
         
-        let record = MoveRecord(from: from, to: to, movedPiece: movingPiece, capturedPiece: capturedPiece)
+        let record = MoveRecord(
+            from: from, to: to, movedPiece: movingPiece, capturedPiece: capturedPiece,
+            blueShieldCount: blueShieldSkillCount,
+            redShieldCount: redShieldSkillCount,
+            blueFrenzyCount: blueFrenzySkillCount,
+            redFrenzyCount: redFrenzySkillCount,
+            blueFreezeCount: blueFreezeSkillCount,
+            redFreezeCount: redFreezeSkillCount,
+            blueFrenzyTurns: blueFrenzyRemainingTurns,
+            redFrenzyTurns: redFrenzyRemainingTurns,
+            frozenPos: frozenPiecePos,
+            frozenTurnsCount: frozenTurns,
+            bannerText: skillBannerText
+        )
         history.append(record)
         if movingPiece.owner == .red || !isVsAI {
             lastOpponentMove = record
@@ -485,18 +579,41 @@ class JungleGameEngine: ObservableObject {
         }
         
         currentTurn = currentTurn.opponent
+        
+        // 困毙胜负判定：若轮到行动的一方无任何合法走步，直接判负
+        if !hasLegalMoves(for: currentTurn) {
+            winner = currentTurn.opponent
+            playSound(type: .win)
+            return
+        }
+        
         updateRoundEvaluation()
         
         if isVsAI && currentTurn == .red {
             isThinking = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            let epoch = gameEpoch
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+                guard let self = self else { return }
+                guard self.gameEpoch == epoch, self.isVsAI, self.currentTurn == .red, self.winner == nil, self.isThinking else { return }
                 self.triggerAIMove()
             }
         }
     }
     
+    func hasLegalMoves(for player: Player) -> Bool {
+        for (pos, piece) in board where piece.owner == player {
+            let moves = calculateValidMoves(from: pos)
+            if !moves.isEmpty {
+                return true
+            }
+        }
+        return false
+    }
+    
     func undo() {
         guard !history.isEmpty, winner == nil else { return }
+        gameEpoch += 1
+        isThinking = false
         let stepsToUndo = (isVsAI && history.count >= 2) ? 2 : 1
         
         for _ in 0..<stepsToUndo {
@@ -508,6 +625,18 @@ class JungleGameEngine: ObservableObject {
                 board.removeValue(forKey: last.to)
             }
             currentTurn = last.movedPiece.owner
+            
+            blueShieldSkillCount = last.blueShieldCount
+            redShieldSkillCount = last.redShieldCount
+            blueFrenzySkillCount = last.blueFrenzyCount
+            redFrenzySkillCount = last.redFrenzyCount
+            blueFreezeSkillCount = last.blueFreezeCount
+            redFreezeSkillCount = last.redFreezeCount
+            blueFrenzyRemainingTurns = last.blueFrenzyTurns
+            redFrenzyRemainingTurns = last.redFrenzyTurns
+            frozenPiecePos = last.frozenPos
+            frozenTurns = last.frozenTurnsCount
+            skillBannerText = last.bannerText
         }
         
         selectedPos = nil
@@ -520,6 +649,7 @@ class JungleGameEngine: ObservableObject {
     }
     
     func executeBestAdvice() {
+        guard winner == nil && !isThinking else { return }
         guard currentTurn == .blue || !isVsAI else { return }
         if let advice = optimalAdvice {
             makeMove(from: advice.from, to: advice.to)
@@ -532,6 +662,7 @@ class JungleGameEngine: ObservableObject {
     }
     
     func autoSelectRecommendedPiece() {
+        guard winner == nil && !isThinking else { return }
         guard currentTurn == .blue || !isVsAI else { return }
         if let advice = optimalAdvice {
             selectedPos = advice.from
@@ -1178,6 +1309,7 @@ class JungleGameEngine: ObservableObject {
     }
     
     func triggerAIMove() {
+        guard winner == nil && currentTurn == .red else { return }
         evaluateAndTriggerAISkills()
         let candidates = searchOptimalMoveCandidates(for: .red)
         self.isThinking = false
@@ -1265,6 +1397,17 @@ class JungleGameEngine: ObservableObject {
         guard let defender = boardState[to] else { return true }
         guard defender.owner != attacker.owner else { return false }
         
+        let fromTile = getTileType(at: from)
+        let toTile = getTileType(at: to)
+        
+        // 铁律：水陆相隔无法出入水捕食（即使激活狂暴/越级也绝不违背河流天然屏障）
+        if fromTile == .river && toTile != .river {
+            return false
+        }
+        if fromTile != .river && toTile == .river {
+            return false
+        }
+        
         if attacker.owner == .blue && blueFrenzyRemainingTurns > 0 {
             return true
         }
@@ -1272,17 +1415,9 @@ class JungleGameEngine: ObservableObject {
             return true
         }
         
-        let toTile = getTileType(at: to)
-        if case .trap(let trapOwner) = toTile, trapOwner == attacker.owner {
+        let toTileTrap = getTileType(at: to)
+        if case .trap(let trapOwner) = toTileTrap, trapOwner == attacker.owner {
             return true
-        }
-        
-        let fromTile = getTileType(at: from)
-        if fromTile == .river && toTile != .river {
-            return false
-        }
-        if fromTile != .river && toTile == .river {
-            return false
         }
         
         if attacker.type == .rat && defender.type == .elephant {
@@ -1458,6 +1593,13 @@ class JungleGameEngine: ObservableObject {
         guard let defender = board[to] else { return true }
         if defender.owner == attacker.owner { return false }
         
+        let fromTile = getTileType(at: from)
+        let toTile = getTileType(at: to)
+        
+        // 铁律：水陆相隔无法出入水捕食（即使激活狂暴/越级也绝不违背河流天然屏障）
+        if fromTile == .river && toTile != .river { return false }
+        if fromTile != .river && toTile == .river { return false }
+        
         if attacker.owner == .blue && blueFrenzyRemainingTurns > 0 {
             return true
         }
@@ -1465,21 +1607,15 @@ class JungleGameEngine: ObservableObject {
             return true
         }
         
-        let fromTile = getTileType(at: from)
-        let toTile = getTileType(at: to)
-        
         if case .trap(let trapOwner) = toTile, trapOwner == attacker.owner {
             return true
         }
         if attacker.type == .rat && defender.type == .elephant {
-            if fromTile == .river && toTile != .river { return false }
             return true
         }
         if attacker.type == .elephant && defender.type == .rat {
             return false
         }
-        if fromTile == .river && toTile != .river { return false }
-        if fromTile != .river && toTile == .river { return false }
         
         return attacker.type.rawValue >= defender.type.rawValue
     }

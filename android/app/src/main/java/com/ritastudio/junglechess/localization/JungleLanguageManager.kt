@@ -1182,16 +1182,17 @@ class JungleLanguageManager(initialLanguage: JungleLanguage = JungleLanguage.det
 
     val forecastStep3: String
         get() {
-        return when (currentLanguage ) {
-        JungleLanguage.ZH_HANS, JungleLanguage.ZH_HANT -> "3️⃣ 我方掌控主动"
-        JungleLanguage.EN -> "3️⃣ Seize board control"
-        JungleLanguage.JA -> "3️⃣ 主導権を確保"
-        JungleLanguage.KO -> "3️⃣ 주도권 장악"
-        JungleLanguage.ES -> "3️⃣ Tomar la iniciativa"
-        JungleLanguage.FR -> "3️⃣ Prendre l'initiative"
-        JungleLanguage.DE -> "3️⃣ Initiative sichern"
+            return when (currentLanguage) {
+                JungleLanguage.ZH_HANS -> "3️⃣ 我方掌控主动"
+                JungleLanguage.ZH_HANT -> "3️⃣ 我方掌控主動"
+                JungleLanguage.EN -> "3️⃣ Seize board control"
+                JungleLanguage.JA -> "3️⃣ 主導権を確保"
+                JungleLanguage.KO -> "3️⃣ 주도권 장악"
+                JungleLanguage.ES -> "3️⃣ Tomar la iniciativa"
+                JungleLanguage.FR -> "3️⃣ Prendre l'initiative"
+                JungleLanguage.DE -> "3️⃣ Initiative sichern"
+            }
         }
-    }
     
     // MARK: - 🎯 妙手建议与对局提示全套国际化
 

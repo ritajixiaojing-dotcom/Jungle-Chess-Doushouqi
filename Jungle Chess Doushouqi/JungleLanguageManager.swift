@@ -1220,7 +1220,8 @@ class JungleLanguageManager: ObservableObject {
     
     var forecastStep3: String {
         switch currentLanguage {
-        case .zhHans, .zhHant: return "3️⃣ 我方掌控主动"
+        case .zhHans: return "3️⃣ 我方掌控主动"
+        case .zhHant: return "3️⃣ 我方掌控主動"
         case .en: return "3️⃣ Seize board control"
         case .ja: return "3️⃣ 主導権を確保"
         case .ko: return "3️⃣ 주도권 장악"

@@ -68,10 +68,11 @@ fun JungleBoardView(
                             val isOpponentTarget = (lastOpMove?.to == pos) && (piece != null && piece.owner == lastOpMove.movedPiece.owner && piece.owner != engine.currentTurn)
                             val isOpponentSource = (lastOpMove?.from == pos) && (lastOpMove.movedPiece.owner != engine.currentTurn)
 
-                            val actionBadge = if (engine.selectedPos != null) {
-                                engine.getActionBadge(pos, engine.selectedPos!!)
+                            val selPos = engine.selectedPos
+                            val actionBadge = if (selPos != null) {
+                                engine.getActionBadge(pos, selPos)
                             } else if (isRecommendedTarget) {
-                                advice.badgeText
+                                advice?.badgeText
                             } else null
 
                             Box(

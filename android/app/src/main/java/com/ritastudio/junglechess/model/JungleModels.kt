@@ -67,7 +67,18 @@ data class MoveRecord(
     val from: Position,
     val to: Position,
     val movedPiece: Piece,
-    val capturedPiece: Piece?
+    val capturedPiece: Piece?,
+    val blueShieldCount: Int = 1,
+    val redShieldCount: Int = 1,
+    val blueFrenzyCount: Int = 1,
+    val redFrenzyCount: Int = 1,
+    val blueFreezeCount: Int = 1,
+    val redFreezeCount: Int = 1,
+    val blueFrenzyTurns: Int = 0,
+    val redFrenzyTurns: Int = 0,
+    val frozenPos: Position? = null,
+    val frozenTurnsCount: Int = 0,
+    val bannerText: String? = null
 )
 
 data class OptimalMoveAdvice(
